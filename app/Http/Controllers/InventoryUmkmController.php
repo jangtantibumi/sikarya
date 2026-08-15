@@ -55,8 +55,18 @@ class InventoryUmkmController extends Controller
             ->orderBy('name', 'asc')
             ->get();
 
-        $mapped = $products->map(function ($p) use ($inventoryService, $warehouse) {
-            $stock = $warehouse ? $inventoryService->balance($p, $warehouse) : 0;
+        $balances = [];
+        if ($warehouse) {
+            $balances = \App\Models\StockMovement::where('company_id', $companyId)
+                ->where('warehouse_id', $warehouse->id)
+                ->select('product_id', \Illuminate\Support\Facades\DB::raw('SUM(quantity) as total_qty'))
+                ->groupBy('product_id')
+                ->pluck('total_qty', 'product_id')
+                ->toArray();
+        }
+
+        $mapped = $products->map(function ($p) use ($balances) {
+            $stock = isset($balances[$p->id]) ? (float) $balances[$p->id] : 0;
 
             return [
                 'id' => $p->id,
