@@ -1,6 +1,16 @@
 <section id="view-inventory_umkm" class="view-section">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+            border-radius: 4px;
+        }
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
         .ios-card {
             background: var(--panel-glass);
             backdrop-filter: blur(20px);
@@ -328,10 +338,23 @@
 
     async function loadInvUmkmHistory() {
         try {
+            // [NEW] Injeksi Skeleton Loader untuk Tabel Riwayat
+            const tbody = document.getElementById('inv-umkm-history-list');
+            tbody.innerHTML = '';
+            for(let i=0; i<3; i++){
+                tbody.innerHTML += `<tr>
+                    <td style="padding: 16px;"><div class="skeleton" style="height: 20px; width: 80%;"></div></td>
+                    <td style="padding: 16px;"><div class="skeleton" style="height: 20px; width: 100%;"></div></td>
+                    <td style="padding: 16px;"><div class="skeleton" style="height: 20px; width: 60%;"></div></td>
+                    <td style="padding: 16px;"><div class="skeleton" style="height: 20px; width: 60%;"></div></td>
+                    <td style="padding: 16px;"><div class="skeleton" style="height: 20px; width: 80%;"></div></td>
+                    <td style="padding: 16px;"><div class="skeleton" style="height: 20px; width: 100%;"></div></td>
+                </tr>`;
+            }
+
             const res = await fetch('/master-demo/inventory-umkm/history');
             const data = await res.json();
             
-            const tbody = document.getElementById('inv-umkm-history-list');
             tbody.innerHTML = '';
             
             if(data.length === 0) {
@@ -382,10 +405,28 @@
 
     async function loadInvUmkm() {
         try {
+            // [NEW] Injeksi Skeleton Loader
+            document.getElementById('kpi-valuation').innerHTML = '<div class="skeleton" style="height: 28px; width: 80%; border-radius: 6px;"></div>';
+            document.getElementById('kpi-items').innerHTML = '<div class="skeleton" style="height: 28px; width: 40%; border-radius: 6px;"></div>';
+            document.getElementById('kpi-critical').innerHTML = '<div class="skeleton" style="height: 28px; width: 40%; border-radius: 6px;"></div>';
+            
+            const tbody = document.getElementById('inv-umkm-list');
+            tbody.innerHTML = '';
+            for(let i=0; i<3; i++){
+                tbody.innerHTML += `<tr>
+                    <td style="padding: 16px;"><div class="skeleton" style="height: 20px; width: 80%;"></div></td>
+                    <td style="padding: 16px;"><div class="skeleton" style="height: 20px; width: 100%;"></div></td>
+                    <td style="padding: 16px;"><div class="skeleton" style="height: 20px; width: 60%;"></div></td>
+                    <td style="padding: 16px;"><div class="skeleton" style="height: 20px; width: 60%;"></div></td>
+                    <td style="padding: 16px;"><div class="skeleton" style="height: 20px; width: 80%;"></div></td>
+                    <td style="padding: 16px;"><div class="skeleton" style="height: 24px; width: 80px; border-radius: 12px;"></div></td>
+                    <td style="padding: 16px;"><div class="skeleton" style="height: 30px; width: 70px; border-radius: 8px;"></div></td>
+                </tr>`;
+            }
+
             const res = await fetch('/master-demo/inventory-umkm');
             const data = await res.json();
             
-            const tbody = document.getElementById('inv-umkm-list');
             tbody.innerHTML = '';
             
             let warningCount = 0;
