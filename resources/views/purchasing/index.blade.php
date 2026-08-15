@@ -29,6 +29,14 @@
         display: flex; flex-direction: column;
         max-height: 85vh;
     }
+
+    /* Fix Flexbox Trap: Mencegah tombol bawah tertutup jika konten panjang */
+    .ios-modal-overlay.purchasing-modal .ios-modal form {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+    }
     @keyframes purchModalSlideUp {
         from { opacity: 0; transform: translateY(24px) scale(0.97); }
         to { opacity: 1; transform: translateY(0) scale(1); }
