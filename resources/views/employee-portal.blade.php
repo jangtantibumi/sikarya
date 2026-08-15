@@ -2332,7 +2332,7 @@
             if(posCart.length === 0 || !posPaymentMethod) return;
             
             const btn = document.getElementById('btn-process-sale');
-            btn.innerHTML = '<div class="loader" style="width: 16px; height: 16px; display: inline-block;"></div> Memproses...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="font-size: 24px; color: var(--accent);"></i> Memproses...';
             btn.disabled = true;
             
             try {
@@ -2409,3 +2409,4 @@
 @include('components.chat-widget')
 </body>
 </html>
+

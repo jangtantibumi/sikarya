@@ -861,22 +861,22 @@
             <div class="grid-4">
                 <div class="card" style="opacity: 0.5; cursor: not-allowed;" title="Module coming soon">
                     <h3>CRM Pipeline</h3>
-                    <div class="value" id="metrics-crm-value"><div class="loader"></div></div>
+                    <div class="value" id="metrics-crm-value"><i class="fa-solid fa-spinner fa-spin" style="font-size: 24px; color: var(--accent);"></i></div>
                     <div class="trend" style="color: var(--text-muted);"><i class="fa-solid fa-tools"></i> Module in Development</div>
                 </div>
                 <div class="card" style="opacity: 0.5; cursor: not-allowed;" title="Module coming soon">
                     <h3>Pending Payables</h3>
-                    <div class="value" id="metrics-po-value"><div class="loader"></div></div>
+                    <div class="value" id="metrics-po-value"><i class="fa-solid fa-spinner fa-spin" style="font-size: 24px; color: var(--accent);"></i></div>
                     <div class="trend" style="color: var(--text-muted);"><i class="fa-solid fa-tools"></i> Module in Development</div>
                 </div>
                 <div class="card" style="opacity: 0.5; cursor: not-allowed;" title="Module coming soon">
                     <h3>Production Quality</h3>
-                    <div class="value" id="metrics-qa-value"><div class="loader"></div></div>
+                    <div class="value" id="metrics-qa-value"><i class="fa-solid fa-spinner fa-spin" style="font-size: 24px; color: var(--accent);"></i></div>
                     <div class="trend" style="color: var(--text-muted);"><i class="fa-solid fa-tools"></i> Module in Development</div>
                 </div>
                 <div class="card interactive" onclick="switchView('inventory_umkm')" style="cursor:pointer;">
                     <h3>Asset Valuation</h3>
-                    <div class="value" id="metrics-inv-value"><div class="loader"></div></div>
+                    <div class="value" id="metrics-inv-value"><i class="fa-solid fa-spinner fa-spin" style="font-size: 24px; color: var(--accent);"></i></div>
                     <div class="trend"><i class="fa-solid fa-boxes-stacked"></i> Go to Inventory & Warehouse</div>
                 </div>
             </div>
@@ -885,7 +885,7 @@
                 <div class="card">
                     <h3>Executive Alerts</h3>
                     <div id="alerts-container">
-                        <div class="loader"></div> Fetching system alerts...
+                        <i class="fa-solid fa-spinner fa-spin" style="font-size: 24px; color: var(--accent);"></i> Fetching system alerts...
                     </div>
                 </div>
                 <div class="card">
@@ -1206,7 +1206,7 @@
                 <!-- Timeline / Data Container -->
                 <div id="audit-log-container" style="position: relative; min-height: 200px; padding-top: 8px;">
                     <div style="text-align: center; padding: 40px 0;">
-                        <div class="loader"></div> <span style="margin-top: 12px; display: block; color: var(--text-muted); font-size: 14px;">Mengambil data log...</span>
+                        <i class="fa-solid fa-spinner fa-spin" style="font-size: 24px; color: var(--accent);"></i> <span style="margin-top: 12px; display: block; color: var(--text-muted); font-size: 14px;">Mengambil data log...</span>
                     </div>
                 </div>
                 
@@ -1253,7 +1253,7 @@
 
                 async function loadAuditLogs() {
                     const container = document.getElementById('audit-log-container');
-                    container.innerHTML = '<div style="text-align: center; padding: 40px 0;"><div class="loader" style="margin: 0 auto;"></div><div style="margin-top: 12px; color: var(--text-muted); font-size: 14px;">Memuat data...</div></div>';
+                    container.innerHTML = '<div style="text-align: center; padding: 40px 0;"><i class="fa-solid fa-spinner fa-spin" style="font-size: 24px; color: var(--accent);"></i><div style="margin-top: 12px; color: var(--text-muted); font-size: 14px;">Memuat data...</div></div>';
                     
                     const date = document.getElementById('audit-date').value;
                     const timeStart = document.getElementById('audit-time-start').value;
@@ -1383,7 +1383,7 @@
                     const timeframe = document.getElementById('audit-clear-timeframe').value;
                     const btn = document.getElementById('btn-execute-clear');
                     const originalText = btn.innerHTML;
-                    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Memproses...';
+                    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
                     btn.disabled = true;
 
                     try {
@@ -3639,7 +3639,7 @@
 
         } catch (error) {
             console.error('Failed to load analytics', error);
-            document.querySelectorAll('.loader').forEach(el => el.parentElement.innerText = 'Error loading data');
+            document.querySelectorAll('.fa-spinner').forEach(el => el.parentElement.innerText = 'Error loading data');
         }
     }
 
@@ -3781,7 +3781,7 @@
             <p style="margin: 0 0 24px 0; font-size: 14px; color: var(--text-main); font-weight: 500;">Menghapus divisi <strong id="del-div-name"></strong>? Modul di dalamnya akan dipindahkan ke Uncategorized.</p>
 
             <div style="display: flex; gap: 12px;">
-                <button type="button" class="ios-btn ios-btn-secondary" style="flex: 1; background: #f3f4f6; color: #374151; font-weight: 600;" onclick="closePopup('division-delete-modal')">Cancel</button>
+                <button type="button" class="ios-btn ios-btn-secondary" style="flex: 1;  font-weight: 600;" onclick="closePopup('division-delete-modal')">Cancel</button>
                 <button type="button" class="ios-btn ios-btn-danger" style="flex: 1; background: #ef4444; color: white; font-weight: 600;" onclick="confirmDeleteDivision()">Hapus Divisi</button>
             </div>
         </div>
@@ -3800,7 +3800,7 @@
             </div>
 
             <div style="display: flex; gap: 12px;">
-                <button type="button" class="ios-btn ios-btn-secondary" style="flex: 1; background: #f3f4f6; color: #374151; font-weight: 600;" onclick="closePopup('division-edit-modal')">Cancel</button>
+                <button type="button" class="ios-btn ios-btn-secondary" style="flex: 1;  font-weight: 600;" onclick="closePopup('division-edit-modal')">Cancel</button>
                 <button type="button" class="ios-btn ios-btn-primary" style="flex: 1; font-weight: 600;" onclick="confirmRenameDivision()">Simpan</button>
             </div>
         </div>
@@ -3822,7 +3822,7 @@
                     <input type="text" id="add-div-code-input" class="form-control" placeholder="Contoh: MKT" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--panel-border); font-size: 15px;">
                 </div>
                 <div style="display: flex; gap: 12px;">
-                    <button type="button" class="ios-btn ios-btn-secondary" style="flex: 1; background: #f3f4f6; color: #374151; font-weight: 600;" onclick="closePopup('division-add-modal')">Batal</button>
+                    <button type="button" class="ios-btn ios-btn-secondary" style="flex: 1;  font-weight: 600;" onclick="closePopup('division-add-modal')">Batal</button>
                     <button type="submit" class="ios-btn ios-btn-primary" style="flex: 1; font-weight: 600;">Simpan Divisi</button>
                 </div>
             </form>
@@ -4199,7 +4199,7 @@
         </p>
         <input type="hidden" id="revoke-user-id" value="">
         <div style="display: flex; gap: 12px; justify-content: center;">
-            <button class="ios-btn" style="flex: 1; background: #f1f5f9; color: #475569;" onclick="document.getElementById('modal-confirm-revoke').style.display='none'">Batal</button>
+            <button class="ios-btn" style="flex: 1; " onclick="document.getElementById('modal-confirm-revoke').style.display='none'">Batal</button>
             <button class="ios-btn ios-btn-danger" style="flex: 1;" onclick="executeRevoke()">Ya, Cabut Akses</button>
         </div>
     </div>
@@ -4257,7 +4257,7 @@
             </div>
             
             <div style="display: flex; gap: 12px; justify-content: flex-end;">
-                <button type="button" class="ios-btn" style="background: #f1f5f9; color: #475569;" onclick="document.getElementById('modal-create-announcement').style.display='none'">Batal</button>
+                <button type="button" class="ios-btn" style="" onclick="document.getElementById('modal-create-announcement').style.display='none'">Batal</button>
                 <button type="submit" class="ios-btn ios-btn-primary"><i class="fa-solid fa-paper-plane" style="margin-right: 6px;"></i> Siarkan Pengumuman</button>
             </div>
         </form>
@@ -4400,7 +4400,7 @@ async function submitAnnouncement(e) {
     
     const btn = e.target.querySelector('button[type="submit"]');
     const oriText = btn.innerHTML;
-    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Menyimpan...';
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
     btn.disabled = true;
     
     try {
@@ -4488,7 +4488,7 @@ async function submitNewChannel(e) {
     
     const btn = e.target.querySelector('button[type="submit"]');
     const oriText = btn.innerHTML;
-    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Menyimpan...';
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
     btn.disabled = true;
     
     try {
@@ -4523,4 +4523,7 @@ async function submitNewChannel(e) {
 <x-ui.toast />
 @include('components.global-loading')
 @include('components.chat-widget')
+
+
+
 

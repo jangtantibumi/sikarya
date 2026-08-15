@@ -69,7 +69,7 @@
                 </thead>
                 <tbody id="payroll-table-body">
                     <tr><td colspan="6" style="text-align: center; padding: 80px; color: var(--text-muted);">
-                        <div class="loader" style="margin: 0 auto 16px;"></div>
+                        <i class="fa-solid fa-spinner fa-spin" style="font-size: 24px; color: var(--accent);"></i>
                         Loading payroll data...
                     </td></tr>
                 </tbody>
@@ -558,7 +558,7 @@
 
     function loadPayrolls() {
         const tbody = document.getElementById('payroll-table-body');
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 80px; color: var(--text-muted);"><div class="loader" style="margin: 0 auto 16px;"></div><div style="font-size:15px; font-weight:500;">Loading payroll data...</div></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 80px; color: var(--text-muted);"><i class="fa-solid fa-spinner fa-spin" style="font-size: 24px; color: var(--accent);"></i><div style="font-size:15px; font-weight:500;">Loading payroll data...</div></td></tr>';
         
         const apiPrefix = window.location.pathname.includes('/master-demo') ? '/master-demo' : '';
         fetch(`${apiPrefix}/payroll`)
@@ -993,3 +993,4 @@
     }
 
 </script>
+

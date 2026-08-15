@@ -86,7 +86,7 @@
         
         // Terapkan efek spinner & disable
         btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>';
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
         
         return originalState;
     }
@@ -213,3 +213,4 @@
     };
 })();
 </script>
+
