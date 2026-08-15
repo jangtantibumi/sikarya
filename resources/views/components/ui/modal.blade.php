@@ -6,7 +6,7 @@
             <i class="fa-solid {{ $icon }}" style="font-size: 40px; color: {{ $iconColor }}; margin-bottom: 16px;"></i>
         @endif
         
-        <h3 style="margin-bottom: 24px; font-weight: 800; font-size: 20px;">{{ $title }}</h3>
+        <h3 id="{{ $id }}-title" style="margin-bottom: 24px; font-weight: 800; font-size: 20px;">{{ $title }}</h3>
         
         @if($formId)
         <form id="{{ $formId }}" method="POST" action="">

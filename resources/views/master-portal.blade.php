@@ -3373,7 +3373,7 @@
         <input type="hidden" name="_method" id="confirm-method" value="POST">
         <div style="display: flex; gap: 12px; justify-content: center;">
             <x-ui.button variant="secondary" type="button" onclick="document.getElementById('modal-confirm').style.display='none'" style="flex:1;">Batal</x-ui.button>
-            <x-ui.button variant="danger" type="button" id="confirm-btn" onclick="document.getElementById('confirm-form').submit();">Ya, Lanjutkan</x-ui.button>
+            <x-ui.button variant="danger" type="submit" id="confirm-btn" onclick="this.innerHTML='<i class=\'fa-solid fa-spinner fa-spin\'></i> Memproses...'; this.style.pointerEvents='none';">Ya, Lanjutkan</x-ui.button>
         </div>
     </div>
 </x-ui.modal>
@@ -3491,14 +3491,14 @@
     }
     
     function confirmDeleteUser(id) {
-        document.getElementById('confirm-title').innerText = "Hapus Staf";
+        document.getElementById('modal-confirm-title').innerText = "Hapus Staf";
         document.getElementById('confirm-msg').innerText = "Apakah Anda yakin ingin menonaktifkan/menghapus staf ini dari sistem?";
         document.getElementById('confirm-form').action = "/master-demo/employee/" + id + "/delete"; 
         document.getElementById('modal-confirm').style.display = 'flex';
     }
     
     function confirmLogout() {
-        document.getElementById('confirm-title').innerText = "Logout";
+        document.getElementById('modal-confirm-title').innerText = "Logout";
         document.getElementById('confirm-msg').innerText = "Apakah Anda yakin ingin keluar dari sistem?";
         document.getElementById('confirm-form').action = "/master-demo/logout"; 
         document.getElementById('modal-confirm').style.display = 'flex';
