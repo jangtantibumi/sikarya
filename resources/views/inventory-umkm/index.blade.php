@@ -498,22 +498,45 @@
         }
     }
 
-    async function deleteInvUmkm(id) {
-        if (!confirm('Yakin ingin menghapus barang ini?')) return;
-        
-        try {
-            const res = await fetch('/master-demo/inventory-umkm/' + id, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+    function deleteInvUmkm(id) {
+        if (typeof showCustomConfirm === 'function') {
+            showCustomConfirm('Yakin ingin menghapus barang ini secara permanen dari gudang?', async () => {
+                try {
+                    const res = await fetch('/master-demo/inventory-umkm/' + id, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        }
+                    });
+                    if (res.ok) {
+                        loadInvUmkm();
+                        if (typeof showToast === 'function') showToast('Barang dihapus!', 'success');
+                    } else {
+                        if (typeof showToast === 'function') showToast('Gagal menghapus barang.', 'error');
+                    }
+                } catch(e) {
+                    console.error(e);
                 }
             });
-            if (res.ok) {
-                loadInvUmkm();
-                if (typeof showToast === 'function') showToast('Barang dihapus!');
-            }
-        } catch(e) {
-            console.error(e);
+        } else {
+            if (!confirm('Yakin ingin menghapus barang ini?')) return;
+            // Fallback for native
+            (async () => {
+                try {
+                    const res = await fetch('/master-demo/inventory-umkm/' + id, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        }
+                    });
+                    if (res.ok) {
+                        loadInvUmkm();
+                        if (typeof showToast === 'function') showToast('Barang dihapus!');
+                    }
+                } catch(e) {
+                    console.error(e);
+                }
+            })();
         }
     }
 
