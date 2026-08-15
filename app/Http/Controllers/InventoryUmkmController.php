@@ -76,10 +76,10 @@ class InventoryUmkmController extends Controller
         return response()->json($mapped);
     }
 
-    public function store(Request $request)
+    public function store(Request $request, InventoryLedgerService $inventoryService)
     {
         $validated = $request->validate([
-            'item_code' => 'nullable|string',
+            'item_code' => 'nullable|string|unique:products,sku',
             'item_name' => 'required|string',
             'category' => 'nullable|string',
             'uom' => 'nullable|string',
@@ -100,6 +100,20 @@ class InventoryUmkmController extends Controller
             'is_active' => true,
         ]);
 
+        $warehouse = Warehouse::where('company_id', $this->getCompanyId())->first();
+        if ($warehouse && isset($validated['actual_stock']) && $validated['actual_stock'] > 0) {
+            $inventoryService->move(
+                $product,
+                $warehouse,
+                (float) $validated['actual_stock'],
+                'in',
+                auth()->user(),
+                'STOK-AWAL',
+                null, null, null,
+                'Input awal stok barang UMKM'
+            );
+        }
+
         return response()->json([
             'success' => true,
             'data' => [
@@ -110,12 +124,12 @@ class InventoryUmkmController extends Controller
         ]);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, $id, InventoryLedgerService $inventoryService)
     {
         $product = Product::where('company_id', $this->getCompanyId())->findOrFail($id);
 
         $validated = $request->validate([
-            'item_code' => 'nullable|string',
+            'item_code' => ['nullable', 'string', \Illuminate\Validation\Rule::unique('products', 'sku')->ignore($id)],
             'item_name' => 'required|string',
             'category' => 'nullable|string',
             'uom' => 'nullable|string',
@@ -133,6 +147,23 @@ class InventoryUmkmController extends Controller
             'max_stock' => $validated['max_stock'] ?? $product->max_stock,
             'standard_cost' => $validated['total_price'] ?? $product->standard_cost,
         ]);
+
+        $warehouse = Warehouse::where('company_id', $this->getCompanyId())->first();
+        if ($warehouse && isset($validated['actual_stock'])) {
+            $currentStock = $inventoryService->balance($product, $warehouse);
+            $newStock = (float) $validated['actual_stock'];
+            $delta = $newStock - $currentStock;
+            
+            if ($delta > 0) {
+                $inventoryService->move(
+                    $product, $warehouse, $delta, 'adjustment_in', auth()->user(), 'ADJ-IN', null, null, null, 'Koreksi penambahan stok UMKM'
+                );
+            } elseif ($delta < 0) {
+                $inventoryService->move(
+                    $product, $warehouse, $delta, 'adjustment_out', auth()->user(), 'ADJ-OUT', null, null, null, 'Koreksi pengurangan stok UMKM'
+                );
+            }
+        }
 
         return response()->json(['success' => true]);
     }

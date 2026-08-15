@@ -508,12 +508,9 @@
                 closeInvUmkmModal();
                 await loadInvUmkm();
                 if (typeof showToast === 'function') showToast('Barang berhasil disimpan!');
-            } else {
-                alert('Gagal menyimpan. Kode item mungkin duplikat.');
             }
         } catch (error) {
             console.error('Error saving item:', error);
-            alert('Terjadi kesalahan.');
         } finally {
             isSubmittingInv = false;
             btn.innerText = originalText;
