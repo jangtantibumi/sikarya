@@ -1,37 +1,19 @@
-@props([
-    'title' => null,
-    'subtitle' => null,
-    'padding' => 'p-6',
-    'class' => ''
-])
+@props(['title', 'value', 'icon' => null, 'trend' => null, 'trendDirection' => 'up', 'interactive' => false, 'class' => ''])
 
-<div {{ $attributes->merge(['class' => 'bg-white rounded-2xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-shadow duration-300 ' . $class]) }}>
-    @if($title || $subtitle || isset($header))
-        <div class="px-6 py-5 border-b border-slate-50 flex justify-between items-center">
-            <div>
-                @if($title)
-                    <h3 class="text-lg font-bold text-slate-800 leading-tight">{{ $title }}</h3>
-                @endif
-                @if($subtitle)
-                    <p class="text-sm text-slate-500 mt-1">{{ $subtitle }}</p>
-                @endif
+<div {{ $attributes->merge(['class' => 'card ' . ($interactive ? 'interactive ' : '') . $class]) }}>
+    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <h3>{{ $title }}</h3>
+        @if($icon)
+            <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(var(--accent-rgb), 0.1); display: flex; align-items: center; justify-content: center; color: var(--accent);">
+                <i class="fa-solid {{ $icon }} fa-lg"></i>
             </div>
-            
-            @if(isset($header))
-                <div>
-                    {{ $header }}
-                </div>
-            @endif
-        </div>
-    @endif
-
-    <div class="{{ $padding }}">
-        {{ $slot }}
+        @endif
     </div>
-    
-    @if(isset($footer))
-        <div class="px-6 py-4 bg-slate-50/50 border-t border-slate-50 rounded-b-2xl">
-            {{ $footer }}
+    <div class="value">{{ $value }}</div>
+    @if($trend)
+        <div class="trend" style="color: {{ $trendDirection === 'up' ? 'var(--success)' : 'var(--danger)' }}">
+            <i class="fa-solid {{ $trendDirection === 'up' ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down' }}"></i>
+            {{ $trend }}
         </div>
     @endif
 </div>

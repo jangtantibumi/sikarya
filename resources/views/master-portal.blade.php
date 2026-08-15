@@ -777,9 +777,7 @@
             </div>
         @endforeach
         <div style="padding: 16px 24px; margin-top: auto;">
-            <button type="button" onclick="confirmLogout()" style="width: 100%; background: var(--danger); color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px;">
-                <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
-            </button>
+            <x-ui.button variant="danger" icon="fa-arrow-right-from-bracket" onclick="confirmLogout()" style="width: 100%; border-radius: 8px; padding: 10px 16px; font-size: 14px;">Logout</x-ui.button>
         </div>
     </aside>
 
@@ -3369,21 +3367,16 @@
 </html>
 
 <!-- Global Confirm Modal -->
-<div id="modal-confirm" class="modal-overlay">
-    <div class="modal-content" style="max-width: 400px; text-align: center;">
-        <i class="fa-solid fa-triangle-exclamation" style="font-size: 40px; color: var(--danger); margin-bottom: 16px;"></i>
-        <h3 id="confirm-title" style="margin-bottom: 8px;">Konfirmasi</h3>
+<x-ui.modal id="modal-confirm" title="Konfirmasi" icon="fa-triangle-exclamation" iconColor="var(--danger)" formId="confirm-form">
+    <div style="text-align: center;">
         <p id="confirm-msg" class="desc" style="margin-bottom: 24px;">Apakah Anda yakin?</p>
+        <input type="hidden" name="_method" id="confirm-method" value="POST">
         <div style="display: flex; gap: 12px; justify-content: center;">
-            <button class="user-pill" onclick="document.getElementById('modal-confirm').style.display='none'" style="background: rgba(255,255,255,0.1); border: none; padding: 10px 24px; cursor: pointer;">Batal</button>
-            <form id="confirm-form" method="POST" action="">
-                @csrf
-                <input type="hidden" name="_method" id="confirm-method" value="POST">
-                <button type="submit" class="user-pill" id="confirm-btn" style="background: var(--danger); color: white; border: none; padding: 10px 24px; cursor: pointer; font-weight: bold;">Ya, Lanjutkan</button>
-            </form>
+            <x-ui.button variant="secondary" type="button" onclick="document.getElementById('modal-confirm').style.display='none'" style="flex:1;">Batal</x-ui.button>
+            <x-ui.button variant="danger" type="button" id="confirm-btn" onclick="document.getElementById('confirm-form').submit();">Ya, Lanjutkan</x-ui.button>
         </div>
     </div>
-</div>
+</x-ui.modal>
 
 <script>
     function showToast(message) {
