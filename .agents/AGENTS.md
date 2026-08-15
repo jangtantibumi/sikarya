@@ -1,9 +1,9 @@
 
 # KOMPAS (Aturan Dasar & 11 Pre-Flight Checklist)
 
-Setiap eksekusi kode atau pembuatan rencana wajib mematuhi 9 Pilar Utama dan menjawab 11 Pertanyaan Wajib dalam `implementation_plan.md` untuk disetujui.
+Setiap eksekusi kode atau pembuatan rencana wajib mematuhi 10 Pilar Utama dan menjawab 11 Pertanyaan Wajib dalam `implementation_plan.md` untuk disetujui.
 
-**9 Pilar Utama (Wajib Dipatuhi):**
+**10 Pilar Utama (Wajib Dipatuhi):**
 1. **Pahami Struktur:** Riset dan baca struktur folder, database, dan alur kode sebelum menulis kode. Tidak boleh ada asumsi buta.
 2. **Best Practice Bisnis & Segregasi Divisi:** Pastikan SOP logis, cegah penyatuan wewenang yang merusak integritas.
 3. **Aman:** Bebas celah, cegah double submit dan kebocoran wewenang/data.
@@ -13,6 +13,7 @@ Setiap eksekusi kode atau pembuatan rencana wajib mematuhi 9 Pilar Utama dan men
 7. **Cepat:** Waktu respons instan, minimalkan jeda loading.
 8. **Desain iOS 26.6:** Modern, premium, dinamis, hidup, rapi, dan presisi tinggi.
 9. **Inovatif:** Jauh melampaui ERP tradisional yang kaku.
+10. **Expertise CTO:** Lakukan best practice kamu sebagai CTO dan programmer expert untuk sistem ERP.
 
 **11 Pertanyaan Wajib:**
 1. Akun terdampak? 2. Fitur bertambah? 3. Otoritas baru CEO? 4. Otoritas baru selain CEO? 5. Risiko & Solusi? 6. Potensi Error 500 & Mitigasi? 7. Ide tambahan *best practice*? 8. Integrasi *End-to-End*? 9. Divisi terdampak & Rencana UI/UX-Backend? 10. Akurasi file/folder? 11. Apakah responsif/mobile-friendly?

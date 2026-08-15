@@ -2276,13 +2276,8 @@ Logout <?php echo $__env->renderComponent(); ?>
                             <div style="display: flex; flex-direction: column; gap: 20px;">
                                 <div style="background: rgba(255,255,255,0.02); padding: 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
                                     <h5 style="margin: 0 0 12px 0; font-size: 13px; color: var(--accent);">1. Info Barang Jadi</h5>
-                                    <label style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px; display: block;">Pilih Produk Jadi (Hasil Akhir)</label>
-                                    <select name="product_id" class="form-control" style="background: rgba(0,0,0,0.2); border: 1px solid var(--panel-border); color: white; padding: 10px 12px; border-radius: 6px; width: 100%; margin-bottom: 12px;" required>
-                                        <option value="">-- Pilih --</option>
-                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = \App\Models\Product::where('company_id', $company->id)->get(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $product): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
-                                            <option value="<?php echo e($product->id); ?>"><?php echo e($product->name); ?></option>
-                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
-                                    </select>
+                                    <label style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px; display: block;">Nama Produk Jadi Baru (Hasil Akhir)</label>
+                                    <input type="text" name="new_product_name" class="form-control" placeholder="Contoh: Roti Sobek Coklat" style="background: rgba(0,0,0,0.2); border: 1px solid var(--panel-border); color: white; padding: 10px 12px; border-radius: 6px; width: 100%; margin-bottom: 12px;" required>
                                     
                                     <label style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px; display: block;">Nama Resep Khusus</label>
                                     <input type="text" name="name" class="form-control" placeholder="Contoh: Roti Sobek Standar Premium" style="background: rgba(0,0,0,0.2); border: 1px solid var(--panel-border); color: white; padding: 10px 12px; border-radius: 6px; width: 100%; margin-bottom: 12px;" required>
@@ -2299,7 +2294,7 @@ Logout <?php echo $__env->renderComponent(); ?>
                                         <div class="recipe-item-row" style="display: flex; gap: 8px; margin-bottom: 12px; align-items: center;">
                                             <select name="materials[]" class="form-control material-select" onchange="calculateRecipeCost()" style="background: rgba(0,0,0,0.2); border: 1px solid var(--panel-border); color: white; padding: 10px 12px; border-radius: 6px; flex: 2;" required>
                                                 <option value="" data-cost="0">-- Pilih Bahan --</option>
-                                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = \App\Models\Product::where('company_id', $company->id)->get(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $material): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = \App\Models\Product::where('company_id', $company->id)->where('type', 'raw_material')->get(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $material): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
                                                     <option value="<?php echo e($material->id); ?>" data-cost="<?php echo e($material->standard_cost ?? 0); ?>"><?php echo e($material->name); ?> (Rp<?php echo e(number_format($material->standard_cost ?? 0, 0, ',', '.')); ?>/gr)</option>
                                                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
                                             </select>
@@ -2402,6 +2397,43 @@ Logout <?php echo $__env->renderComponent(); ?>
                                         </tr>
                                         <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                     <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h4 style="margin: 24px 0 12px 0; font-size: 14px; color: var(--accent);">Histori Hasil Produksi (Barang Jadi)</h4>
+                        <div style="background: rgba(0,0,0,0.2); padding: 16px; border-radius: 8px; border: 1px solid var(--panel-border);">
+                            <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                                <thead>
+                                    <tr style="border-bottom: 1px solid var(--panel-border); color: var(--text-muted); text-align: left;">
+                                        <th style="padding: 8px;">Produk Jadi</th>
+                                        <th style="padding: 8px;">Stok Tersedia (Pcs)</th>
+                                        <th style="padding: 8px;">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php $hasFinishedGoods = false; ?>
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = \App\Models\StockMovement::select('product_id', \Illuminate\Support\Facades\DB::raw('SUM(quantity) as total_qty'))->where('company_id', $company->id)->groupBy('product_id')->with('product')->get(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $stock): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($stock->product && $stock->product->type === 'finished_good'): ?>
+                                        <?php $hasFinishedGoods = true; ?>
+                                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                            <td style="padding: 8px; font-weight: bold; color: var(--text-heading);">
+                                                <?php echo e($stock->product->name); ?>
+
+                                            </td>
+                                            <td style="padding: 8px; font-weight: bold; color: var(--success);"><?php echo e(number_format($stock->total_qty, 0, ',', '.')); ?> <?php echo e($stock->product->unit ?? 'Pcs'); ?></td>
+                                            <td style="padding: 8px;">
+                                                <span class="pill" style="background: rgba(16, 185, 129, 0.2); color: var(--success);">Siap Jual</span>
+                                            </td>
+                                        </tr>
+                                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                                    
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!$hasFinishedGoods): ?>
+                                    <tr>
+                                        <td colspan="3" style="padding: 16px; text-align: center; color: var(--text-muted);">Belum ada barang jadi yang diproduksi.</td>
+                                    </tr>
+                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </tbody>
                             </table>
                         </div>

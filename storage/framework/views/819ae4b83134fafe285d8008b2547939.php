@@ -167,24 +167,48 @@
     </div>
 
     <!-- Table Area (Stok Aktual) -->
-    <div id="inv-tab-stock" class="ios-card" style="overflow-x: auto; margin-bottom: 30px;">
-        <table class="modern-table">
-            <thead>
-                <tr>
-                    <th>Kode</th>
-                    <th>Nama Barang</th>
-                    <th>Stok Aktual</th>
-                    <th>Batas Min.</th>
-                    <th>Batas Max.</th>
-                    <th>Harga/Satuan</th>
-                    <th>Status</th>
-                    <th style="text-align: center;">Aksi</th>
-                </tr>
-            </thead>
-            <tbody id="inv-umkm-list">
-                <!-- Loaded via JS -->
-            </tbody>
-        </table>
+    <div id="inv-tab-stock" style="margin-bottom: 30px;">
+        <div class="ios-card" style="overflow-x: auto; margin-bottom: 24px;">
+            <h3 style="margin: 0 0 16px 0; font-size: 16px; color: var(--text-heading);"><i class="fa-solid fa-wheat-awn"></i> Stok Bahan Baku</h3>
+            <table class="modern-table">
+                <thead>
+                    <tr>
+                        <th>Kode</th>
+                        <th>Nama Bahan</th>
+                        <th>Stok Aktual</th>
+                        <th>Batas Min.</th>
+                        <th>Batas Max.</th>
+                        <th>Harga/Satuan</th>
+                        <th>Status</th>
+                        <th style="text-align: center;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="inv-umkm-list-raw">
+                    <!-- Loaded via JS -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="ios-card" style="overflow-x: auto; border: 1px solid var(--accent); background: linear-gradient(180deg, rgba(217, 239, 233, 0.05) 0%, var(--panel-glass) 100%);">
+            <h3 style="margin: 0 0 16px 0; font-size: 16px; color: var(--accent);"><i class="fa-solid fa-box-open"></i> Stok Produk Siap Jual (Barang Jadi)</h3>
+            <table class="modern-table">
+                <thead>
+                    <tr>
+                        <th>Kode</th>
+                        <th>Nama Produk Jadi</th>
+                        <th>Stok Aktual</th>
+                        <th>Batas Min.</th>
+                        <th>Batas Max.</th>
+                        <th>Harga Produksi/HPP</th>
+                        <th>Status</th>
+                        <th style="text-align: center;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="inv-umkm-list-finished">
+                    <!-- Loaded via JS -->
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <!-- Table Area (Riwayat Input) -->
@@ -410,10 +434,14 @@
             document.getElementById('kpi-items').innerHTML = '<div class="skeleton" style="height: 28px; width: 40%; border-radius: 6px;"></div>';
             document.getElementById('kpi-critical').innerHTML = '<div class="skeleton" style="height: 28px; width: 40%; border-radius: 6px;"></div>';
             
-            const tbody = document.getElementById('inv-umkm-list');
-            tbody.innerHTML = '';
+            const tbodyRaw = document.getElementById('inv-umkm-list-raw');
+            const tbodyFinished = document.getElementById('inv-umkm-list-finished');
+            tbodyRaw.innerHTML = '';
+            tbodyFinished.innerHTML = '';
+            
+            let skeleton = '';
             for(let i=0; i<3; i++){
-                tbody.innerHTML += `<tr>
+                skeleton += `<tr>
                     <td style="padding: 16px;"><div class="skeleton" style="height: 20px; width: 80%;"></div></td>
                     <td style="padding: 16px;"><div class="skeleton" style="height: 20px; width: 100%;"></div></td>
                     <td style="padding: 16px;"><div class="skeleton" style="height: 20px; width: 60%;"></div></td>
@@ -423,11 +451,14 @@
                     <td style="padding: 16px;"><div class="skeleton" style="height: 30px; width: 70px; border-radius: 8px;"></div></td>
                 </tr>`;
             }
+            tbodyRaw.innerHTML = skeleton;
+            tbodyFinished.innerHTML = skeleton;
 
             const res = await fetch('/master-demo/inventory-umkm');
             const data = await res.json();
             
-            tbody.innerHTML = '';
+            tbodyRaw.innerHTML = '';
+            tbodyFinished.innerHTML = '';
             
             let warningCount = 0;
             let totalValuation = 0;
@@ -451,7 +482,7 @@
                     ? `<span style="background: rgba(231, 76, 60, 0.1); color: #e74c3c; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold;">⚠️ Kritis</span>`
                     : `<span style="background: rgba(217, 239, 233, 0.5); color: var(--text-accent); padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold;">Aman</span>`;
 
-                tbody.innerHTML += `
+                const rowHtml = `
                     <tr>
                         <td style="color: var(--text-muted);">${item.item_code || '-'}</td>
                         <td style="color: var(--text-heading); font-weight: 700;">${item.item_name}</td>
@@ -466,6 +497,12 @@
                         </td>
                     </tr>
                 `;
+                
+                if (item.type === 'finished_good') {
+                    tbodyFinished.innerHTML += rowHtml;
+                } else {
+                    tbodyRaw.innerHTML += rowHtml;
+                }
             });
 
             // Update KPI Cards
