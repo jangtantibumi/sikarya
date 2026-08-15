@@ -55,7 +55,39 @@
         };
     }
 
+    // Fungsi untuk menampilkan Custom Alert (hanya tombol OK)
+    function showCustomAlert(message) {
+        const modal = document.getElementById('custom-confirm-modal');
+        const msgEl = document.getElementById('custom-confirm-message');
+        const cancelBtn = document.getElementById('custom-confirm-cancel');
+        const okBtn = document.getElementById('custom-confirm-ok');
+        const content = modal.firstElementChild;
+        
+        msgEl.textContent = message;
+        cancelBtn.style.display = 'none'; // Sembunyikan tombol Batal
+        
+        modal.style.display = 'flex';
+        
+        requestAnimationFrame(() => {
+            modal.style.opacity = '1';
+            content.style.transform = 'scale(1)';
+        });
+
+        const cleanup = () => {
+            modal.style.opacity = '0';
+            content.style.transform = 'scale(0.9)';
+            setTimeout(() => { 
+                modal.style.display = 'none'; 
+                cancelBtn.style.display = 'block'; // Kembalikan ke state awal
+            }, 300);
+            okBtn.onclick = null;
+        };
+
+        okBtn.onclick = cleanup;
+    }
+
     window.showCustomConfirm = showCustomConfirm;
+    window.showCustomAlert = showCustomAlert;
 
     // Convert native confirm to custom
     function attachCustomConfirm() {

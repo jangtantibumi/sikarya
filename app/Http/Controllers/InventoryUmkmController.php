@@ -25,26 +25,15 @@ class InventoryUmkmController extends Controller
     public function history()
     {
         $companyId = $this->getCompanyId();
-        $movements = \App\Models\StockMovement::where('company_id', $companyId)
-            ->with(['product'])
-            ->orderBy('created_at', 'desc')
-            ->take(100)
+        if (!$companyId) return response()->json([]);
+
+        $history = \App\Models\StockMovement::with(['product:id,item_code,item_name,uom', 'createdBy:id,name'])
+            ->where('company_id', $companyId)
+            ->latest()
+            ->limit(200)
             ->get();
 
-        $mapped = $movements->map(function ($m) {
-            return [
-                'id' => $m->id,
-                'date' => $m->created_at->format('d M Y H:i'),
-                'item_name' => $m->product ? $m->product->name : 'Unknown',
-                'type' => $m->type,
-                'quantity' => (float) $m->quantity,
-                'unit' => $m->product ? $m->product->unit : '',
-                'reference' => $m->reference ?? '-',
-                'notes' => $m->notes ?? '-',
-            ];
-        });
-
-        return response()->json($mapped);
+        return response()->json($history);
     }
 
     public function index(InventoryLedgerService $inventoryService)
@@ -76,10 +65,10 @@ class InventoryUmkmController extends Controller
         return response()->json($mapped);
     }
 
-    public function store(Request $request, InventoryLedgerService $inventoryService)
+    public function store(Request $request)
     {
         $validated = $request->validate([
-            'item_code' => 'nullable|string|unique:products,sku',
+            'item_code' => 'nullable|string',
             'item_name' => 'required|string',
             'category' => 'nullable|string',
             'uom' => 'nullable|string',
@@ -100,20 +89,6 @@ class InventoryUmkmController extends Controller
             'is_active' => true,
         ]);
 
-        $warehouse = Warehouse::where('company_id', $this->getCompanyId())->first();
-        if ($warehouse && isset($validated['actual_stock']) && $validated['actual_stock'] > 0) {
-            $inventoryService->move(
-                $product,
-                $warehouse,
-                (float) $validated['actual_stock'],
-                'in',
-                auth()->user(),
-                'STOK-AWAL',
-                null, null, null,
-                'Input awal stok barang UMKM'
-            );
-        }
-
         return response()->json([
             'success' => true,
             'data' => [
@@ -124,12 +99,12 @@ class InventoryUmkmController extends Controller
         ]);
     }
 
-    public function update(Request $request, $id, InventoryLedgerService $inventoryService)
+    public function update(Request $request, $id)
     {
         $product = Product::where('company_id', $this->getCompanyId())->findOrFail($id);
 
         $validated = $request->validate([
-            'item_code' => ['nullable', 'string', \Illuminate\Validation\Rule::unique('products', 'sku')->ignore($id)],
+            'item_code' => 'nullable|string',
             'item_name' => 'required|string',
             'category' => 'nullable|string',
             'uom' => 'nullable|string',
@@ -147,23 +122,6 @@ class InventoryUmkmController extends Controller
             'max_stock' => $validated['max_stock'] ?? $product->max_stock,
             'standard_cost' => $validated['total_price'] ?? $product->standard_cost,
         ]);
-
-        $warehouse = Warehouse::where('company_id', $this->getCompanyId())->first();
-        if ($warehouse && isset($validated['actual_stock'])) {
-            $currentStock = $inventoryService->balance($product, $warehouse);
-            $newStock = (float) $validated['actual_stock'];
-            $delta = $newStock - $currentStock;
-            
-            if ($delta > 0) {
-                $inventoryService->move(
-                    $product, $warehouse, $delta, 'adjustment_in', auth()->user(), 'ADJ-IN', null, null, null, 'Koreksi penambahan stok UMKM'
-                );
-            } elseif ($delta < 0) {
-                $inventoryService->move(
-                    $product, $warehouse, $delta, 'adjustment_out', auth()->user(), 'ADJ-OUT', null, null, null, 'Koreksi pengurangan stok UMKM'
-                );
-            }
-        }
 
         return response()->json(['success' => true]);
     }
