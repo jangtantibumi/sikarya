@@ -20,7 +20,7 @@ class RecipeController extends Controller
         }
 
         $request->validate([
-            'product_id' => 'required|exists:products,id',
+            'new_product_name' => 'required|string|max:255',
             'name' => 'required|string|max:255',
             'yield_quantity' => 'required|numeric|min:1',
             'materials' => 'required|array|min:1',
@@ -32,9 +32,19 @@ class RecipeController extends Controller
         $companyId = $user->company_id ?? 1;
 
         DB::transaction(function () use ($request, $companyId, $user) {
+            // Magic: Otomatis daftarkan Barang Jadi ke Gudang
+            $product = \App\Models\Product::create([
+                'company_id' => $companyId,
+                'name' => $request->new_product_name,
+                'type' => 'finished_good',
+                'sku' => 'FG-' . strtoupper(\Illuminate\Support\Str::random(6)),
+                'unit' => 'pcs',
+                'is_active' => true,
+            ]);
+
             $recipe = Recipe::create([
                 'company_id' => $companyId,
-                'product_id' => $request->product_id,
+                'product_id' => $product->id,
                 'name' => $request->name,
                 'yield_quantity' => $request->yield_quantity,
                 'created_by_id' => $user->id,

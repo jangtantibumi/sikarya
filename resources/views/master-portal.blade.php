@@ -2244,13 +2244,8 @@
                             <div style="display: flex; flex-direction: column; gap: 20px;">
                                 <div style="background: rgba(255,255,255,0.02); padding: 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
                                     <h5 style="margin: 0 0 12px 0; font-size: 13px; color: var(--accent);">1. Info Barang Jadi</h5>
-                                    <label style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px; display: block;">Pilih Produk Jadi (Hasil Akhir)</label>
-                                    <select name="product_id" class="form-control" style="background: rgba(0,0,0,0.2); border: 1px solid var(--panel-border); color: white; padding: 10px 12px; border-radius: 6px; width: 100%; margin-bottom: 12px;" required>
-                                        <option value="">-- Pilih --</option>
-                                        @foreach(\App\Models\Product::where('company_id', $company->id)->where('type', 'finished_good')->get() as $product)
-                                            <option value="{{ $product->id }}">{{ $product->name }}</option>
-                                        @endforeach
-                                    </select>
+                                    <label style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px; display: block;">Nama Produk Jadi Baru (Hasil Akhir)</label>
+                                    <input type="text" name="new_product_name" class="form-control" placeholder="Contoh: Roti Sobek Coklat" style="background: rgba(0,0,0,0.2); border: 1px solid var(--panel-border); color: white; padding: 10px 12px; border-radius: 6px; width: 100%; margin-bottom: 12px;" required>
                                     
                                     <label style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px; display: block;">Nama Resep Khusus</label>
                                     <input type="text" name="name" class="form-control" placeholder="Contoh: Roti Sobek Standar Premium" style="background: rgba(0,0,0,0.2); border: 1px solid var(--panel-border); color: white; padding: 10px 12px; border-radius: 6px; width: 100%; margin-bottom: 12px;" required>
@@ -2368,6 +2363,42 @@
                                         </tr>
                                         @endif
                                     @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h4 style="margin: 24px 0 12px 0; font-size: 14px; color: var(--accent);">Histori Hasil Produksi (Barang Jadi)</h4>
+                        <div style="background: rgba(0,0,0,0.2); padding: 16px; border-radius: 8px; border: 1px solid var(--panel-border);">
+                            <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                                <thead>
+                                    <tr style="border-bottom: 1px solid var(--panel-border); color: var(--text-muted); text-align: left;">
+                                        <th style="padding: 8px;">Produk Jadi</th>
+                                        <th style="padding: 8px;">Stok Tersedia (Pcs)</th>
+                                        <th style="padding: 8px;">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @php $hasFinishedGoods = false; @endphp
+                                    @foreach(\App\Models\StockMovement::select('product_id', \Illuminate\Support\Facades\DB::raw('SUM(quantity) as total_qty'))->where('company_id', $company->id)->groupBy('product_id')->with('product')->get() as $stock)
+                                        @if($stock->product && $stock->product->type === 'finished_good')
+                                        @php $hasFinishedGoods = true; @endphp
+                                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                            <td style="padding: 8px; font-weight: bold; color: var(--text-heading);">
+                                                {{ $stock->product->name }}
+                                            </td>
+                                            <td style="padding: 8px; font-weight: bold; color: var(--success);">{{ number_format($stock->total_qty, 0, ',', '.') }} {{ $stock->product->unit ?? 'Pcs' }}</td>
+                                            <td style="padding: 8px;">
+                                                <span class="pill" style="background: rgba(16, 185, 129, 0.2); color: var(--success);">Siap Jual</span>
+                                            </td>
+                                        </tr>
+                                        @endif
+                                    @endforeach
+                                    
+                                    @if(!$hasFinishedGoods)
+                                    <tr>
+                                        <td colspan="3" style="padding: 16px; text-align: center; color: var(--text-muted);">Belum ada barang jadi yang diproduksi.</td>
+                                    </tr>
+                                    @endif
                                 </tbody>
                             </table>
                         </div>
