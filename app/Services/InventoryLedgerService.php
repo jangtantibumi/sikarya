@@ -54,6 +54,10 @@ class InventoryLedgerService
                 throw ValidationException::withMessages(['quantity' => 'Stok tidak mencukupi; saldo tidak boleh negatif.']);
             }
 
+            if ($quantity > 0 && $product->max_stock > 0 && ($this->balance($product, $warehouse, $batchId, $rackId, $binId) + $quantity > $product->max_stock)) {
+                throw ValidationException::withMessages(['quantity' => 'Transaksi ditolak: Penambahan barang akan melebihi kapasitas gudang (Max: ' . $product->max_stock . ').']);
+            }
+
             // If batchId is provided, update the StockBatch quantity
             if ($batchId) {
                 $batch = StockBatch::find($batchId);
