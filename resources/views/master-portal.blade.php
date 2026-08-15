@@ -2322,7 +2322,10 @@
             <div class="card" style="margin-bottom: 24px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--panel-border); padding-bottom: 16px; margin-bottom: 16px;">
                     <h3 style="margin: 0; border: none; padding: 0;">Laporan Produksi Harian</h3>
-                    <div style="color: var(--success); font-size: 13px; font-weight: bold;"><i class="fa-solid fa-link"></i> Terkoneksi ke Gudang Sentral</div>
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <button class="user-pill" onclick="document.getElementById('modal-add-recipe').style.display='flex'" style="background: var(--accent); color: white; cursor: pointer; border: none;"><i class="fa-solid fa-plus"></i> Buat Resep Baru</button>
+                        <div style="color: var(--success); font-size: 13px; font-weight: bold;"><i class="fa-solid fa-link"></i> Terkoneksi ke Gudang Sentral</div>
+                    </div>
                 </div>
                 
                 <div style="display: flex; flex-direction: column; gap: 24px;">
