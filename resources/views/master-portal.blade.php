@@ -3373,7 +3373,7 @@
         <input type="hidden" name="_method" id="confirm-method" value="POST">
         <div style="display: flex; gap: 12px; justify-content: center;">
             <x-ui.button variant="secondary" type="button" onclick="document.getElementById('modal-confirm').style.display='none'" style="flex:1;">Batal</x-ui.button>
-            <x-ui.button variant="danger" type="submit" id="confirm-btn" onclick="this.innerHTML='<i class=\'fa-solid fa-spinner fa-spin\'></i> Memproses...'; this.style.pointerEvents='none';">Ya, Lanjutkan</x-ui.button>
+            <x-ui.button variant="danger" type="submit" id="confirm-btn" onclick="this.innerHTML=`<i class='fa-solid fa-spinner fa-spin'></i> Memproses...`; this.style.pointerEvents=`none`;">Ya, Lanjutkan</x-ui.button>
         </div>
     </div>
 </x-ui.modal>
@@ -4523,6 +4523,7 @@ async function submitNewChannel(e) {
 <x-ui.toast />
 @include('components.global-loading')
 @include('components.chat-widget')
+
 
 
 
