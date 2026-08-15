@@ -2247,9 +2247,9 @@
         <!-- PRODUCTION VIEW -->
         <section id="view-production" class="view-section">
             <div class="ios-tabs" style="display: flex; gap: 16px; border-bottom: 1px solid var(--panel-border); margin-bottom: 24px; padding-bottom: 8px; overflow-x: auto;">
-                <button class="ios-tab-main active" data-prodtab="dashboard" onclick="switchProdTab('dashboard')" style="background:none; border:none; color:var(--accent); font-weight:600; padding:8px 16px; border-bottom: 2px solid var(--accent); cursor:pointer; white-space: nowrap;">Production / BOM</button>
-                <button class="ios-tab-main" data-prodtab="request" onclick="switchProdTab('request')" style="background:none; border:none; color:var(--text-muted); font-weight:500; padding:8px 16px; cursor:pointer; white-space: nowrap;">Request Bahan (Pabrik)</button>
-                <button class="ios-tab-main" data-prodtab="automation" onclick="switchProdTab('automation')" style="background:none; border:none; color:var(--text-muted); font-weight:500; padding:8px 16px; cursor:pointer; white-space: nowrap;">Otomasi Backflush</button>
+                <button class="ios-tab-main active" data-prodtab="dashboard" onclick="switchProdTab('dashboard')" style="background:none; border:none; color:var(--accent); font-weight:600; padding:8px 16px; border-bottom: 2px solid var(--accent); cursor:pointer; white-space: nowrap;">Resep & Produksi</button>
+                <button class="ios-tab-main" data-prodtab="request" onclick="switchProdTab('request')" style="background:none; border:none; color:var(--text-muted); font-weight:500; padding:8px 16px; cursor:pointer; white-space: nowrap;">Permintaan ke Gudang</button>
+                <button class="ios-tab-main" data-prodtab="automation" onclick="switchProdTab('automation')" style="background:none; border:none; color:var(--text-muted); font-weight:500; padding:8px 16px; cursor:pointer; white-space: nowrap;">Riwayat Penggunaan</button>
             </div>
             
             <script>
@@ -2431,7 +2431,7 @@
                 <div style="text-align: center; padding: 40px 20px; background: rgba(255, 255, 255, 0.02); border: 1px dashed var(--panel-border); border-radius: 12px;">
                     <i class="fa-solid fa-boxes-packing" style="font-size: 48px; color: var(--text-muted); margin-bottom: 16px; opacity: 0.5;"></i>
                     <h4 style="margin: 0 0 8px 0; color: var(--text-heading);">Fitur dalam tahap pengembangan</h4>
-                    <p style="margin: 0; font-size: 14px; color: var(--text-muted);">Sistem pengajuan bahan baku dari pabrik ke gudang akan tersedia di pembaruan berikutnya.</p>
+                    <p style="margin: 0; font-size: 14px; color: var(--text-muted);">Sistem permintaan bahan baku dari pabrik ke gudang akan tersedia di pembaruan berikutnya.</p>
                 </div>
             </div>
             
@@ -2440,7 +2440,7 @@
                 <div style="text-align: center; padding: 40px 20px; background: rgba(255, 255, 255, 0.02); border: 1px dashed var(--panel-border); border-radius: 12px;">
                     <i class="fa-solid fa-robot" style="font-size: 48px; color: var(--text-muted); margin-bottom: 16px; opacity: 0.5;"></i>
                     <h4 style="margin: 0 0 8px 0; color: var(--text-heading);">Fitur dalam tahap pengembangan</h4>
-                    <p style="margin: 0; font-size: 14px; color: var(--text-muted);">Pengaturan matriks pemotongan stok otomatis (Backflushing) akan tersedia di pembaruan berikutnya.</p>
+                    <p style="margin: 0; font-size: 14px; color: var(--text-muted);">Laporan riwayat pemotongan stok otomatis (Backflushing) akan tersedia di pembaruan berikutnya.</p>
                 </div>
             </div>
         </section>

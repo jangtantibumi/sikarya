@@ -42,6 +42,7 @@ class ProductionController extends Controller
 
         try {
             DB::transaction(function () use ($recipe, $request, $inventoryService, $warehouse) {
+                // 1. Kurangi Bahan Baku (Raw Materials)
                 foreach ($recipe->items as $item) {
                     $deductionQuantity = -($item->quantity * $request->batch_quantity);
 
@@ -55,9 +56,22 @@ class ProductionController extends Controller
                         "Backflush for Recipe: {$recipe->name} Batch: {$request->batch_quantity}"
                     );
                 }
+
+                // 2. Tambah Barang Jadi (Finished Goods) ke Gudang
+                if ($recipe->product_id) {
+                    $addedQuantity = $recipe->yield_quantity * $request->batch_quantity;
+                    $inventoryService->move(
+                        $recipe->product,
+                        $warehouse,
+                        $addedQuantity,
+                        'in_production',
+                        Auth::user(),
+                        "Barang jadi dari Produksi: {$recipe->name} Batch: {$request->batch_quantity}"
+                    );
+                }
             });
 
-            return redirect()->back()->with('success', "Produksi {$recipe->name} sebanyak {$request->batch_quantity} batch berhasil. Stok bahan baku otomatis dipotong.");
+            return redirect()->back()->with('success', "Produksi {$recipe->name} sebanyak {$request->batch_quantity} batch berhasil. Bahan baku terpotong dan barang jadi telah masuk ke Gudang.");
 
         } catch (ValidationException $e) {
             // Tangkap exception jika stok minus
