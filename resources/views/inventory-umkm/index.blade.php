@@ -117,8 +117,8 @@
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
         <h2 style="margin: 0; font-size: 28px; color: var(--text-accent); font-weight: 800;">Manajemen Gudang</h2>
         <div style="display: flex; gap: 12px;">
-            <button class="btn-ios-outline" onclick="switchInvUmkmTab('history')">
-                <i class="fa-solid fa-clock-rotate-left"></i> Riwayat Input
+            <button class="btn-ios-outline" id="btn-inv-umkm-history" onclick="switchInvUmkmTab('history')">
+                <i class="fa-solid fa-clock-rotate-left"></i> <span id="btn-inv-umkm-history-text">Riwayat Input</span>
             </button>
             <button class="btn-ios" onclick="openInvUmkmModal()">
                 <i class="fa-solid fa-plus"></i> Tambah Barang
@@ -126,8 +126,10 @@
         </div>
     </div>
 
-    <!-- KPI Dashboard Area -->
-    <div style="display: flex; gap: 24px; margin-bottom: 24px; flex-wrap: wrap;">
+    <!-- Main Tab Area -->
+    <div id="inv-umkm-main-tab">
+        <!-- KPI Dashboard Area -->
+        <div style="display: flex; gap: 24px; margin-bottom: 24px; flex-wrap: wrap;">
         <div class="kpi-card kpi-primary" style="min-width: 200px;">
             <div class="kpi-label">Total Valuasi Aset</div>
             <div class="kpi-value" id="kpi-valuation">Rp 0</div>
@@ -175,6 +177,27 @@
                 <!-- Loaded via JS -->
             </tbody>
         </table>
+        </div>
+    </div>
+
+    <!-- History Tab Area -->
+    <div id="inv-umkm-history-tab" style="display: none; animation: fadeIn 0.3s ease;">
+        <div class="ios-card" style="overflow-x: auto; margin-bottom: 30px;">
+            <table class="modern-table">
+                <thead>
+                    <tr>
+                        <th>Waktu</th>
+                        <th>Nama Barang</th>
+                        <th>Tipe</th>
+                        <th>Jumlah</th>
+                        <th>Ref / Catatan</th>
+                    </tr>
+                </thead>
+                <tbody id="inv-umkm-history-list">
+                    <!-- Loaded via JS -->
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <!-- Modal Tambah/Edit Barang -->
@@ -498,7 +521,7 @@
         }
     }
 
-    function deleteInvUmkm(id) {
+    async function deleteInvUmkm(id) {
         if (window.showCustomConfirm) {
             window.showCustomConfirm('Yakin ingin menghapus barang ini?', async () => {
                 await performDeleteInvUmkm(id);
@@ -527,12 +550,77 @@
         }
     }
 
+    // --- History Feature ---
+    let currentInvUmkmTab = 'main';
+
+    function switchInvUmkmTab(targetTab) {
+        if (currentInvUmkmTab === 'main' && targetTab === 'history') {
+            document.getElementById('inv-umkm-main-tab').style.display = 'none';
+            document.getElementById('inv-umkm-history-tab').style.display = 'block';
+            document.getElementById('btn-inv-umkm-history').innerHTML = '<i class="fa-solid fa-arrow-left"></i> <span id="btn-inv-umkm-history-text">Kembali ke Stok</span>';
+            document.getElementById('btn-inv-umkm-history').setAttribute('onclick', "switchInvUmkmTab('main')");
+            currentInvUmkmTab = 'history';
+            loadInvUmkmHistory();
+        } else if (currentInvUmkmTab === 'history' && targetTab === 'main') {
+            document.getElementById('inv-umkm-history-tab').style.display = 'none';
+            document.getElementById('inv-umkm-main-tab').style.display = 'block';
+            document.getElementById('btn-inv-umkm-history').innerHTML = '<i class="fa-solid fa-clock-rotate-left"></i> <span id="btn-inv-umkm-history-text">Riwayat Input</span>';
+            document.getElementById('btn-inv-umkm-history').setAttribute('onclick', "switchInvUmkmTab('history')");
+            currentInvUmkmTab = 'main';
+            loadInvUmkm();
+        }
+    }
+
+    async function loadInvUmkmHistory() {
+        try {
+            const tbody = document.getElementById('inv-umkm-history-list');
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;"><i class="fa-solid fa-spinner fa-spin"></i> Memuat Riwayat...</td></tr>';
+            
+            const res = await fetch('/master-demo/inventory-umkm/history');
+            const data = await res.json();
+            
+            tbody.innerHTML = '';
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-muted);">Belum ada riwayat stok.</td></tr>';
+                return;
+            }
+
+            data.forEach(m => {
+                let badge = '';
+                if (m.type === 'in' || m.quantity > 0) {
+                    badge = `<span style="background: rgba(46, 204, 113, 0.15); color: #2ecc71; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold;"><i class="fa-solid fa-arrow-down"></i> Masuk</span>`;
+                } else if (m.type === 'out' || m.quantity < 0) {
+                    badge = `<span style="background: rgba(231, 76, 60, 0.15); color: #e74c3c; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold;"><i class="fa-solid fa-arrow-up"></i> Keluar</span>`;
+                } else {
+                    badge = `<span style="background: rgba(241, 196, 15, 0.15); color: #f39c12; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold;"><i class="fa-solid fa-pen"></i> ${m.type || 'Sistem'}</span>`;
+                }
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="color: var(--text-muted); font-size: 12px;">${m.date}</td>
+                        <td style="color: var(--text-heading); font-weight: 700;">${m.item_name}</td>
+                        <td>${badge}</td>
+                        <td style="font-weight: 800; font-family: monospace; color: ${m.quantity > 0 ? '#2ecc71' : (m.quantity < 0 ? '#e74c3c' : 'var(--text-main)')};">${m.quantity > 0 ? '+' : ''}${m.quantity} ${m.unit}</td>
+                        <td style="color: var(--text-muted); font-size: 12px;">Ref: ${m.reference} <br> <span style="opacity:0.7">${m.notes}</span></td>
+                    </tr>
+                `;
+            });
+        } catch (e) {
+            console.error('Failed to load history', e);
+            document.getElementById('inv-umkm-history-list').innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">Gagal memuat riwayat.</td></tr>';
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         const orgSwitchView = window.switchView;
         window.switchView = function(viewId) {
             if (orgSwitchView) orgSwitchView(viewId);
             if (viewId === 'inventory_umkm') {
-                loadInvUmkm();
+                if (currentInvUmkmTab === 'main') {
+                    loadInvUmkm();
+                } else {
+                    loadInvUmkmHistory();
+                }
             }
         }
     });

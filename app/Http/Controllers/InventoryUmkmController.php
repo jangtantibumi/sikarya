@@ -22,6 +22,31 @@ class InventoryUmkmController extends Controller
         return $company ? $company->id : 1;
     }
 
+    public function history()
+    {
+        $companyId = $this->getCompanyId();
+        $movements = \App\Models\StockMovement::where('company_id', $companyId)
+            ->with(['product'])
+            ->orderBy('created_at', 'desc')
+            ->take(100)
+            ->get();
+
+        $mapped = $movements->map(function ($m) {
+            return [
+                'id' => $m->id,
+                'date' => $m->created_at->format('d M Y H:i'),
+                'item_name' => $m->product ? $m->product->name : 'Unknown',
+                'type' => $m->type,
+                'quantity' => (float) $m->quantity,
+                'unit' => $m->product ? $m->product->unit : '',
+                'reference' => $m->reference ?? '-',
+                'notes' => $m->notes ?? '-',
+            ];
+        });
+
+        return response()->json($mapped);
+    }
+
     public function index(InventoryLedgerService $inventoryService)
     {
         $companyId = $this->getCompanyId();

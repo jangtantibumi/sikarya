@@ -173,6 +173,7 @@ Route::middleware('master.demo.auth')->group(function () {
     Route::delete('/master-demo/shifts/{id}', [\App\Http\Controllers\HrisController::class, 'deleteShift'])->name('master-demo.shifts.delete');
     Route::post('/master-demo/production/backflush', [\App\Http\Controllers\ProductionController::class, 'autoBackflush'])->name('master-demo.production.backflush');
     // Inventory UMKM Routes
+    Route::get('/master-demo/inventory-umkm/history', [\App\Http\Controllers\InventoryUmkmController::class, 'history'])->name('master-demo.inventory-umkm.history');
     Route::get('/master-demo/inventory-umkm', [\App\Http\Controllers\InventoryUmkmController::class, 'index'])->name('master-demo.inventory-umkm.index');
     Route::post('/master-demo/inventory-umkm', [\App\Http\Controllers\InventoryUmkmController::class, 'store'])->name('master-demo.inventory-umkm.store');
     Route::put('/master-demo/inventory-umkm/{id}', [\App\Http\Controllers\InventoryUmkmController::class, 'update'])->name('master-demo.inventory-umkm.update');
