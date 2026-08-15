@@ -2234,7 +2234,7 @@
             <div id="prod-tab-dashboard">
                 <!-- Create Recipe Form (Modal for CEO) -->
                 <div id="modal-add-recipe" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
-                    <div style="background: var(--panel-bg); border: 1px solid var(--panel-border); padding: 24px; border-radius: 12px; width: 600px; max-width: 95%; max-height: 90vh; overflow-y: auto;">
+                    <div style="background: rgba(20, 24, 30, 0.95); backdrop-filter: blur(20px); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8); border: 1px solid var(--panel-border); padding: 24px; border-radius: 12px; width: 600px; max-width: 95%; max-height: 90vh; overflow-y: auto;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--panel-border); padding-bottom: 12px;">
                             <h4 style="margin: 0; color: var(--text-heading); font-size: 16px;">Buat Resep (BOM) Baru</h4>
                             <button onclick="document.getElementById('modal-add-recipe').style.display='none'" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 24px; line-height: 1;">&times;</button>
