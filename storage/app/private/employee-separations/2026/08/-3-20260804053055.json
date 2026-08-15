@@ -1,0 +1,18 @@
+{
+    "exported_at": "2026-08-04T05:30:55+07:00",
+    "employee": {
+        "id": 3,
+        "name": "M. Maulana Zakaria",
+        "username": "maulana",
+        "email": "maulana@suba-arch.local",
+        "employee_code": null,
+        "role": "staff_marketing",
+        "job_title": null,
+        "employment_type": "Full-Time",
+        "parent": "mgr_marketing"
+    },
+    "attendance": [],
+    "tasks": [],
+    "leave_requests": [],
+    "resignation_requests": []
+}

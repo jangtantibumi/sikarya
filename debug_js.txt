@@ -1,0 +1,126 @@
+﻿                    <button type="submit" class="ios-btn ios-btn-primary" style="flex: 1; font-weight: 600;">Simpan Divisi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentDeleteTaskId = null;
+
+    function openPopup(id) {
+        const el = document.getElementById(id);
+        if (el) {
+            el.style.display = 'flex';
+        }
+    }
+
+    function closePopup(id) {
+        const el = document.getElementById(id);
+        if (el) {
+            el.style.display = 'none';
+        }
+    }
+
+    function showToast(message) {
+        let toast = document.getElementById('global-toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'global-toast';
+            toast.className = 'ios-toast';
+            document.body.appendChild(toast);
+        }
+        toast.innerHTML = `<i class="fa-solid fa-circle-check" style="color: #34D399; font-size: 18px;"></i><span>${message}</span>`;
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+
+    function updateAssignTaskDivision(selectElem) {
+        const selectedOption = selectElem.options[selectElem.selectedIndex];
+        const divisionInput = document.getElementById('assign-task-division');
+        if (!selectElem.value) {
+            divisionInput.value = '';
+            return;
+        }
+        const division = selectedOption.getAttribute('data-division') || 'Tanpa Divisi';
+        divisionInput.value = division;
+    }
+
+    function updateEditTaskDivision(selectElem) {
+        const selectedOption = selectElem.options[selectElem.selectedIndex];
+        const divisionInput = document.getElementById('edit-task-division');
+        if (!selectElem.value) {
+            divisionInput.value = '';
+            return;
+        }
+        const division = selectedOption.getAttribute('data-division') || 'Tanpa Divisi';
+        divisionInput.value = division;
+    }
+
+    function handleStoreTask(e) {
+        e.preventDefault();
+        const form = e.target;
+        const formData = new FormData(form);
+
+        fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}',
+                'Accept': 'application/json',
+            },
+            body: formData
+        })
+        .then(res => res.json())
+    // Drag leave to reset border
+    document.addEventListener('dragleave', function(ev) {
+        const box = ev.target.closest('.division-box');
+        if(box) {
+            box.style.borderColor = box.getAttribute('data-id') ? 'transparent' : 'var(--danger)'; 
+        }
+    });
+
+    window.createNewDivision = function() {
+        const input = document.getElementById('add-div-name-input');
+        if(input) input.value = '';
+        const codeInput = document.getElementById('add-div-code-input');
+        if(codeInput) codeInput.value = '';
+        
+        const modal = document.getElementById('division-add-modal');
+        if(modal) {
+            modal.style.display = 'flex';
+        } else {
+            console.error('Modal division-add-modal tidak ditemukan');
+        }
+    };
+
+    window.submitNewDivision = async function(e) {
+        if(e) e.preventDefault();
+        const name = document.getElementById('add-div-name-input').value;
+        if(!name || name.trim() === '') return;
+        const code = document.getElementById('add-div-code-input') ? document.getElementById('add-div-code-input').value : '';
+
+        try {
+            const response = await fetch('/master-demo/divisions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ name: name, code: code })
+            });
+            
+            const result = await response.json();
+            if(result.success) {
+                closePopup('division-add-modal');
+                showToast('Divisi berhasil ditambahkan.');
+                setTimeout(() => window.location.reload(), 500); 
+            } else {
+                alert('Gagal membuat divisi: ' + (result.message || 'Unknown error'));
+            }
+        } catch(e) {
+            console.error(e);
+            alert('Gagal membuat divisi.');
+        }
+    };

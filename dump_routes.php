@@ -1,0 +1,1 @@
+<?php require __DIR__." /vendor/autoload.php\; \ = require_once __DIR__.\/bootstrap/app.php\; \->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap(); \ = app(\router\)->getRoutes()->getRoutes(); foreach(\ as \) { if(strpos(\->uri(), \payroll\) !== false) { echo \->uri() . \\n\; } }

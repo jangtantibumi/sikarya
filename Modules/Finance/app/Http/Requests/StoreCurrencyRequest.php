@@ -1,0 +1,25 @@
+<?php
+
+namespace Modules\Finance\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class StoreCurrencyRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    public function rules(): array
+    {
+        return [
+            'code' => 'required|string|max:10',
+            'name' => 'required|string|max:100',
+            'symbol' => 'required|string|max:10',
+            'decimal_places' => 'integer|min:0|max:6',
+            'is_base' => 'boolean',
+            'is_active' => 'boolean',
+        ];
+    }
+}

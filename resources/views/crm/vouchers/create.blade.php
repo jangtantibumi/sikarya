@@ -1,0 +1,73 @@
+@extends('crm.layouts.app')
+@section('title', 'Tambah Voucher - CRM')
+
+@section('content')
+<div class="page-header">
+    <div class="page-title-group">
+        <h1>Tambah Voucher</h1>
+        <p>Buat kode voucher diskon untuk pelanggan.</p>
+    </div>
+</div>
+
+<div class="crm-card" style="max-width: 800px;">
+    <form action="{{ route('crm.vouchers.store') }}" method="POST">
+        @csrf
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Kode Voucher</label>
+                <input type="text" name="code" class="form-control" required value="{{ old('code') }}" placeholder="Misal: PROMO2024" style="font-family: monospace; text-transform: uppercase;">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Nama Voucher</label>
+                <input type="text" name="name" class="form-control" required value="{{ old('name') }}">
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1; margin-bottom: 0;">
+                <label class="form-label">Deskripsi</label>
+                <textarea name="description" class="form-control" rows="3">{{ old('description') }}</textarea>
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Tipe Diskon</label>
+                <select name="type" class="form-control" required>
+                    <option value="percentage">Persentase (%)</option>
+                    <option value="fixed">Nominal Tetap (Rp)</option>
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Nilai Diskon</label>
+                <input type="number" step="0.01" name="value" class="form-control" required min="0" value="{{ old('value') }}">
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Minimal Pembelanjaan (Rp)</label>
+                <input type="number" name="min_purchase" class="form-control" required min="0" value="{{ old('min_purchase', 0) }}">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Maksimal Kuota (Opsional)</label>
+                <input type="number" name="max_uses" class="form-control" min="1" value="{{ old('max_uses') }}" placeholder="Kosongkan jika unlimited">
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Berlaku Dari (Opsional)</label>
+                <input type="date" name="valid_from" class="form-control" value="{{ old('valid_from') }}">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Berlaku Sampai (Opsional)</label>
+                <input type="date" name="valid_until" class="form-control" value="{{ old('valid_until') }}">
+            </div>
+
+            <div class="form-group" style="grid-column: 1 / -1; margin-bottom: 0;">
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; color: #1e293b; cursor: pointer;">
+                    <input type="checkbox" name="is_active" value="1" checked style="width: 18px; height: 18px; accent-color: var(--crm-primary);">
+                    Voucher Aktif
+                </label>
+            </div>
+        </div>
+        
+        <div style="display: flex; gap: 12px; margin-top: 32px; padding-top: 24px; border-top: 1px solid rgba(0,0,0,0.05);">
+            <button type="submit" class="btn btn-primary"><i class="ph ph-floppy-disk"></i> Simpan</button>
+            <a href="{{ route('crm.vouchers.index') }}" class="btn btn-outline">Batal</a>
+        </div>
+    </form>
+</div>
+@endsection

@@ -1,0 +1,3 @@
+<?php
+use Illuminate\Database\Migrations\Migration; use Illuminate\Database\Schema\Blueprint; use Illuminate\Support\Facades\Schema;
+return new class extends Migration { public function up():void{Schema::create('purchase_order_lines',function(Blueprint $t){$t->id();$t->foreignId('company_id')->constrained()->cascadeOnDelete();$t->foreignId('purchase_order_id')->constrained()->cascadeOnDelete();$t->foreignId('product_id')->constrained()->cascadeOnDelete();$t->decimal('ordered_quantity',15,3);$t->decimal('received_quantity',15,3)->default(0);$t->decimal('unit_price',18,2);$t->decimal('line_total',18,2);$t->timestamps();});}public function down():void{Schema::dropIfExists('purchase_order_lines');}};

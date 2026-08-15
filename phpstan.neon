@@ -1,0 +1,14 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+
+    paths:
+        - app/
+        - Modules/Finance/app/
+
+    # Level 9 is the highest level
+    level: 5
+
+    # Ignore generic mixed type errors at this stage
+    checkMissingIterableValueType: false

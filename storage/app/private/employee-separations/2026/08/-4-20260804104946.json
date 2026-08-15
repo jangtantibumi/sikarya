@@ -1,0 +1,35 @@
+{
+    "exported_at": "2026-08-04T10:49:46+07:00",
+    "employee": {
+        "id": 4,
+        "name": "D BEST AR",
+        "username": "dbest",
+        "email": "dbest@suba-arch.local",
+        "employee_code": null,
+        "role": "staff_marketing",
+        "job_title": null,
+        "employment_type": "Full-Time",
+        "parent": "mgr_marketing"
+    },
+    "attendance": [
+        {
+            "id": 1,
+            "user_id": 4,
+            "clock_in": "2026-08-04T03:49:46.000000Z",
+            "clock_out": null,
+            "status": "Present",
+            "location_coordinates": "-6.20,106.84",
+            "created_at": "2026-08-04T03:49:46.000000Z",
+            "updated_at": "2026-08-04T03:49:46.000000Z",
+            "work_type": "WFO",
+            "location_name": null,
+            "deleted_at": null,
+            "is_holiday_work": false,
+            "company_id": null,
+            "shift_type": "morning"
+        }
+    ],
+    "tasks": [],
+    "leave_requests": [],
+    "resignation_requests": []
+}

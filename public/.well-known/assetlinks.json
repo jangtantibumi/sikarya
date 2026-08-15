@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "id.co.subaarch.erp",
+      "sha256_cert_fingerprints": [
+        "C4:D1:B9:04:AC:31:F7:BA:9B:27:C5:49:94:9A:77:9E:81:FB:13:62:C0:AB:4A:50:DF:8C:5D:02:FD:47:4E:B1"
+      ]
+    }
+  }
+]

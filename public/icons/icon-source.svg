@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">SubaArch ERP</title>
+  <defs>
+    <linearGradient id="background" x1="72" y1="52" x2="440" y2="460" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#242426"/>
+      <stop offset="1" stop-color="#09090A"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="122" y1="106" x2="391" y2="412" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFE58A"/>
+      <stop offset=".48" stop-color="#F2C94C"/>
+      <stop offset="1" stop-color="#C99718"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#background)"/>
+  <rect x="18" y="18" width="476" height="476" rx="96" fill="none" stroke="#F2C94C" stroke-opacity=".28" stroke-width="4"/>
+  <path d="M104 221 256 109l152 112v178H104V221Z" fill="none" stroke="url(#gold)" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M164 397V252h184v145M229 397V292h54v105" fill="none" stroke="url(#gold)" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M88 414h336" stroke="#F2C94C" stroke-width="20" stroke-linecap="round"/>
+</svg>

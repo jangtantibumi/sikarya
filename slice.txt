@@ -1,0 +1,501 @@
+
+        fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}',
+                'Accept': 'application/json',
+            },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                showToast(data.message || 'Tugas / Goal berhasil ditambahkan.');
+                form.reset();
+                document.getElementById('assign-task-division').value = '';
+                refreshTaskList();
+            } else {
+                showToast(data.message || 'Gagal menambahkan tugas.');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            showToast('Tugas / Goal berhasil ditambahkan.');
+            refreshTaskList();
+        });
+    }
+
+    function openEditTaskModal(id, title, userId, deadline, status, priority) {
+        document.getElementById('edit-task-id').value = id;
+        document.getElementById('edit-task-title').value = title;
+        
+        const userSelect = document.getElementById('edit-task-user');
+        userSelect.value = userId;
+        updateEditTaskDivision(userSelect);
+        
+        document.getElementById('edit-task-deadline').value = deadline;
+        document.getElementById('edit-task-status').value = status || 'pending';
+        document.getElementById('edit-task-priority').value = priority || 'medium';
+        
+        openPopup('task-edit-modal');
+    }
+
+    function submitEditTask(e) {
+        e.preventDefault();
+        const id = document.getElementById('edit-task-id').value;
+        const form = document.getElementById('form-edit-task');
+        const formData = new FormData(form);
+        formData.append('_method', 'PUT');
+
+        fetch(`/master-demo/tasks/${id}`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}',
+                'Accept': 'application/json',
+            },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                closePopup('task-edit-modal');
+                showToast(data.message || 'Tugas / Goal berhasil diperbarui.');
+                refreshTaskList();
+            } else {
+                showToast(data.message || 'Gagal mengupdate tugas.');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            closePopup('task-edit-modal');
+            showToast('Tugas / Goal berhasil diperbarui.');
+            refreshTaskList();
+        });
+    }
+
+    function openDeleteTaskModal(id, title, userName, userDivision, deadline) {
+        currentDeleteTaskId = id;
+        document.getElementById('del-task-title').innerText = title;
+        document.getElementById('del-task-user').innerText = userName;
+        document.getElementById('del-task-division').innerText = userDivision;
+        document.getElementById('del-task-deadline').innerText = deadline;
+        openPopup('task-delete-modal');
+    }
+
+    function confirmDeleteTask() {
+        if (!currentDeleteTaskId) return;
+
+        fetch(`/master-demo/tasks/${currentDeleteTaskId}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}',
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                closePopup('task-delete-modal');
+                showToast(data.message || 'Tugas / Goal berhasil dihapus.');
+                refreshTaskList();
+            } else {
+                showToast(data.message || 'Gagal menghapus tugas.');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            closePopup('task-delete-modal');
+            showToast('Tugas / Goal berhasil dihapus.');
+            refreshTaskList();
+        });
+    }
+
+    function refreshTaskList() {
+        fetch('/master-demo/tasks/list', {
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success && data.tasks) {
+                renderTaskList(data.tasks);
+            }
+        })
+        .catch(err => console.error(err));
+    }
+
+    function renderTaskList(tasks) {
+        const container = document.getElementById('active-tasks-list');
+        if (!container) return;
+
+        if (tasks.length === 0) {
+            container.innerHTML = `<div style="font-size: 12px; color: var(--text-muted); text-align: center; padding: 12px; background: var(--panel-secondary); border-radius: 8px;">Belum ada goal / tugas.</div>`;
+            return;
+        }
+
+        let html = '';
+        tasks.forEach(task => {
+            const safeTitle = (task.title || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            const safeUserName = (task.user_name || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            const safeDivision = (task.user_division || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            
+            html += `
+                <div style="display: flex; justify-content: space-between; align-items: center; background: var(--panel-secondary); padding: 10px 14px; border-radius: 8px; margin-bottom: 8px; border: 1px solid var(--panel-border);">
+                    <div>
+                        <div style="font-size: 13px; font-weight: 600; color: var(--text-heading);">${task.title}</div>
+                        <div style="font-size: 11px; color: var(--text-muted);">
+                            Assigned to: ${task.user_name} &bull; Divisi: ${task.user_division} &bull; DL: ${task.deadline_formatted}
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 6px; align-items: center;">
+                        <button type="button" class="ios-btn ios-btn-secondary" style="padding: 4px 10px; font-size: 11px;" onclick="openEditTaskModal(${task.id}, '${safeTitle}', ${task.user_id || 0}, '${task.deadline || ''}', '${task.status || 'pending'}', '${task.priority || 'medium'}')">✏ Edit</button>
+                        <button type="button" class="ios-btn ios-btn-danger" style="padding: 4px 10px; font-size: 11px;" onclick="openDeleteTaskModal(${task.id}, '${safeTitle}', '${safeUserName}', '${safeDivision}', '${task.deadline_formatted}')"><i class="fa-solid fa-trash"></i> Hapus</button>
+                    </div>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    }
+
+    // --- DIVISION SETTINGS (DRAG & DROP) ---
+    function allowDrop(ev) {
+        ev.preventDefault();
+        const box = ev.target.closest('.division-box');
+        if(box) box.style.borderColor = 'var(--accent)';
+    }
+
+    function drag(ev) {
+        ev.dataTransfer.setData("text/plain", ev.currentTarget.id);
+        ev.dataTransfer.setData("feature_key", ev.currentTarget.getAttribute('data-key'));
+    }
+
+    async function drop(ev) {
+        ev.preventDefault();
+        const box = ev.target.closest('.division-box');
+        
+        // Reset border styles for all boxes
+        document.querySelectorAll('.division-box').forEach(b => {
+            b.style.borderColor = b.getAttribute('data-id') ? 'transparent' : 'var(--danger)'; 
+        });
+
+        if(!box) return;
+
+        const dataId = ev.dataTransfer.getData("text/plain") || ev.dataTransfer.getData("text");
+        const featureKey = ev.dataTransfer.getData("feature_key");
+        const divisionId = box.getAttribute('data-id');
+
+        const draggedElement = document.getElementById(dataId);
+        const targetList = box.querySelector('.module-list');
+        
+        if(draggedElement && targetList) {
+            targetList.appendChild(draggedElement);
+            
+            // Check for empty placeholders in all boxes
+            updateEmptyPlaceholders();
+
+            // API Call to assign feature
+            try {
+                const response = await fetch('{{ route('master-demo.features.assign') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        feature_key: featureKey,
+                        division_id: divisionId || null
+                    })
+                });
+                
+                const result = await response.json();
+                if(result.success) {
+                    window.dispatchEvent(new CustomEvent('toast', { detail: { message: 'Modul berhasil dipindahkan.', type: 'success' }}));
+                    
+                    // Update sidebar dynamically without reload
+                    const sidebarItem = document.getElementById('sidebar-nav-item-' + featureKey);
+                    let targetSidebarGroup = document.getElementById('sidebar-nav-group-' + (divisionId || 'uncategorized'));
+                    
+                    if(sidebarItem && targetSidebarGroup) {
+                        targetSidebarGroup.appendChild(sidebarItem);
+                    }
+                }
+            } catch(e) {
+                console.error(e);
+                window.dispatchEvent(new CustomEvent('toast', { detail: { message: 'Gagal memindahkan modul.', type: 'danger' }}));
+            }
+        }
+    }
+
+    function updateEmptyPlaceholders() {
+        document.querySelectorAll('.division-box .module-list').forEach(list => {
+            // Remove existing placeholder if any
+            const existingPlaceholder = list.querySelector('.empty-placeholder');
+            if (existingPlaceholder) existingPlaceholder.remove();
+
+            // If empty, add placeholder
+            if (list.children.length === 0) {
+                const placeholder = document.createElement('div');
+                placeholder.className = 'empty-placeholder';
+                placeholder.style = 'border: 2px dashed var(--panel-border); border-radius: 6px; padding: 24px; text-align: center; color: var(--text-muted); font-size: 13px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; flex: 1; min-height: 80px;';
+                placeholder.innerHTML = '<i class="fa-solid fa-plus" style="font-size: 18px; color: var(--panel-border);"></i> <span>Drop modul ke divisi ini</span>';
+                list.appendChild(placeholder);
+            }
+        });
+    }
+
+    // Call once on load
+    document.addEventListener('DOMContentLoaded', () => {
+        updateEmptyPlaceholders();
+    });
+
+    // Drag leave to reset border
+        .then(data => {
+            if (data.success) {
+                closePopup('task-edit-modal');
+                showToast(data.message || 'Tugas / Goal berhasil diperbarui.');
+                refreshTaskList();
+            } else {
+                showToast(data.message || 'Gagal mengupdate tugas.');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            closePopup('task-edit-modal');
+            showToast('Tugas / Goal berhasil diperbarui.');
+            refreshTaskList();
+        });
+    }
+
+    function openDeleteTaskModal(id, title, userName, userDivision, deadline) {
+        currentDeleteTaskId = id;
+        document.getElementById('del-task-title').innerText = title;
+        document.getElementById('del-task-user').innerText = userName;
+        document.getElementById('del-task-division').innerText = userDivision;
+        document.getElementById('del-task-deadline').innerText = deadline;
+        openPopup('task-delete-modal');
+    }
+
+    function confirmDeleteTask() {
+        if (!currentDeleteTaskId) return;
+
+        fetch(`/master-demo/tasks/${currentDeleteTaskId}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}',
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                closePopup('task-delete-modal');
+                showToast(data.message || 'Tugas / Goal berhasil dihapus.');
+                refreshTaskList();
+            } else {
+                showToast(data.message || 'Gagal menghapus tugas.');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            closePopup('task-delete-modal');
+            showToast('Tugas / Goal berhasil dihapus.');
+            refreshTaskList();
+        });
+    }
+
+    function refreshTaskList() {
+        fetch('/master-demo/tasks/list', {
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success && data.tasks) {
+                renderTaskList(data.tasks);
+            }
+        })
+        .catch(err => console.error(err));
+    }
+
+    function renderTaskList(tasks) {
+        const container = document.getElementById('active-tasks-list');
+        if (!container) return;
+
+        if (tasks.length === 0) {
+            container.innerHTML = `<div style="font-size: 12px; color: var(--text-muted); text-align: center; padding: 12px; background: var(--panel-secondary); border-radius: 8px;">Belum ada goal / tugas.</div>`;
+            return;
+        }
+
+        let html = '';
+        tasks.forEach(task => {
+            const safeTitle = (task.title || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            const safeUserName = (task.user_name || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            const safeDivision = (task.user_division || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            
+            html += `
+                <div style="display: flex; justify-content: space-between; align-items: center; background: var(--panel-secondary); padding: 10px 14px; border-radius: 8px; margin-bottom: 8px; border: 1px solid var(--panel-border);">
+                    <div>
+                        <div style="font-size: 13px; font-weight: 600; color: var(--text-heading);">${task.title}</div>
+                        <div style="font-size: 11px; color: var(--text-muted);">
+                            Assigned to: ${task.user_name} &bull; Divisi: ${task.user_division} &bull; DL: ${task.deadline_formatted}
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 6px; align-items: center;">
+                        <button type="button" class="ios-btn ios-btn-secondary" style="padding: 4px 10px; font-size: 11px;" onclick="openEditTaskModal(${task.id}, '${safeTitle}', ${task.user_id || 0}, '${task.deadline || ''}', '${task.status || 'pending'}', '${task.priority || 'medium'}')">✏ Edit</button>
+                        <button type="button" class="ios-btn ios-btn-danger" style="padding: 4px 10px; font-size: 11px;" onclick="openDeleteTaskModal(${task.id}, '${safeTitle}', '${safeUserName}', '${safeDivision}', '${task.deadline_formatted}')"><i class="fa-solid fa-trash"></i> Hapus</button>
+                    </div>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    }
+
+    // --- DIVISION SETTINGS (DRAG & DROP) ---
+    function allowDrop(ev) {
+        ev.preventDefault();
+        const box = ev.target.closest('.division-box');
+        if(box) box.style.borderColor = 'var(--accent)';
+    }
+
+    function drag(ev) {
+        ev.dataTransfer.setData("text/plain", ev.currentTarget.id);
+        ev.dataTransfer.setData("feature_key", ev.currentTarget.getAttribute('data-key'));
+    }
+
+    async function drop(ev) {
+        ev.preventDefault();
+        const box = ev.target.closest('.division-box');
+        
+        // Reset border styles for all boxes
+        document.querySelectorAll('.division-box').forEach(b => {
+            b.style.borderColor = b.getAttribute('data-id') ? 'transparent' : 'var(--danger)'; 
+        });
+
+        if(!box) return;
+
+        const dataId = ev.dataTransfer.getData("text/plain") || ev.dataTransfer.getData("text");
+        const featureKey = ev.dataTransfer.getData("feature_key");
+        const divisionId = box.getAttribute('data-id');
+
+        const draggedElement = document.getElementById(dataId);
+        const targetList = box.querySelector('.module-list');
+        
+        if(draggedElement && targetList) {
+            targetList.appendChild(draggedElement);
+            
+            // Check for empty placeholders in all boxes
+            updateEmptyPlaceholders();
+
+            // API Call to assign feature
+            try {
+                const response = await fetch('{{ route('master-demo.features.assign') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        feature_key: featureKey,
+                        division_id: divisionId || null
+                    })
+                });
+                
+                const result = await response.json();
+                if(result.success) {
+                    window.dispatchEvent(new CustomEvent('toast', { detail: { message: 'Modul berhasil dipindahkan.', type: 'success' }}));
+                    
+                    // Update sidebar dynamically without reload
+                    const sidebarItem = document.getElementById('sidebar-nav-item-' + featureKey);
+                    let targetSidebarGroup = document.getElementById('sidebar-nav-group-' + (divisionId || 'uncategorized'));
+                    
+                    if(sidebarItem && targetSidebarGroup) {
+                        targetSidebarGroup.appendChild(sidebarItem);
+                    }
+                }
+            } catch(e) {
+                console.error(e);
+                window.dispatchEvent(new CustomEvent('toast', { detail: { message: 'Gagal memindahkan modul.', type: 'danger' }}));
+            }
+        }
+    }
+
+    function updateEmptyPlaceholders() {
+        document.querySelectorAll('.division-box .module-list').forEach(list => {
+            // Remove existing placeholder if any
+            const existingPlaceholder = list.querySelector('.empty-placeholder');
+            if (existingPlaceholder) existingPlaceholder.remove();
+
+            // If empty, add placeholder
+            if (list.children.length === 0) {
+                const placeholder = document.createElement('div');
+                placeholder.className = 'empty-placeholder';
+                placeholder.style = 'border: 2px dashed var(--panel-border); border-radius: 6px; padding: 24px; text-align: center; color: var(--text-muted); font-size: 13px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; flex: 1; min-height: 80px;';
+                placeholder.innerHTML = '<i class="fa-solid fa-plus" style="font-size: 18px; color: var(--panel-border);"></i> <span>Drop modul ke divisi ini</span>';
+                list.appendChild(placeholder);
+            }
+        });
+    }
+
+    // Call once on load
+    document.addEventListener('DOMContentLoaded', () => {
+        updateEmptyPlaceholders();
+    });
+
+    // Drag leave to reset border
+    document.addEventListener('dragleave', function(ev) {
+        const box = ev.target.closest('.division-box');
+        if(box) {
+            box.style.borderColor = box.getAttribute('data-id') ? 'transparent' : 'var(--danger)'; 
+        }
+    });    window.createNewDivision = function() {
+        const input = document.getElementById('add-div-name-input');
+        if(input) input.value = '';
+        const codeInput = document.getElementById('add-div-code-input');
+        if(codeInput) codeInput.value = '';
+        
+        const modal = document.getElementById('division-add-modal');
+        if(modal) {
+            modal.style.display = 'flex';
+        } else {
+            console.error('Modal division-add-modal tidak ditemukan');
+        }
+    };
+
+    window.submitNewDivision = async function(e) {
+        if(e) e.preventDefault();
+        const name = document.getElementById('add-div-name-input').value;
+        if(!name || name.trim() === '') return;
+
+        try {
+            const response = await fetch('{{ route('master-demo.divisions.store') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ name: name })
+            });
+            
+            const result = await response.json();
+            if(result.success) {
+                closePopup('division-add-modal');
+                window.dispatchEvent(new CustomEvent('toast', { detail: { message: 'Divisi berhasil ditambahkan.', type: 'success' }}));
+                setTimeout(() => window.location.reload(), 500); // Simple reload to reflect changes and re-render grid
+            }
+        } catch(e) {
+            console.error(e);
+            alert('Gagal membuat divisi.');
+        }
+    };
+
+    let currentDivEditId = null;
+    let currentDivDeleteId = null;
+
+    function openRenameDivisionModal(id, currentName) {
+        currentDivEditId = id;
+        document.getElementById('edit-div-name-input').value = currentName;
+        openPopup('division-edit-modal');

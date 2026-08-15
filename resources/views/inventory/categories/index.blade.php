@@ -1,0 +1,64 @@
+@extends('inventory.layout')
+@section('title', 'Kategori Gudang & Stok')
+@section('content')
+<div class="flex justify-between items-center mb-6">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-1">Kategori Barang</h1>
+        <p class="text-xs text-gray-600 dark:text-gray-400">Pengelompokan jenis produk dan bahan baku F&B.</p>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <!-- Form Tambah -->
+    <div class="glass-panel p-5 rounded-xl border border-gray-200 dark:border-erp-border h-fit">
+        <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-4">Tambah Kategori Baru</h3>
+        <form method="POST" action="{{ route('inventory.categories.store') }}" class="space-y-4">
+            @csrf
+            <div>
+                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Kode Kategori *</label>
+                <input type="text" name="code" value="CAT-{{ rand(100, 999) }}" required class="w-full bg-gray-50 dark:bg-erp-dark border border-gray-200 dark:border-erp-border rounded-lg px-3 py-1.5 text-xs text-gray-900 dark:text-white">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Nama Kategori *</label>
+                <input type="text" name="name" placeholder="mis. Sayuran Segar" required class="w-full bg-gray-50 dark:bg-erp-dark border border-gray-200 dark:border-erp-border rounded-lg px-3 py-1.5 text-xs text-gray-900 dark:text-white">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Deskripsi</label>
+                <textarea name="description" rows="2" class="w-full bg-gray-50 dark:bg-erp-dark border border-gray-200 dark:border-erp-border rounded-lg px-3 py-1.5 text-xs text-gray-900 dark:text-white"></textarea>
+            </div>
+            <button type="submit" class="w-full bg-erp-green hover:bg-emerald-400 text-gray-900 font-bold py-2 rounded-lg text-xs">Simpan Kategori</button>
+        </form>
+    </div>
+
+    <!-- Table -->
+    <div class="md:col-span-2 glass-panel rounded-xl border border-gray-200 dark:border-erp-border overflow-hidden">
+        <table class="w-full text-left text-xs">
+            <thead class="bg-gray-50 dark:bg-erp-dark text-gray-600 dark:text-gray-400 uppercase text-[10px]">
+                <tr>
+                    <th class="py-3 px-4">Kode</th>
+                    <th class="py-3 px-4">Nama Kategori</th>
+                    <th class="py-3 px-4">Jumlah Item</th>
+                    <th class="py-3 px-4 text-center">Aksi</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-erp-border text-gray-800 dark:text-gray-200">
+                @foreach($categories as $cat)
+                    <tr class="hover:bg-white/5">
+                        <td class="py-3 px-4 font-mono text-erp-green font-semibold">{{ $cat->code }}</td>
+                        <td class="py-3 px-4 font-semibold text-gray-900 dark:text-white">{{ $cat->name }}</td>
+                        <td class="py-3 px-4 text-gray-700 dark:text-gray-300 font-mono">{{ $cat->items_count }} items</td>
+                        <td class="py-3 px-4 text-center">
+                            <form method="POST" action="{{ route('inventory.categories.destroy', $cat->id) }}" class="inline" onsubmit="return confirm('Hapus kategori ini?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-rose-400 hover:text-rose-300"><i class="ph ph-trash text-base"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+        <div class="p-4">{{ $categories->links() }}</div>
+    </div>
+</div>
+@endsection

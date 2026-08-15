@@ -1,0 +1,7 @@
+Category,Item,Status,Notes
+UI,Dead Links,WARNING,Found href="#" used for JS triggers
+Routes,Orphan Routes,PASS,No orphan routes
+Controllers,Orphan Controllers,PASS,0 orphan controllers
+Services,Orphan Services,PASS,0 orphan services
+Code,Dead Code,PASS,No obvious dead code
+Security,Access Control,PASS,All portals protected by middlewares

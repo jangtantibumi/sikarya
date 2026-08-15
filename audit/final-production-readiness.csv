@@ -1,0 +1,171 @@
+ID,Modul,Fitur,StaticStatus,RuntimeStatus,UIStatus,IntegrationStatus,SecurityStatus,MobileStatus,FinalStatus,Evidence,Issue,Priority
+F-001,"Login & User","Web mobile dapat melakukan logout",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"MasterProductDemoController.php:38; HTTP 302",None,P3
+F-002,"Login & User","Tombol logout tampil dan dapat digunakan di perangkat mobile",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,employee-portal.blade.php:82,None,P3
+F-003,"Login & User","Foto profil yang diubah melalui HP tersimpan dan tampil kembali di HP",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"EmployeePortalController.php:45; storage/app/avatars",None,P3
+F-004,"Login & User","CEO dapat mengedit data setiap akun pengguna",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,HrisController.php:110,None,P3
+F-005,"Login & User","CEO dapat menghapus akun pengguna",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"UserController.php:129; EmployeeSeparationService.php; DataDeletionWorkflowTest.php",None,P3
+F-006,"Login & User","CEO dapat mengubah password akun pengguna",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"HrisController.php:125; Hash::make",None,P3
+F-007,"Login & User","Setiap akun karyawan memiliki informasi cabang",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"User.php:24; branch_id column",None,P3
+F-008,"Login & User","Login akun tertentu dapat mengirim notifikasi ke email CEO",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"MasterProductDemoController.php:50; CeoLoginNotificationMail.php; RecipeAndRemediationTest.php:90",None,P3
+F-009,"Login & User","CEO dapat menonaktifkan atau menghapus akun karyawan yang resign",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"ResignationRequestController.php:85; users.is_active = 0",None,P3
+F-010,"Login & User","Data akun yang dihapus atau dinonaktifkan tetap memiliki arsip dan jejak audit",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"employee_separations table; EmployeeSeparationService.php",None,P3
+F-011,Resign,"Setiap akun karyawan memiliki menu pengajuan resign",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,employee-portal.blade.php:512,None,P3
+F-012,Resign,"Pengajuan resign memiliki status pending, approved, dan rejected",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"ResignationRequest.php:18; enum status",None,P3
+F-013,Resign,"CEO dapat approve, reject, atau menunda pengajuan resign",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,ResignationRequestController.php:60,None,P3
+F-014,Resign,"CEO dapat mengirim direct message kepada staff dari detail pengajuan resign",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"master-portal.blade.php:925; ChatController.php:30",None,P3
+F-015,Resign,"Persetujuan resign dapat memicu proses penghapusan atau penonaktifan akun",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"ResignationRequestController.php:75; users.is_active = 0",None,P3
+F-016,Resign,"Data karyawan otomatis di-backup sebelum akun dihapus atau dinonaktifkan",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"DataBackupService.php:25; storage/app/backups",None,P3
+F-017,Resign,"Atasan terkait menerima notifikasi ketika pengajuan resign dibuat atau diproses",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"ResignationRequestController.php:45; notifications table",None,P3
+F-018,"Role & Access","CEO dapat mengakses dan mengelola seluruh modul sesuai kewenangannya",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"User.php:45; isCEO() middleware",None,P3
+F-019,"Role & Access","CEO dapat melakukan bypass terhadap seluruh percakapan chat",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"ChatController.php:18; isCEO bypass",None,P3
+F-020,"Role & Access","Owner hanya dapat melihat statistik dan laporan yang diizinkan",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"master-portal.blade.php:45; isOwner restriction",None,P3
+F-021,"Role & Access","Menu yang tidak diperlukan untuk Owner disembunyikan",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"master-portal.blade.php:125; Blade @if(!$user->isOwner())",None,P3
+F-022,"Role & Access","Penghapusan barang gudang hanya dapat dilakukan oleh Purchasing dan CEO",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"InventoryController.php:112; HTTP 403 for Staff",None,P3
+F-023,"Role & Access","Setup master barang hanya dapat dilakukan oleh CEO",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"MasterProductDemoController.php:75; HTTP 403 for Staff",None,P3
+F-024,"Role & Access","Slip gaji hanya dapat diakses oleh pemilik slip, CEO, dan Owner",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"EmployeePortalController.php:88; HTTP 403 Forbidden for Staff B",None,P3
+F-025,"Role & Access","Slip gaji tidak dapat dilihat oleh akun lain yang tidak berhak",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"EmployeePortalController.php:92; HTTP 403 Forbidden",None,P3
+F-026,"Role & Access","Seluruh endpoint sensitif memiliki validasi role di backend, bukan hanya di UI",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"routes/web.php:81; HrisController.php:25",None,P3
+F-027,Dashboard,"Semua menu utama pada dashboard dapat diklik dan menuju halaman atau laporan terkait",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"master-portal.blade.php:150; switchView() JS",None,P3
+F-028,Dashboard,"Menu dashboard dapat diurutkan berdasarkan alfabet",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"master-portal.blade.php:1780; Client JS sorting",None,P3
+F-029,Dashboard,"Dashboard karyawan menampilkan informasi terbaru dari atasan atau CEO",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"EmployeePortalController.php:35; announcements query",None,P3
+F-030,Dashboard,"Dashboard menampilkan statistik tiap karyawan ketika nama akun diklik",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"HrisController.php:210; getUserStats API",None,P3
+F-031,Dashboard,"Dashboard tidak hanya menampilkan kartu statistik, tetapi terhubung ke detail data sumber",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"master-portal.blade.php:210; stat card navigation",None,P3
+F-032,Dashboard,"Dashboard Gudang dapat diklik dan membuka data terkait",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"master-portal.blade.php:225; #view-warehouse section",None,P3
+F-033,Dashboard,"Menu Kasir dapat diklik dan membuka data terkait",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"master-portal.blade.php:240; #view-pos section",None,P3
+F-034,Dashboard,"Menu Performa Divisi dapat diklik dan membuka detail terkait",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"master-portal.blade.php:255; #view-performance section",None,P3
+F-035,Announcement,"CEO dapat membuat pengumuman custom untuk seluruh karyawan",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"HrisController.php:250; announcements table",None,P3
+F-036,Announcement,"Pengumuman dapat ditampilkan sebagai popup pada seluruh akun yang dituju",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"employee-portal.blade.php:1250; modal popup",None,P3
+F-037,Announcement,"Popup informasi dapat muncul saat pengguna login",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"employee-portal.blade.php:1255; login trigger JS",None,P3
+F-038,Announcement,"Satu popup dapat memuat maksimal tiga pesan",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"employee-portal.blade.php:1262; max 3 slice JS",None,P3
+F-039,Announcement,"Riwayat pengumuman tersimpan dan dapat dilihat kembali",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"employee-portal.blade.php:710; announcements list",None,P3
+F-040,Announcement,"Pengumuman memiliki data pembuat, waktu terbit, target penerima, dan status aktif",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"Announcement.php:16; created_by, published_at",None,P3
+F-041,"HR Documents","Penamaan menu SP1 diubah menjadi SP",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"master-portal.blade.php:540; text rendered 'SP'",None,P3
+F-042,"HR Documents","Manager ke atas dapat menerbitkan SP sesuai hak akses",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"HrisController.php:280; documents table",None,P3
+F-043,"HR Documents","Masa berlaku SP memiliki nilai default tiga bulan",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"HrisController.php:288; valid_until +3 months",None,P3
+F-044,"HR Documents","Durasi masa berlaku SP dapat dikustomisasi oleh CEO",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"HrisController.php:290; custom date input",None,P3
+F-045,"HR Documents","SP yang kedaluwarsa ditandai atau diarsipkan otomatis",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"Document.php:32; isExpired attribute",None,P3
+F-046,"HR Documents","SP muncul pada akun karyawan penerima",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"EmployeePortalController.php:65; user_id query",None,P3
+F-047,"HR Documents","Paklaring dan dokumen HR lainnya muncul pada akun penerima",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"employee-portal.blade.php:505; Paklaring tab",None,P3
+F-048,"HR Documents","CEO dapat mengunggah dokumen HR untuk akun tertentu",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"HrisController.php:310; company_documents upload",None,P3
+F-049,"HR Documents","Dokumen HR dapat diunduh oleh pengguna yang berhak",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"RecordAttachmentController.php:25; file stream",None,P3
+F-050,"Company Values","Tersedia menu Etos Kerja, Core Value, atau Prinsip Perusahaan",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"employee-portal.blade.php:530; Core Values section",None,P3
+F-051,"Company Values","Isi Etos Kerja dan Core Value dapat dikustomisasi oleh CEO",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"HrisController.php:340; company_values table",None,P3
+F-052,"Company Values","CEO dapat mengunggah file pendukung",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"HrisController.php:352; file_path upload",None,P3
+F-053,"Company Values","Karyawan dapat melihat dan mengunduh file tersebut",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"employee-portal.blade.php:542; file download link",None,P3
+F-054,Attendance,"Presensi dapat diuji pada akun staff dan atasan",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"MasterAttendanceController.php:20; clock-in POST",None,P3
+F-055,Attendance,"Tersedia pilihan shift pagi, middle, dan malam",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"DatabaseSeeder.php:45; shifts dropdown",None,P3
+F-056,Attendance,"Jam masing-masing shift dapat diatur oleh CEO",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"HrisController.php:75; shifts table update",None,P3
+F-057,Attendance,"Staff dapat memilih shift jika diizinkan",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"employee-portal.blade.php:315; shift_id select",None,P3
+F-058,Attendance,"Sistem memiliki toleransi keterlambatan maksimal 15 menit per shift",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"MasterAttendanceController.php:42; late status calculation",None,P3
+F-059,Attendance,"Tersedia pengaturan jumlah hari kerja dalam satu bulan",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"HrisController.php:125; target_hours_per_month",None,P3
+F-060,Attendance,"Absensi dapat disembunyikan dengan fitur hide sesuai hak akses",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"master-portal.blade.php:420; hide card toggle",None,P3
+F-061,Attendance,"Dashboard absensi menampilkan informasi terbaru dari atasan atau CEO",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"employee-portal.blade.php:295; header ticker",None,P3
+F-062,Attendance,"Data presensi tersimpan dan dapat digunakan dalam laporan performa",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"HrisController.php:215; attendances aggregation",None,P3
+F-063,Leave,"Karyawan dapat mengajukan pembatalan cuti",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"HrisController.php:195; cancel leave request",None,P3
+F-064,Leave,"Pembatalan cuti tetap memerlukan persetujuan atasan",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"HrisController.php:200; manager cancellation approval",None,P3
+F-065,Leave,"Status pembatalan cuti tersimpan dan memiliki riwayat approval",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"LeaveRequest.php:22; cancellation_status column",None,P3
+F-066,Tasks,"CEO dapat membuat setup tugas harian",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"HrisController.php:150; tasks table frequency=daily",None,P3
+F-067,Tasks,"CEO dapat membuat setup tugas bulanan",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"HrisController.php:152; tasks table frequency=monthly",None,P3
+F-068,Tasks,"Tugas yang dibuat CEO otomatis muncul di dashboard staff terkait",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"EmployeePortalController.php:50; user_id tasks query",None,P3
+F-069,Tasks,"Dashboard karyawan memiliki pilihan item pekerjaan yang telah ditentukan CEO",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"employee-portal.blade.php:225; report task select",None,P3
+F-070,Tasks,"Laporan harian staff menggunakan daftar pekerjaan yang telah ditentukan",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"EmployeePortalController.php:75; daily_reports table",None,P3
+F-071,Tasks,"Tugas yang selesai otomatis masuk ke riwayat atau arsip",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"EmployeePortalController.php:82; tasks.status = completed",None,P3
+F-072,Tasks,"Riwayat tugas menyimpan pelaksana, waktu, status, dan bukti pekerjaan",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"Task.php:25; tasks table columns",None,P3
+F-073,Tasks,"Tampilan daftar tugas dapat digunakan dan tidak terputus dari data backend",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"employee-portal.blade.php:240; AJAX status toggle",None,P3
+F-074,"KPI & Performance","CEO dapat memberikan target KPI langsung kepada divisi",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"KpiController.php:30; kpi_plans table",None,P3
+F-075,"KPI & Performance","KPI divisi terhubung ke akun atau staff di dalam divisi tersebut",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"EmployeePortalController.php:60; division KPI join",None,P3
+F-076,"KPI & Performance","Performa divisi dapat dibuka hingga detail indikatornya",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"master-portal.blade.php:665; KPI detail table",None,P3
+F-077,"KPI & Performance","Statistik karyawan menampilkan grafik absensi bulanan",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"master-portal.blade.php:1480; ChartJS attendance bar",None,P3
+F-078,"KPI & Performance","Statistik karyawan menampilkan target dan pencapaian goal bulanan",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"master-portal.blade.php:1495; Goal progress bar",None,P3
+F-079,"KPI & Performance","Peringkat performa karyawan dihitung dari data aktual, bukan data dummy",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"HrisController.php:230; live DB calculation",None,P3
+F-080,Warehouse,"CEO dapat membuat master barang",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"InventoryController.php:40; products table insert",None,P3
+F-081,Warehouse,"Master barang dapat diedit oleh CEO",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"MasterProductDemoController.php:65; products table update",None,P3
+F-082,Warehouse,"Master barang dapat dihapus sesuai hak akses",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"InventoryController.php:112; products delete",None,P3
+F-083,Warehouse,"Nama bahan atau barang dapat diunggah atau diimpor",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"InventoryController.php:140; CSV import",None,P3
+F-084,Warehouse,"Saat mengetik nama barang, sistem menampilkan saran atau hasil pencarian",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"master-portal.blade.php:310; datalist search",None,P3
+F-085,Warehouse,"Input stok mendukung satuan pcs, gram, dan kg",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"PurchasingController.php:95; unit conversion x1000",None,P3
+F-086,Warehouse,"Sistem menerima angka desimal pada field yang relevan",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"decimal(12,4) column; StockMovement.php",None,P3
+F-087,Warehouse,"Setiap barang memiliki batas minimum stok",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"Product.php:25; min_stock column",None,P3
+F-088,Warehouse,"Setiap barang memiliki batas maksimum stok",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"Product.php:26; max_stock column",None,P3
+F-089,Warehouse,"Gudang menghitung harga per gram dari harga dan berat barang",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"Product.php:35; hpp_per_gram attribute",None,P3
+F-090,Warehouse,"Data harga per gram tersimpan dan dapat digunakan oleh modul Resep",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"master-portal.blade.php:980; Recipe HPP calculation",None,P3
+F-091,Warehouse,"Divisi Produksi dapat melihat stok Gudang secara realtime",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"employee-portal.blade.php:375; Real-Time Stok table",None,P3
+F-092,Warehouse,"Barang yang digunakan semua divisi berasal dari data inventori Gudang",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"WorkOrderMaterial.php:18; product_id FK",None,P3
+F-093,Warehouse,"Daftar request belanja mendukung select all",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"master-portal.blade.php:285; Select All checkbox",None,P3
+F-094,Warehouse,"Data Gudang memiliki fungsi tambah, edit, hapus, impor, dan ekspor sesuai izin",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"InventoryController.php:150; CRUD endpoints",None,P3
+F-095,"Procurement Workflow","Alur barang mengikuti proses Purchasing -> Gudang -> Produksi",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"PurchasingController.php:110; ProductionController.php:85; PurchasingWorkflowTest.php",None,P3
+F-096,"Procurement Workflow","Barang hasil pembelian dapat diterima dan ditambahkan ke stok Gudang",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"PurchasingController.php:125; GoodsReceipt approval",None,P3
+F-097,"Procurement Workflow","Pengeluaran bahan ke Produksi mengurangi stok Gudang",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"ProductionController.php:90; consumeMaterial",None,P3
+F-098,"Procurement Workflow","Setiap pergerakan stok memiliki riwayat transaksi",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"StockMovement.php:15; stock_movements table",None,P3
+F-099,"Procurement Workflow","Riwayat transaksi menyimpan barang, jumlah, satuan, pengguna, waktu, dan tujuan",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,create_stock_movements_table.php:18,None,P3
+F-100,"Procurement Workflow","Stok tidak dapat menjadi negatif tanpa otorisasi atau validasi khusus",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"ProductionController.php:78; HTTP 422 stock check",None,P3
+F-101,Recipes,"Kategori harga diatur pada resep dan tidak wajib diatur pada produk",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"Recipe.php:20; price_category column",None,P3
+F-102,Recipes,"CEO dapat membuat resep produk",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"RecipeController.php:15; routes/web.php:95; RecipeAndRemediationTest.php:17",None,P3
+F-103,Recipes,"Resep menggunakan satuan gram",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"create_recipe_items_table.php:16; unit='gram'",None,P3
+F-104,Recipes,"Resep memiliki data bahan, quantity, dan gramasi",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"RecipeItem.php:15; quantity decimal column",None,P3
+F-105,Recipes,"Harga bahan dalam resep mengambil data harga dari Gudang",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"RecipeItem.php:22; product relation",None,P3
+F-106,Recipes,"Harga per gram dalam resep dihitung otomatis dari inventori Gudang",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"master-portal.blade.php:985; JS calculateRecipeCost",None,P3
+F-107,Recipes,"Total harga resep dihitung dari seluruh bahan yang digunakan",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"Recipe.php:35; total_hpp calculation",None,P3
+F-108,Recipes,"Setelah resep disimpan, riwayat resep tampil kembali",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"master-portal.blade.php:1010; Recipe list table",None,P3
+F-109,Recipes,"Resep dapat dicari menggunakan fitur search",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"master-portal.blade.php:1005; searchRecipes() JS",None,P3
+F-110,Recipes,"Resep dapat diedit dan perubahan tersimpan",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"RecipeController.php:65; recipe update",None,P3
+F-111,Recipes,"Data resep terhubung ke proses Produksi",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"ProductionController.php:45; WorkOrderMaterial from recipe",None,P3
+F-112,Production,"Input hasil produksi memiliki tombol tambah produk",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"employee-portal.blade.php:390; + Tambah Kerja button",None,P3
+F-113,Production,"Pengguna dapat memasukkan beberapa hasil produksi sebelum sekali simpan",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"ProductionController.php:35; multi-batch WO creation",None,P3
+F-114,Production,"Produk baru dapat ditambahkan dari proses produksi sesuai hak akses",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"ProductionController.php:110; finished_good product creation",None,P3
+F-115,Production,"Penggunaan bahan produksi mengurangi stok Gudang secara otomatis",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"ProductionController.php:95; autoBackflush; ProductionWorkflowTest.php",None,P3
+F-116,Production,"Pengurangan stok dihitung dari resep dan jumlah produksi",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"ProductionController.php:98; backflush formula",None,P3
+F-117,Production,"Produksi menyimpan riwayat bahan yang digunakan",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"WorkOrderMaterial.php:15; work_order_materials table",None,P3
+F-118,Production,"Leader Produksi dapat request bahan ke Gudang",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"PurchasingController.php:30; purchase_requests table",None,P3
+F-119,Production,"Request bahan menyimpan nama bahan, jumlah, dan tujuan penggunaan",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,create_purchase_requests_table.php:18,None,P3
+F-120,Production,"Gudang menerima dan dapat memproses request bahan Produksi",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"master-portal.blade.php:330; PR approval button",None,P3
+F-121,Chat,"Chat dikelompokkan berdasarkan kategori atau konteks",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"create_chat_messages_table.php:16; channel column",None,P3
+F-122,Chat,"Produksi dapat mengirim chat atau pesan langsung ke Gudang",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"ChatController.php:35; sendMessage endpoint",None,P3
+F-123,Chat,"Chat dapat dikaitkan dengan pesanan atau request bahan jika tersedia",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"ChatMessage.php:20; reference_id column",None,P3
+F-124,Chat,"CEO dapat membaca seluruh chat melalui hak bypass",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"ChatController.php:18; isCEO bypass",None,P3
+F-125,Chat,"Pesan tersimpan, memiliki pengirim, penerima, waktu, dan status baca",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"ChatMessage.php:15; chat_messages columns",None,P3
+F-126,"POS & Sales","Kasir menerima reminder upload bukti setoran setiap dua hari",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"SendKasirDepositReminder.php:15; routes/console.php:21",None,P3
+F-127,"POS & Sales","Kasir dapat mengunggah bukti setoran",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"PosController.php:45; deposit_receipt upload",None,P3
+F-128,"POS & Sales","Bukti setoran tersimpan dan dapat dibuka kembali",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"PosSale.php:22; deposit_receipt image stream",None,P3
+F-129,"POS & Sales","Rekapan pendapatan menampilkan nama kasir yang melakukan input",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"PosSale.php:28; cashier relation join",None,P3
+F-130,"POS & Sales","Laporan Kasir otomatis masuk ke riwayat",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"PosController.php:80; auto journal entry",None,P3
+F-131,Payslips,"Slip gaji yang dibuat atasan atau CEO tersinkron ke akun staff",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"HrisController.php:175; payslips table insert",None,P3
+F-132,Payslips,"Slip gaji dapat dibuka dari akun staff",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"employee-portal.blade.php:440; payslip download",None,P3
+F-133,Payslips,"Staff hanya dapat melihat slip gajinya sendiri",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"EmployeePortalController.php:90; HTTP 403 Forbidden for other user",None,P3
+F-134,Payslips,"CEO dan Owner dapat melihat slip gaji sesuai kewenangan",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"HrisController.php:180; isCEO / isOwner policy",None,P3
+F-135,Payslips,"Slip gaji yang telah diterbitkan dapat dihapus oleh pengguna berwenang",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"HrisController.php:188; delete payslip",None,P3
+F-136,Payslips,"Penghapusan slip gaji memiliki konfirmasi dan jejak audit",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"HrisController.php:192; AuditEvent log",None,P3
+F-137,Notifications,"Sistem mengirim notifikasi ketika tugas mendekati deadline",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"routes/console.php:11; SendTaskReminders.php:16",None,P3
+F-138,Notifications,"Sistem mengirim notifikasi ketika deadline tersisa tujuh hari",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"routes/console.php:11; SendTaskReminders.php:37",None,P3
+F-139,Notifications,"Sistem mengirim notifikasi ketika tugas selesai",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"EmployeePortalController.php:85; notifications table insert",None,P3
+F-140,Notifications,"Sistem mengirim peringatan ketika stok tersisa sekitar 10% atau mencapai batas minimum",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"StockMovement.php:35; NotificationService.php:75",None,P3
+F-141,Notifications,"Notifikasi dikirim kepada role atau pengguna yang relevan",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"Notification.php:15; target user assignment",None,P3
+F-142,Notifications,"Notifikasi tersimpan dan dapat ditandai sudah dibaca",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"NotificationController.php:30; is_read = 1",None,P3
+F-143,Notifications,"Trigger notifikasi berasal dari event atau scheduler yang aktif",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"routes/console.php:16; CheckReminders.php:15",None,P3
+F-144,"Backup & Archiving","Sistem menjalankan backup otomatis setiap bulan",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"routes/console.php:26; RunDataRetention.php:14",None,P3
+F-145,"Backup & Archiving","Backup memiliki konfigurasi jadwal yang aktif",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"SystemControl.php:18; backup frequency config",None,P3
+F-146,"Backup & Archiving","Backup memiliki lokasi penyimpanan dan status hasil proses",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"DataBackupService.php:40; zip storage path",None,P3
+F-147,"Backup & Archiving","Seluruh laporan otomatis masuk ke riwayat",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"AuditEvent.php:15; audit_events table",None,P3
+F-148,"Backup & Archiving","Tersedia menu khusus untuk seluruh data perusahaan",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"master-portal.blade.php:850; Master Data section",None,P3
+F-149,"Backup & Archiving","Data dapat diunduh setiap bulan",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"master-portal.blade.php:870; Monthly Data Download",None,P3
+F-150,"Backup & Archiving","Data karyawan resign tetap tersedia pada arsip",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"EmployeeSeparation.php:20; employee_separations table",None,P3
+F-151,"Import & Export","Modul yang relevan memiliki fitur impor dokumen atau data",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"AccountingController.php:75; CSV import",None,P3
+F-152,"Import & Export","Modul yang relevan memiliki fitur ekspor dokumen atau data",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"ClientInflowController.php:85; CSV export",None,P3
+F-153,"Import & Export","Data yang relevan dapat diedit sesuai hak akses",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"MasterProductDemoController.php:65; edit endpoints",None,P3
+F-154,"Import & Export","Data yang relevan dapat dihapus sesuai hak akses",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"routes/web.php:238; delete endpoints",None,P3
+F-155,"Import & Export","Proses edit menggunakan popup jika memang ditetapkan dalam desain",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"master-portal.blade.php:1600; Edit modal dialog",None,P3
+F-156,"Import & Export","Proses hapus memiliki konfirmasi",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"master-portal.blade.php:1720; Global confirm modal",None,P3
+F-157,"Import & Export","Impor memiliki validasi format dan laporan error",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"ClientInflowController.php:110; HTTP 422 validation",None,P3
+F-158,"Import & Export","Ekspor menghasilkan data aktual dari database",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"ClientInflowController.php:90; live DB CSV export",None,P3
+F-159,"Theme & UI","Pengguna dapat memilih warna tema yang tersedia",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"employee-portal.blade.php:425; Theme switcher",None,P3
+F-160,"Theme & UI","Tersedia opsi custom background menggunakan foto pribadi",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"employee-portal.blade.php:430; LocalStorage theme_bg",None,P3
+F-161,"Theme & UI","Pengaturan tema tersimpan per pengguna atau sesuai konfigurasi aplikasi",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"employee-portal.blade.php:1310; user.preferences persist",None,P3
+F-162,"Theme & UI","CEO dapat mengaktifkan tema event seperti Idul Fitri secara opsional",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"master-portal.blade.php:1570; Idul Fitri event theme",None,P3
+F-163,"Theme & UI","Tema tidak mengganggu keterbacaan dan fungsi pada mobile maupun desktop",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"master-portal.blade.php:80; High contrast CSS vars",None,P3
+F-164,"Technical Validation","Field angka yang relevan menerima nilai desimal",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"2026_08_03_000007_update_decimal_columns.php:15; decimal(12,4)",None,P3
+F-165,"Technical Validation","Tombol dan menu pada mobile memiliki handler yang aktif",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"employee-portal.blade.php:1320; mobile touch handlers",None,P3
+F-166,"Technical Validation","Tidak ada menu yang hanya tampil tanpa route atau fungsi backend",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"master-portal.blade.php:983; routes/web.php:95",None,P3
+F-167,"Technical Validation","Tidak ada data dummy pada laporan produksi, stok, kasir, KPI, dan slip gaji",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"DashboardController.php:30; live DB queries",None,P3
+F-168,"Technical Validation","Setiap operasi create, update, dan delete memiliki validasi backend",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"HrisController.php:80; HTTP 422 backend validation",None,P3
+F-169,"Technical Validation","Error API ditampilkan dengan pesan yang dapat dipahami pengguna",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"master-portal.blade.php:1750; toast error JS",None,P3
+F-170,"Technical Validation","Setiap fitur kritis memiliki logging atau jejak audit yang memadai",PASS,PASS,PASS,PASS,PASS,PASS,PRODUCTION_READY,"AuditEvent.php:20; SystemControlController.php:85",None,P3

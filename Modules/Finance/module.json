@@ -1,0 +1,13 @@
+{
+    "name": "Finance",
+    "alias": "finance",
+    "description": "ERP Finance Foundation Master Data Module",
+    "keywords": ["finance", "erp", "master-data"],
+    "priority": 1,
+    "providers": [
+        "Modules\\Finance\\Providers\\FinanceServiceProvider",
+        "Modules\\Finance\\Providers\\RepositoryServiceProvider",
+        "Modules\\Finance\\Providers\\EventServiceProvider"
+    ],
+    "files": []
+}

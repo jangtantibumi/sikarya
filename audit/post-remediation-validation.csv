@@ -1,0 +1,10 @@
+ID,PreviousStatus,RemediationStatus,TestResult,Evidence,RemainingGap
+F-005,PARTIAL,FIXED,PASS,"UserController.php:129; DataDeletionWorkflowTest.php",None
+F-008,FAIL,FIXED,PASS,"MasterProductDemoController.php:50; CeoLoginNotificationMail.php; RecipeAndRemediationTest.php:90",None
+F-102,PARTIAL,FIXED,PASS,"RecipeController.php:15; routes/web.php:95; RecipeAndRemediationTest.php:17",None
+F-126,FAIL,FIXED,PASS,"SendKasirDepositReminder.php:15; routes/console.php:21",None
+F-137,PASS_STATIC_ONLY,FIXED,PASS,"routes/console.php:11; SendTaskReminders.php:16",None
+F-138,PASS_STATIC_ONLY,FIXED,PASS,"routes/console.php:11; SendTaskReminders.php:37",None
+F-143,PASS_STATIC_ONLY,FIXED,PASS,"routes/console.php:16; CheckReminders.php:15",None
+F-144,PASS_STATIC_ONLY,FIXED,PASS,"routes/console.php:26; RunDataRetention.php:14",None
+F-166,PARTIAL,FIXED,PASS,"master-portal.blade.php:983; routes/web.php:95",None

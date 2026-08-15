@@ -1,0 +1,60 @@
+{
+    "id": "/erp-access",
+    "name": "SubaArch ERP",
+    "short_name": "SubaArch ERP",
+    "description": "Portal ERP internal Suba Arch untuk organisasi, kinerja, attendance, finance, dokumen, dan kolaborasi.",
+    "lang": "id-ID",
+    "dir": "ltr",
+    "start_url": "/erp-access?source=pwa",
+    "scope": "/",
+    "display": "standalone",
+    "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+    "orientation": "any",
+    "background_color": "#080809",
+    "theme_color": "#111113",
+    "categories": ["business", "productivity"],
+    "icons": [
+        {
+            "src": "/icons/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/icons/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/icons/icon-maskable-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Attendance",
+            "short_name": "Attendance",
+            "url": "/#attendance",
+            "icons": [
+                {
+                    "src": "/icons/icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "Notifikasi",
+            "short_name": "Notifikasi",
+            "url": "/#notifications",
+            "icons": [
+                {
+                    "src": "/icons/icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        }
+    ]
+}

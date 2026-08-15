@@ -1,0 +1,192 @@
+        <div id="view-hierarchy" class="view-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <div>
+                    <h2>Struktur Organisasi</h2>
+                    <p class="desc" style="margin-top: 4px;">Informasi struktur departemen dan divisi karyawan.</p>
+                </div>
+                @if($user->isManager())
+                <button class="user-pill" style="background: var(--accent); color: white; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer;" onclick="document.getElementById('modal-hire-hierarchy-staff').style.display='flex'">
+                    <i class="fa-solid fa-user-plus"></i> Tambah Staf Baru
+                </button>
+                @endif
+            </div>
+
+            @php
+                $allUsersHierarchyStaff = \App\Models\User::where('company_id', $user->company_id)->where('is_active', true)->get();
+                $divisionsStaff = $allUsersHierarchyStaff->groupBy(function($u) {
+                    return $u->division ?? $u->divisionLabel();
+                });
+            @endphp
+
+            @foreach($divisionsStaff as $divName => $divUsers)
+                <div class="org-division-container">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                        <h4 style="margin: 0; font-size: 18px; display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-layer-group" style="color: var(--accent);"></i> {{ $divName }}
+                        </h4>
+                        <span class="user-pill" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b; font-size: 11px;">{{ $divUsers->count() }} aktif</span>
+                    </div>
+
+                    @php
+                        $managers = $divUsers->filter(fn($u) => $u->isManager() || $u->isCEO());
+                        $staffs = $divUsers->reject(fn($u) => $u->isManager() || $u->isCEO());
+                    @endphp
+
+                    <div class="org-tree">
+                        <ul>
+                            @foreach($managers as $mgr)
+                            <li>
+                                <div class="org-card" style="border-color: rgba(16,185,129,0.5); box-shadow: 0 0 15px rgba(16,185,129,0.05);">
+                                    <div class="org-avatar">{{ $mgr->getInitials() }}</div>
+                                    <strong style="font-size: 15px; color: var(--text-heading); display: block;">{{ $mgr->name }}</strong>
+                                    <span style="font-size: 12px; color: var(--text-muted);">{{ $mgr->job_title ?? $mgr->role }}</span>
+                                    
+                                    <div class="org-badges">
+                                        <span class="org-badge badge-role">Manager</span>
+                                        <span class="org-badge badge-type">{{ $mgr->employment_type ?? 'Full-Time' }}</span>
+                                        @php $pendingTasks = $mgr->tasks()->where('status', 'pending')->count(); @endphp
+                                        @if($pendingTasks > 0)
+                                            <span class="org-badge badge-task-active" onclick="alert('Membuka statistik performa/tugas untuk {{ $mgr->name }}')">{{ $pendingTasks }} tugas aktif</span>
+                                        @else
+                                            <span class="org-badge badge-task" onclick="alert('Membuka statistik performa/tugas untuk {{ $mgr->name }}')">On Track</span>
+                                        @endif
+                                    </div>
+                                    
+                                    @if($user->isCEO() || $user->isManagerOf($mgr) || $user->id == $mgr->id)
+                                    <div class="org-actions">
+                                        <button onclick="openEditProfileModal({{ $mgr->id }}, '{{ $mgr->name }}', '{{ $mgr->job_title ?? '' }}', '{{ $mgr->employment_type ?? 'Full-Time' }}', '{{ $mgr->target_hours_per_month ?? 160 }}')"><i class="fa-solid fa-pen"></i> Edit</button>
+                                        @if($user->isCEO() || $user->isManagerOf($mgr))
+                                        <button class="btn-delete" onclick="confirmDeleteUser({{ $mgr->id }})"><i class="fa-solid fa-trash"></i> Hapus</button>
+                                        @endif
+                                    </div>
+                                    @endif
+                                </div>
+                                
+                                @php
+                                    $myStaffs = $staffs->filter(function($s) use ($mgr) {
+                                        return $s->reports_to_id == $mgr->id || (!$s->reports_to_id && $s->manager() && $s->manager()->id == $mgr->id);
+                                    });
+                                @endphp
+                                
+                                @if($myStaffs->count() > 0)
+                                <ul>
+                                    @foreach($myStaffs as $staff)
+                                    <li>
+                                        <div class="org-card" style="border-color: rgba(59,130,246,0.3);">
+                                            <div class="org-avatar" style="background: #3b82f6;">{{ $staff->getInitials() }}</div>
+                                            <strong style="font-size: 15px; color: var(--text-heading); display: block;">{{ $staff->name }}</strong>
+                                            <span style="font-size: 12px; color: var(--text-muted);">{{ $staff->job_title ?? $staff->role }}</span>
+                                            
+                                            <div class="org-badges">
+                                                <span class="org-badge badge-role">Staff</span>
+                                                <span class="org-badge badge-type">{{ $staff->employment_type ?? 'Full-Time' }}</span>
+                                                @php $pendingTasksStaff = $staff->tasks()->where('status', 'pending')->count(); @endphp
+                                                @if($pendingTasksStaff > 0)
+                                                    <span class="org-badge badge-task-active" onclick="alert('Membuka statistik performa/tugas untuk {{ $staff->name }}')">{{ $pendingTasksStaff }} tugas aktif</span>
+                                                @else
+                                                    <span class="org-badge badge-task" onclick="alert('Membuka statistik performa/tugas untuk {{ $staff->name }}')">On Track</span>
+                                                @endif
+                                            </div>
+                                            
+                                            @if($user->isCEO() || $user->isManagerOf($staff) || $user->id == $staff->id)
+                                            <div class="org-actions">
+                                                <button onclick="openEditProfileModal({{ $staff->id }}, '{{ $staff->name }}', '{{ $staff->job_title ?? '' }}', '{{ $staff->employment_type ?? 'Full-Time' }}', '{{ $staff->target_hours_per_month ?? 160 }}')"><i class="fa-solid fa-pen"></i> Edit</button>
+                                                @if($user->isCEO() || $user->isManagerOf($staff))
+                                                <button class="btn-delete" onclick="confirmDeleteUser({{ $staff->id }})"><i class="fa-solid fa-trash"></i> Hapus</button>
+                                                @endif
+                                            </div>
+                                            @endif
+                                        </div>
+                                    </li>
+                                    @endforeach
+                                </ul>
+                                @endif
+                            </li>
+                            @endforeach
+                            
+                            @php
+                                $orphanStaffs = $staffs->reject(function($s) use ($managers) {
+                                    return $managers->contains('id', $s->reports_to_id) || ($s->manager() && $managers->contains('id', $s->manager()->id));
+                                });
+                            @endphp
+                            
+                            @foreach($orphanStaffs as $staff)
+                            <li>
+                                <div class="org-card" style="border-color: rgba(59,130,246,0.3);">
+                                    <div class="org-avatar" style="background: #3b82f6;">{{ $staff->getInitials() }}</div>
+                                    <strong style="font-size: 15px; color: var(--text-heading); display: block;">{{ $staff->name }}</strong>
+                                    <span style="font-size: 12px; color: var(--text-muted);">{{ $staff->job_title ?? $staff->role }}</span>
+                                    
+                                    <div class="org-badges">
+                                        <span class="org-badge badge-role">Staff</span>
+                                        <span class="org-badge badge-type">{{ $staff->employment_type ?? 'Full-Time' }}</span>
+                                        @php $pendingTasksStaff = $staff->tasks()->where('status', 'pending')->count(); @endphp
+                                        @if($pendingTasksStaff > 0)
+                                            <span class="org-badge badge-task-active" onclick="alert('Membuka statistik performa/tugas untuk {{ $staff->name }}')">{{ $pendingTasksStaff }} tugas aktif</span>
+                                        @else
+                                            <span class="org-badge badge-task" onclick="alert('Membuka statistik performa/tugas untuk {{ $staff->name }}')">On Track</span>
+                                        @endif
+                                    </div>
+                                    
+                                    @if($user->isCEO() || $user->isManagerOf($staff) || $user->id == $staff->id)
+                                    <div class="org-actions">
+                                        <button onclick="openEditProfileModal({{ $staff->id }}, '{{ $staff->name }}', '{{ $staff->job_title ?? '' }}', '{{ $staff->employment_type ?? 'Full-Time' }}', '{{ $staff->target_hours_per_month ?? 160 }}')"><i class="fa-solid fa-pen"></i> Edit</button>
+                                        @if($user->isCEO() || $user->isManagerOf($staff))
+                                        <button class="btn-delete" onclick="confirmDeleteUser({{ $staff->id }})"><i class="fa-solid fa-trash"></i> Hapus</button>
+                                        @endif
+                                    </div>
+                                    @endif
+                                </div>
+                            </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            @endforeach
+            
+            @if($user->isManager())
+            <!-- Modal Hire Employee Khusus Manager -->
+            <div id="modal-hire-hierarchy-staff" class="modal-overlay" style="display: none;">
+                <div class="modal-content" style="max-width: 600px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 style="margin: 0;">Tambah Staf / Rekrutmen</h3>
+                        <i class="fa-solid fa-times" style="cursor: pointer; color: var(--text-muted);" onclick="document.getElementById('modal-hire-hierarchy-staff').style.display='none'"></i>
+                    </div>
+                    <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; color: #f59e0b;">
+                        <i class="fa-solid fa-circle-info"></i> Penambahan staf oleh Manager akan berstatus <strong>Pending</strong> dan membutuhkan persetujuan (ACC) dari CEO sebelum dapat digunakan.
+                    </div>
+                    <form method="POST" action="{{ route('master-demo.employee.hire') }}">
+                        @csrf
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                            <div class="form-group">
+                                <label>Nama Lengkap</label>
+                                <input type="text" name="name" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" name="email" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Nama Jabatan (Job Title)</label>
+                                <input type="text" name="job_title" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Tipe Pekerjaan</label>
+                                <select name="employment_type" class="form-control" required>
+                                    <option value="Full-Time">Full-Time</option>
+                                    <option value="Part-Time">Part-Time</option>
+                                    <option value="Contract">Contract</option>
+                                    <option value="Paid Internship">Paid Internship</option>
+                                </select>
+                            </div>
+                            <!-- Manager cannot set arbitrary division; defaults to manager's division -->
+                            <input type="hidden" name="division" value="{{ $user->division ?? $user->divisionLabel() }}">
+                            <input type="hidden" name="reports_to_id" value="{{ $user->id }}">
+                        </div>
+                        <button type="submit" class="btn" style="width: 100%;"><i class="fa-solid fa-paper-plane"></i> Ajukan Perekrutan ke CEO</button>
+                    </form>
+                </div>
+            </div>
+            @endif
+        </div>
+
