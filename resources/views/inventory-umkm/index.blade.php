@@ -609,7 +609,22 @@
         window.switchView = function(viewId) {
             if (orgSwitchView) orgSwitchView(viewId);
             if (viewId === 'inventory_umkm') {
+                if (currentInvTab === 'stock') {
+                    loadInvUmkm();
+                } else {
+                    loadInvUmkmHistory();
+                }
+            }
+        };
+
+        // Failsafe untuk Race Condition SPA:
+        // Jika halaman di-reload, switchView dari master-portal akan terpicu sebelum DOMContentLoaded ini.
+        // Maka kita periksa secara manual apakah view aktif saat ini adalah inventory_umkm.
+        if (localStorage.getItem('subaActiveView') === 'inventory_umkm') {
+            if (currentInvTab === 'stock') {
                 loadInvUmkm();
+            } else {
+                loadInvUmkmHistory();
             }
         }
     });
