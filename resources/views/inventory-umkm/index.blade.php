@@ -165,6 +165,7 @@
                     <th>Nama Barang</th>
                     <th>Stok Aktual</th>
                     <th>Batas Min.</th>
+                    <th>Batas Max.</th>
                     <th>Harga/Satuan</th>
                     <th>Status</th>
                     <th style="text-align: center;">Aksi</th>
@@ -317,6 +318,7 @@
             data.forEach(item => {
                 const actualStock = parseFloat(item.actual_stock) || 0;
                 const minStock = parseFloat(item.min_stock) || 0;
+                const maxStock = item.max_stock ? parseFloat(item.max_stock) : '-';
                 const price = parseFloat(item.price_per_gram) || 0;
                 
                 const isWarning = actualStock < minStock;
@@ -337,6 +339,7 @@
                         <td style="color: var(--text-heading); font-weight: 700;">${item.item_name}</td>
                         <td style="color: ${isWarning ? 'var(--danger)' : 'var(--text-main)'}; font-weight: bold;">${actualStock} ${item.uom || ''}</td>
                         <td style="color: var(--text-muted);">${minStock} ${item.uom || ''}</td>
+                        <td style="color: var(--text-muted);">${maxStock !== '-' ? maxStock + ' ' + (item.uom || '') : '-'}</td>
                         <td style="color: var(--text-heading); font-weight: 600;">${formatCurrencyUmkm(price)}</td>
                         <td>${statusBadge}</td>
                         <td style="text-align: center;">
