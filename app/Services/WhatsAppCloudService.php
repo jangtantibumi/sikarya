@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Lead;
@@ -15,8 +17,7 @@ class WhatsAppCloudService
 {
     public function __construct(
         private readonly MetricAggregationService $metrics,
-    ) {
-    }
+    ) {}
 
     public function status(): array
     {

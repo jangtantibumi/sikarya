@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Inventory;
 
-use App\Models\Inventory\Category;
 use App\Models\Inventory\Brand;
+use App\Models\Inventory\Category;
 use App\Models\Inventory\Uom;
 
 class MasterDataService
@@ -17,10 +19,11 @@ class MasterDataService
     {
         return Category::create($data);
     }
-    
+
     public function updateCategory(Category $category, array $data)
     {
         $category->update($data);
+
         return $category;
     }
 
@@ -38,7 +41,7 @@ class MasterDataService
     {
         return Uom::all();
     }
-    
+
     public function createUom(array $data)
     {
         return Uom::create($data);

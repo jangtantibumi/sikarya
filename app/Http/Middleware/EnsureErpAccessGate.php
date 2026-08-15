@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Middleware;
 
 use App\Services\SecuritySettingsService;
@@ -11,13 +13,11 @@ class EnsureErpAccessGate
 {
     private const SESSION_KEY = 'erp_gate_granted_at';
 
-    public function __construct(private readonly SecuritySettingsService $settings)
-    {
-    }
+    public function __construct(private readonly SecuritySettingsService $settings) {}
 
     public function handle(Request $request, Closure $next): Response
     {
-        if (!$this->settings->gateEnabled()) {
+        if (! $this->settings->gateEnabled()) {
             return $next($request);
         }
 

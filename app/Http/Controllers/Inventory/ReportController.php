@@ -1,12 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Inventory;
 
 use App\Http\Controllers\Controller;
-use App\Models\Inventory\Item;
-use App\Models\Inventory\Warehouse;
 use App\Models\Inventory\StockSummary;
-use App\Models\Inventory\StockMovement;
+use App\Models\Inventory\Warehouse;
 use Illuminate\Http\Request;
 
 class ReportController extends Controller

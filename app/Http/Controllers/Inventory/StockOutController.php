@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Inventory;
 
 use App\Http\Controllers\Controller;
+use App\Models\Inventory\Item;
 use App\Models\Inventory\StockOut;
 use App\Models\Inventory\StockOutLine;
 use App\Models\Inventory\Warehouse;
-use App\Models\Inventory\Item;
 use App\Services\InventoryService;
 use Illuminate\Http\Request;
 
@@ -17,9 +19,10 @@ class StockOutController extends Controller
         $query = StockOut::with(['warehouse', 'lines.item']);
         if ($request->filled('search')) {
             $query->where('number', 'like', "%{$request->search}%")
-                  ->orWhere('recipient_name', 'like', "%{$request->search}%");
+                ->orWhere('recipient_name', 'like', "%{$request->search}%");
         }
         $stockOuts = $query->paginate(15);
+
         return view('inventory.stock-out.index', compact('stockOuts'));
     }
 
@@ -27,6 +30,7 @@ class StockOutController extends Controller
     {
         $warehouses = Warehouse::all();
         $items = Item::all();
+
         return view('inventory.stock-out.create', compact('warehouses', 'items'));
     }
 
@@ -75,6 +79,7 @@ class StockOutController extends Controller
     public function show($id)
     {
         $stockOut = StockOut::with(['warehouse', 'lines.item'])->findOrFail($id);
+
         return view('inventory.stock-out.show', compact('stockOut'));
     }
 
@@ -89,18 +94,18 @@ class StockOutController extends Controller
             $service->recordMovement([
                 'reference_number' => $stockOut->number,
                 'transaction_type' => 'stock_out',
-                'item_id'          => $line->item_id,
-                'warehouse_id'     => $stockOut->warehouse_id,
-                'bin_id'           => $line->bin_id,
-                'quantity'         => -$line->quantity, // negative movement for stock out
-                'unit_cost'        => $line->unit_price,
-                'notes'            => 'Pengeluaran Stock Out: ' . $stockOut->number,
+                'item_id' => $line->item_id,
+                'warehouse_id' => $stockOut->warehouse_id,
+                'bin_id' => $line->bin_id,
+                'quantity' => -$line->quantity, // negative movement for stock out
+                'unit_cost' => $line->unit_price,
+                'notes' => 'Pengeluaran Stock Out: '.$stockOut->number,
             ]);
         }
 
         $stockOut->update([
             'status' => 'approved',
-            'approved_by' => 'Manager Inventory'
+            'approved_by' => 'Manager Inventory',
         ]);
 
         return redirect()->route('inventory.stock-out.index')->with('success', 'Transaksi Stock Out disetujui & stok berhasil dikurangi.');
@@ -110,6 +115,7 @@ class StockOutController extends Controller
     {
         $stockOut = StockOut::findOrFail($id);
         $stockOut->update(['status' => 'rejected']);
+
         return redirect()->route('inventory.stock-out.index')->with('success', 'Transaksi Stock Out ditolak.');
     }
 
@@ -117,6 +123,7 @@ class StockOutController extends Controller
     {
         $stockOut = StockOut::findOrFail($id);
         $stockOut->delete();
+
         return redirect()->route('inventory.stock-out.index')->with('success', 'Transaksi Stock Out dihapus.');
     }
 }

@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Announcement;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class AnnouncementController extends Controller
@@ -29,13 +31,13 @@ class AnnouncementController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Announcement created successfully',
-            'data' => $announcement
+            'data' => $announcement,
         ]);
     }
 
     public function destroy($id)
     {
-        if (!Auth::user()->isCEO()) {
+        if (! Auth::user()->isCEO()) {
             return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
         }
 
@@ -47,7 +49,7 @@ class AnnouncementController extends Controller
 
     public function bulkDelete(Request $request)
     {
-        if (!Auth::user()->isCEO()) {
+        if (! Auth::user()->isCEO()) {
             return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
         }
 
@@ -68,8 +70,8 @@ class AnnouncementController extends Controller
         $count = $query->delete();
 
         return response()->json([
-            'status' => 'success', 
-            'message' => "$count announcements deleted successfully."
+            'status' => 'success',
+            'message' => "$count announcements deleted successfully.",
         ]);
     }
 }

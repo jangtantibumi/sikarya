@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Models\Concerns\BelongsToCompany;
@@ -8,9 +10,10 @@ use Illuminate\Database\Eloquent\Model;
 class ApprovalRequest extends Model
 {
     use BelongsToCompany;
+
     protected $fillable = [
         'request_type', 'division', 'requester_id', 'subject_type', 'subject_id',
-        'current_approver_id', 'current_step', 'status', 'payload', 'submitted_at', 'completed_at'
+        'current_approver_id', 'current_step', 'status', 'payload', 'submitted_at', 'completed_at',
     ];
 
     protected $casts = [

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Models\CrmVoucher;
@@ -10,6 +12,7 @@ class CrmVoucherController extends Controller
     public function index()
     {
         $vouchers = CrmVoucher::orderBy('id', 'desc')->get();
+
         return view('crm.vouchers.index', compact('vouchers'));
     }
 
@@ -36,12 +39,14 @@ class CrmVoucherController extends Controller
         $validated['is_active'] = $request->has('is_active') ? true : false;
 
         CrmVoucher::create($validated);
+
         return redirect()->route('crm.vouchers.index')->with('success', 'Voucher berhasil ditambahkan.');
     }
 
     public function edit($id)
     {
         $voucher = CrmVoucher::findOrFail($id);
+
         return view('crm.vouchers.edit', compact('voucher'));
     }
 
@@ -49,7 +54,7 @@ class CrmVoucherController extends Controller
     {
         $voucher = CrmVoucher::findOrFail($id);
         $validated = $request->validate([
-            'code' => 'required|string|max:50|unique:crm_vouchers,code,' . $id,
+            'code' => 'required|string|max:50|unique:crm_vouchers,code,'.$id,
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'type' => 'required|in:percentage,fixed',
@@ -64,6 +69,7 @@ class CrmVoucherController extends Controller
         $validated['is_active'] = $request->has('is_active') ? true : false;
 
         $voucher->update($validated);
+
         return redirect()->route('crm.vouchers.index')->with('success', 'Voucher berhasil diperbarui.');
     }
 
@@ -71,6 +77,7 @@ class CrmVoucherController extends Controller
     {
         $voucher = CrmVoucher::findOrFail($id);
         $voucher->delete();
+
         return redirect()->route('crm.vouchers.index')->with('success', 'Voucher berhasil dihapus.');
     }
 }

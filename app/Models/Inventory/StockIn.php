@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\Inventory;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,6 +14,7 @@ class StockIn extends Model
     use HasFactory;
 
     protected $table = 'inv_stock_ins';
+
     protected $guarded = [];
 
     public function warehouse(): BelongsTo

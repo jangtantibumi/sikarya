@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\ApprovalRequest;
 use App\Models\LeaveRequest;
 use App\Services\ApprovalWorkflowService;
 use Illuminate\Http\Request;
@@ -13,8 +16,7 @@ class LeaveRequestController extends Controller
 {
     public function __construct(
         private readonly ApprovalWorkflowService $workflowService,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request)
     {
@@ -23,7 +25,7 @@ class LeaveRequestController extends Controller
         $user = $request->user();
         $query = LeaveRequest::query()->with('user');
 
-        if (!$user->isCEO() && !$user->isHRD()) {
+        if (! $user->isCEO() && ! $user->isHRD()) {
             if ($user->isManager()) {
                 $query->where(function ($builder) use ($user): void {
                     $builder
@@ -39,8 +41,8 @@ class LeaveRequestController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
-        $approvalMap = \App\Models\ApprovalRequest::query()
-            ->where('subject_type', (new LeaveRequest())->getMorphClass())
+        $approvalMap = ApprovalRequest::query()
+            ->where('subject_type', (new LeaveRequest)->getMorphClass())
             ->whereIn('subject_id', $leaves->pluck('id'))
             ->latest('id')
             ->get()
@@ -95,7 +97,7 @@ class LeaveRequestController extends Controller
 
         $initialManager = $user->isStaff() ? $user->manager() : null;
 
-        if ($user->isStaff() && !$initialManager) {
+        if ($user->isStaff() && ! $initialManager) {
             throw ValidationException::withMessages([
                 'approval' => 'Atasan langsung belum terdaftar. Hubungi HRD sebelum mengajukan cuti.',
             ]);
@@ -165,7 +167,7 @@ class LeaveRequestController extends Controller
         }
 
         $leaveRequest->forceFill($validated)->save();
-        $approval = \App\Models\ApprovalRequest::query()
+        $approval = ApprovalRequest::query()
             ->where('subject_type', $leaveRequest->getMorphClass())
             ->where('subject_id', $leaveRequest->id)
             ->whereIn('status', ['pending_manager', 'pending_ceo'])

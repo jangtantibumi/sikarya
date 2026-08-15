@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Finance\Tests\Unit;
 
 use App\Models\Company;

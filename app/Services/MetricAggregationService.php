@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Attendance;
@@ -189,7 +191,7 @@ class MetricAggregationService
     private function divisionUsers(Kpi $kpi): Collection
     {
         $manager = $kpi->plan->manager;
-        if (!$manager) {
+        if (! $manager) {
             return collect();
         }
 

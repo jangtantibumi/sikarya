@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Models\CrmMembership;
@@ -10,6 +12,7 @@ class CrmMembershipController extends Controller
     public function index()
     {
         $memberships = CrmMembership::orderBy('min_points')->get();
+
         return view('crm.memberships.index', compact('memberships'));
     }
 
@@ -29,12 +32,14 @@ class CrmMembershipController extends Controller
         ]);
 
         CrmMembership::create($validated);
+
         return redirect()->route('crm.memberships.index')->with('success', 'Membership tier berhasil ditambahkan.');
     }
 
     public function edit($id)
     {
         $membership = CrmMembership::findOrFail($id);
+
         return view('crm.memberships.edit', compact('membership'));
     }
 
@@ -42,7 +47,7 @@ class CrmMembershipController extends Controller
     {
         $membership = CrmMembership::findOrFail($id);
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:crm_memberships,name,' . $id,
+            'name' => 'required|string|max:255|unique:crm_memberships,name,'.$id,
             'min_points' => 'required|integer|min:0',
             'discount_percentage' => 'required|numeric|min:0|max:100',
             'benefits' => 'nullable|string',
@@ -50,6 +55,7 @@ class CrmMembershipController extends Controller
         ]);
 
         $membership->update($validated);
+
         return redirect()->route('crm.memberships.index')->with('success', 'Membership tier berhasil diperbarui.');
     }
 
@@ -57,6 +63,7 @@ class CrmMembershipController extends Controller
     {
         $membership = CrmMembership::findOrFail($id);
         $membership->delete();
+
         return redirect()->route('crm.memberships.index')->with('success', 'Membership tier berhasil dihapus.');
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\AlumniProfile;
@@ -8,6 +10,7 @@ use App\Models\TeamRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class EmployeeSeparationService
 {
@@ -15,8 +18,7 @@ class EmployeeSeparationService
         private readonly SecurityAuditService $audit,
         private readonly WorkflowNotificationService $notifications,
         private readonly EmployeeDataExportService $exports,
-    ) {
-    }
+    ) {}
 
     public function separate(
         User $target,
@@ -35,7 +37,7 @@ class EmployeeSeparationService
         ): EmployeeSeparation {
             $convertToAlumni = (bool) ($details['convert_to_alumni'] ?? false);
             if ($convertToAlumni && ($details['completion_status'] ?? null) !== 'completed') {
-                throw \Illuminate\Validation\ValidationException::withMessages([
+                throw ValidationException::withMessages([
                     'convert_to_alumni' => 'Hanya anggota yang menyelesaikan masa kerja atau magang yang dapat dijadikan alumni.',
                 ]);
             }

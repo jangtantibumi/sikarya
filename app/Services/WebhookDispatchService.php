@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\WebhookSubscription;
@@ -35,10 +37,10 @@ class WebhookDispatchService
                         'timestamp' => now()->toIso8601String(),
                         'data' => $payload,
                     ]);
-                    
+
                 Log::info("Webhook dispatched for event {$eventName} to {$subscription->url}");
             } catch (\Exception $e) {
-                Log::error("Failed to dispatch webhook to {$subscription->url}: " . $e->getMessage());
+                Log::error("Failed to dispatch webhook to {$subscription->url}: ".$e->getMessage());
             }
         }
     }

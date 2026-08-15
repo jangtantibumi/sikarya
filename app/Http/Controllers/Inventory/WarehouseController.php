@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Inventory;
 
 use App\Http\Controllers\Controller;
@@ -14,9 +16,10 @@ class WarehouseController extends Controller
         $query = Warehouse::with(['zones.racks.bins']);
         if ($request->filled('search')) {
             $query->where('name', 'like', "%{$request->search}%")
-                  ->orWhere('code', 'like', "%{$request->search}%");
+                ->orWhere('code', 'like', "%{$request->search}%");
         }
         $warehouses = $query->paginate(15);
+
         return view('inventory.warehouses.index', compact('warehouses'));
     }
 
@@ -36,18 +39,21 @@ class WarehouseController extends Controller
             'manager_name' => 'nullable|string',
         ]);
         Warehouse::create($validated);
+
         return redirect()->route('inventory.warehouses.index')->with('success', 'Gudang berhasil ditambahkan.');
     }
 
     public function show($id)
     {
         $warehouse = Warehouse::with(['zones.racks.bins', 'stockSummaries.item'])->findOrFail($id);
+
         return view('inventory.warehouses.show', compact('warehouse'));
     }
 
     public function edit($id)
     {
         $warehouse = Warehouse::findOrFail($id);
+
         return view('inventory.warehouses.edit', compact('warehouse'));
     }
 
@@ -63,6 +69,7 @@ class WarehouseController extends Controller
             'manager_name' => 'nullable|string',
         ]);
         $warehouse->update($validated);
+
         return redirect()->route('inventory.warehouses.index')->with('success', 'Gudang berhasil diperbarui.');
     }
 
@@ -70,6 +77,7 @@ class WarehouseController extends Controller
     {
         $warehouse = Warehouse::findOrFail($id);
         $warehouse->delete();
+
         return redirect()->route('inventory.warehouses.index')->with('success', 'Gudang berhasil dihapus.');
     }
 
@@ -80,6 +88,7 @@ class WarehouseController extends Controller
         foreach ($warehouses as $w) {
             $csv .= "{$w->id},\"{$w->code}\",\"{$w->name}\",\"{$w->manager_name}\",\"{$w->phone}\",\"{$w->email}\",\"{$w->address}\"\n";
         }
+
         return Response::make($csv, 200, [
             'Content-Type' => 'text/csv',
             'Content-Disposition' => 'attachment; filename="warehouses.csv"',

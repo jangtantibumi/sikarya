@@ -1,23 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Services\AccountingService;
 use App\Models\JournalEntry;
+use App\Services\AccountingService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Illuminate\View\View;
 
 class FinanceController extends Controller
 {
-    public function __construct(private readonly AccountingService $accounting)
-    {
-    }
+    public function __construct(private readonly AccountingService $accounting) {}
 
     /**
      * Display the Finance dashboard.
      *
-     * @param Request $request
-     * @return \Illuminate\View\View
+     * @return View
      */
     public function index(Request $request)
     {
@@ -32,10 +32,11 @@ class FinanceController extends Controller
             'journals' => $journals,
         ]);
     }
+
     public function storeJournal(Request $request)
     {
         abort_unless(app()->environment(['local', 'testing']), 404);
-        
+
         $request->validate([
             'memo' => 'required|string',
             'debit_account' => 'required|string',
@@ -55,10 +56,9 @@ class FinanceController extends Controller
             $lines,
             'manual_journal',
             time(), // arbitrary source_id
-            'MNL-' . strtoupper(\Illuminate\Support\Str::random(6))
+            'MNL-'.strtoupper(Str::random(6))
         );
 
         return redirect()->back()->with('success', 'Jurnal manual berhasil dicatat.');
     }
 }
-?>

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Middleware;
 
 use App\Models\Company;
@@ -12,9 +14,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class EnsureFeatureEnabled
 {
-    public function __construct(private readonly FeatureManager $features)
-    {
-    }
+    public function __construct(private readonly FeatureManager $features) {}
 
     public function handle(Request $request, Closure $next, string $feature): Response
     {
@@ -25,6 +25,7 @@ class EnsureFeatureEnabled
             if (! $this->features->enabled($feature)) {
                 return $this->disabled($feature, 'Modul ini sedang dinonaktifkan oleh Superadmin.', 'FEATURE_DISABLED');
             }
+
             return $next($request);
         }
 

@@ -1,3 +1,26 @@
 <?php
-namespace App\Http\Controllers\Api; use App\Http\Controllers\Controller; use App\Models\PurchaseOrder; use App\Models\Warehouse; use App\Services\GoodsReceiptService; use Illuminate\Http\Request;
-class GoodsReceiptController extends Controller { public function __construct(private GoodsReceiptService $service){} public function store(Request $r){$d=$r->validate(['purchase_order_id'=>'required|integer','warehouse_id'=>'required|integer','lines'=>'required|array|min:1','lines.*.purchase_order_line_id'=>'required|integer','lines.*.quantity'=>'required|numeric|gt:0']);$po=PurchaseOrder::query()->findOrFail($d['purchase_order_id']);$warehouse=Warehouse::query()->findOrFail($d['warehouse_id']);abort_unless($po->company_id===$warehouse->company_id,422,'Gudang bukan milik tenant PO.');return response()->json($this->service->receive($po,$warehouse,$d['lines'],$r->user()),201);}}
+
+declare(strict_types=1);
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\PurchaseOrder;
+use App\Models\Warehouse;
+use App\Services\GoodsReceiptService;
+use Illuminate\Http\Request;
+
+class GoodsReceiptController extends Controller
+{
+    public function __construct(private GoodsReceiptService $service) {}
+
+    public function store(Request $r)
+    {
+        $d = $r->validate(['purchase_order_id' => 'required|integer', 'warehouse_id' => 'required|integer', 'lines' => 'required|array|min:1', 'lines.*.purchase_order_line_id' => 'required|integer', 'lines.*.quantity' => 'required|numeric|gt:0']);
+        $po = PurchaseOrder::query()->findOrFail($d['purchase_order_id']);
+        $warehouse = Warehouse::query()->findOrFail($d['warehouse_id']);
+        abort_unless($po->company_id === $warehouse->company_id, 422, 'Gudang bukan milik tenant PO.');
+
+        return response()->json($this->service->receive($po, $warehouse, $d['lines'], $r->user()), 201);
+    }
+}

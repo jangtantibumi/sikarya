@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Product;
-use App\Models\ProductionOrder;
-use App\Models\ProductionMaterial;
 use App\Models\BillOfMaterial;
+use App\Models\Product;
+use App\Models\ProductionMaterial;
+use App\Models\ProductionOrder;
 use App\Models\Warehouse;
 use App\Services\InventoryLedgerService;
 use App\Services\TenantContext;
@@ -21,12 +23,14 @@ class ProductionOrderController extends Controller
     private function company(): int
     {
         abort_unless($this->tenant->id(), 422, 'Akun belum dipetakan ke perusahaan.');
+
         return $this->tenant->id();
     }
 
     public function index()
     {
         $this->company();
+
         return response()->json(ProductionOrder::query()->with('product:id,sku,name', 'materials.product', 'billOfMaterial')->latest()->get());
     }
 
@@ -37,23 +41,23 @@ class ProductionOrderController extends Controller
             'product_id' => 'required|integer',
             'bill_of_material_id' => 'nullable|integer',
             'planned_quantity' => 'required|numeric|gt:0',
-            'planned_date' => 'nullable|date'
+            'planned_date' => 'nullable|date',
         ]);
 
         $p = Product::query()->findOrFail($d['product_id']);
-        
+
         $bom = null;
-        if (!empty($d['bill_of_material_id'])) {
+        if (! empty($d['bill_of_material_id'])) {
             $bom = BillOfMaterial::query()->with('lines')->where('company_id', $c)->findOrFail($d['bill_of_material_id']);
             abort_unless($bom->product_id === $p->id, 422, 'BOM tidak sesuai dengan produk yang diproduksi.');
         }
 
-        return DB::transaction(function () use ($c, $d, $bom, $r) {
+        return DB::transaction(function () use ($c, $d, $bom) {
             $d['company_id'] = $c;
-            $d['number'] = 'MO-' . now()->format('Ymd') . '-' . str_pad((string)(ProductionOrder::withoutGlobalScopes()->where('company_id', $c)->count() + 1), 4, '0', STR_PAD_LEFT);
+            $d['number'] = 'MO-'.now()->format('Ymd').'-'.str_pad((string) (ProductionOrder::withoutGlobalScopes()->where('company_id', $c)->count() + 1), 4, '0', STR_PAD_LEFT);
             $d['status'] = 'draft';
             $d['completed_quantity'] = 0;
-            
+
             $mo = ProductionOrder::query()->create($d);
 
             if ($bom) {
@@ -118,7 +122,7 @@ class ProductionOrderController extends Controller
         $user = $r->user();
 
         $d = $r->validate([
-            'decision' => 'required|in:approve,reject'
+            'decision' => 'required|in:approve,reject',
         ]);
 
         abort_unless($user->isManager() || $user->isCEO(), 403, 'Akses ditolak.');
@@ -146,6 +150,7 @@ class ProductionOrderController extends Controller
         $o = ProductionOrder::query()->findOrFail($id);
         abort_unless($o->status === 'draft', 422, 'Order tidak dapat dirilis.');
         $o->update(['status' => 'released']);
+
         return response()->json($o);
     }
 
@@ -153,7 +158,7 @@ class ProductionOrderController extends Controller
     {
         $mo = ProductionOrder::query()->with('materials')->findOrFail($id);
         abort_unless($mo->status === 'released', 422, 'Order harus dirilis terlebih dahulu.');
-        
+
         // Validate all materials are approved or default
         $unapproved = $mo->materials()->whereNotIn('status', ['default', 'approved'])->count();
         if ($unapproved > 0) {
@@ -162,7 +167,7 @@ class ProductionOrderController extends Controller
 
         $d = $r->validate([
             'warehouse_id' => 'required|integer',
-            'quantity' => 'required|numeric|gt:0'
+            'quantity' => 'required|numeric|gt:0',
         ]);
 
         $w = Warehouse::query()->findOrFail($d['warehouse_id']);
@@ -173,16 +178,16 @@ class ProductionOrderController extends Controller
             foreach ($mo->materials as $mat) {
                 if ($mat->actual_quantity > 0) {
                     $component = Product::query()->findOrFail($mat->product_id);
-                    $this->ledger->move($component, $w, -((float)$mat->actual_quantity), 'production_issue', $r->user(), $mo->number);
+                    $this->ledger->move($component, $w, -((float) $mat->actual_quantity), 'production_issue', $r->user(), $mo->number);
                 }
             }
 
             // 2. Receipt: Add finished goods
-            $this->ledger->move($p, $w, (float)$d['quantity'], 'production_receipt', $r->user(), $mo->number);
+            $this->ledger->move($p, $w, (float) $d['quantity'], 'production_receipt', $r->user(), $mo->number);
 
             $mo->update([
                 'status' => 'completed',
-                'completed_quantity' => $d['quantity']
+                'completed_quantity' => $d['quantity'],
             ]);
         });
 

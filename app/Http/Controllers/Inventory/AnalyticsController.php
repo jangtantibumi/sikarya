@@ -1,11 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Inventory;
 
 use App\Http\Controllers\Controller;
-use App\Models\Inventory\StockMovement;
-use App\Models\Inventory\StockSummary;
 use App\Models\Inventory\Category;
+use App\Models\Inventory\StockMovement;
 use Illuminate\Http\Request;
 
 class AnalyticsController extends Controller

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -12,9 +14,7 @@ use Illuminate\Http\Request;
 
 class TalentController extends Controller
 {
-    public function __construct(private readonly SecurityAuditService $audit, private readonly TenantContext $tenant)
-    {
-    }
+    public function __construct(private readonly SecurityAuditService $audit, private readonly TenantContext $tenant) {}
 
     public function index(Request $request)
     {

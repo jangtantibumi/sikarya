@@ -1,16 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Company;
 use App\Models\CompanyFeature;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\ValidationException;
 
 class CompanyFeatureManager
 {
     public function catalogue(Company $company): array
     {
-        return \Illuminate\Support\Facades\Cache::remember(
+        return Cache::remember(
             "company.{$company->id}.features.catalogue",
             now()->addDay(),
             function () use ($company) {
@@ -19,7 +22,7 @@ class CompanyFeatureManager
                 return collect(config('master_modules', []))->map(function (array $definition, string $key) use ($features): array {
                     $feature = $features->get($key);
                     $state = $definition['permanent'] ?? false ? 'active' : ($feature->state ?? $definition['default']);
-                    
+
                     // Gunakan nama divisi dinamis dari database jika ada, jika tidak fallback ke config
                     $groupName = $feature && $feature->division ? $feature->division->name : $definition['group'];
                     $divisionId = $feature && $feature->division ? $feature->division->id : null;
@@ -65,7 +68,7 @@ class CompanyFeatureManager
             ['state' => $state],
         );
 
-        \Illuminate\Support\Facades\Cache::forget("company.{$company->id}.features.catalogue");
+        Cache::forget("company.{$company->id}.features.catalogue");
 
         return $result;
     }

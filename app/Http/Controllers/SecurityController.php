@@ -1,10 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Models\Role;
 use App\Models\User;
+use App\Services\SecurityAuditService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class SecurityController extends Controller
@@ -14,18 +19,18 @@ class SecurityController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'permissions' => 'nullable|array'
+            'permissions' => 'nullable|array',
         ]);
 
         $companyId = auth()->user()->company_id;
-        
+
         $key = Str::slug($request->name, '_');
-        
+
         // Ensure key is unique
         $originalKey = $key;
         $counter = 1;
         while (Role::where('company_id', $companyId)->where('key', $key)->exists()) {
-            $key = $originalKey . '_' . $counter;
+            $key = $originalKey.'_'.$counter;
             $counter++;
         }
 
@@ -34,31 +39,31 @@ class SecurityController extends Controller
             'name' => $request->name,
             'key' => $key,
             'description' => $request->description,
-            'permissions' => $request->permissions ?? []
+            'permissions' => $request->permissions ?? [],
         ]);
 
         return response()->json(['message' => 'Role created successfully']);
     }
 
-    public function assignRole(Request $request, \App\Services\SecurityAuditService $auditService)
+    public function assignRole(Request $request, SecurityAuditService $auditService)
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'role_key' => 'required|string'
+            'role_key' => 'required|string',
         ]);
 
         $companyId = auth()->user()->company_id;
-        
+
         // Verify user belongs to company
         $user = User::where('company_id', $companyId)->findOrFail($request->user_id);
-        
+
         // Ensure role exists
         $role = Role::where('company_id', $companyId)->where('key', $request->role_key)->firstOrFail();
-        
+
         $oldRole = $user->role;
-        
+
         $user->update([
-            'role' => $role->key
+            'role' => $role->key,
         ]);
 
         $auditService->logRbac(
@@ -73,11 +78,11 @@ class SecurityController extends Controller
         return response()->json(['message' => 'User role updated successfully']);
     }
 
-    public function revokeRole($userId, Request $request, \App\Services\SecurityAuditService $auditService)
+    public function revokeRole($userId, Request $request, SecurityAuditService $auditService)
     {
         $companyId = auth()->user()->company_id;
         $user = User::where('company_id', $companyId)->findOrFail($userId);
-        
+
         $oldRole = $user->role;
 
         // Optionally, don't allow revoking the last admin role
@@ -86,7 +91,7 @@ class SecurityController extends Controller
         }
 
         $user->update([
-            'role' => ''
+            'role' => '',
         ]);
 
         $auditService->logRbac(
@@ -111,38 +116,38 @@ class SecurityController extends Controller
         $keyword = $request->get('keyword');
         $sort = $request->get('sort', 'desc');
 
-        $rbacQuery = \Illuminate\Support\Facades\DB::table('audit_logs')
+        $rbacQuery = DB::table('audit_logs')
             ->join('users as actor', 'audit_logs.user_id', '=', 'actor.id')
             ->leftJoin('users as target', 'audit_logs.target_user_id', '=', 'target.id')
             ->where('actor.company_id', $companyId)
             ->select(
                 'audit_logs.id',
-                \Illuminate\Support\Facades\DB::raw("'rbac' as type"),
+                DB::raw("'rbac' as type"),
                 'actor.name as actor_name',
                 'actor.profile_picture_path as actor_avatar',
-                \Illuminate\Support\Facades\DB::raw("COALESCE(target.name, '-') as target_name"),
+                DB::raw("COALESCE(target.name, '-') as target_name"),
                 'audit_logs.action',
                 'audit_logs.after_state as details',
                 'audit_logs.ip_address',
                 'audit_logs.created_at'
             );
 
-        $eventQuery = \Illuminate\Support\Facades\DB::table('audit_events')
+        $eventQuery = DB::table('audit_events')
             ->leftJoin('users as actor', 'audit_events.actor_id', '=', 'actor.id')
             ->where('audit_events.company_id', $companyId)
             ->select(
                 'audit_events.id',
-                \Illuminate\Support\Facades\DB::raw("'event' as type"),
-                \Illuminate\Support\Facades\DB::raw("COALESCE(actor.name, 'System') as actor_name"),
+                DB::raw("'event' as type"),
+                DB::raw("COALESCE(actor.name, 'System') as actor_name"),
                 'actor.profile_picture_path as actor_avatar',
-                \Illuminate\Support\Facades\DB::raw("CONCAT(COALESCE(audit_events.subject_type, '-'), ' #', COALESCE(audit_events.subject_id, '')) as target_name"),
+                DB::raw("CONCAT(COALESCE(audit_events.subject_type, '-'), ' #', COALESCE(audit_events.subject_id, '')) as target_name"),
                 'audit_events.event_type as action',
                 'audit_events.metadata as details',
                 'audit_events.ip_address',
                 'audit_events.created_at'
             );
 
-        $applyFilters = function($query, $column) use ($range, $date, $timeStart, $timeEnd, $keyword) {
+        $applyFilters = function ($query, $column) use ($range, $date, $timeStart, $timeEnd) {
             if ($range === 'today') {
                 $query->whereDate($column, now()->toDateString());
             } elseif ($range === 'week') {
@@ -156,7 +161,7 @@ class SecurityController extends Controller
             } elseif ($date) {
                 $query->whereDate($column, $date);
             }
-            
+
             if ($timeStart) {
                 $query->whereTime($column, '>=', $timeStart);
             }
@@ -169,43 +174,45 @@ class SecurityController extends Controller
         $applyFilters($eventQuery, 'audit_events.created_at');
 
         if ($keyword) {
-            $keywordStr = '%' . strtolower($keyword) . '%';
-            $rbacQuery->where(function($q) use ($keywordStr) {
+            $keywordStr = '%'.strtolower($keyword).'%';
+            $rbacQuery->where(function ($q) use ($keywordStr) {
                 $q->whereRaw('LOWER(actor.name) LIKE ?', [$keywordStr])
-                  ->orWhereRaw('LOWER(target.name) LIKE ?', [$keywordStr])
-                  ->orWhereRaw('LOWER(audit_logs.action) LIKE ?', [$keywordStr]);
+                    ->orWhereRaw('LOWER(target.name) LIKE ?', [$keywordStr])
+                    ->orWhereRaw('LOWER(audit_logs.action) LIKE ?', [$keywordStr]);
             });
-            $eventQuery->where(function($q) use ($keywordStr) {
+            $eventQuery->where(function ($q) use ($keywordStr) {
                 $q->whereRaw('LOWER(actor.name) LIKE ?', [$keywordStr])
-                  ->orWhereRaw('LOWER(audit_events.subject_type) LIKE ?', [$keywordStr])
-                  ->orWhereRaw('LOWER(audit_events.event_type) LIKE ?', [$keywordStr]);
+                    ->orWhereRaw('LOWER(audit_events.subject_type) LIKE ?', [$keywordStr])
+                    ->orWhereRaw('LOWER(audit_events.event_type) LIKE ?', [$keywordStr]);
             });
         }
 
         $unionQuery = $rbacQuery->unionAll($eventQuery);
-        
+
         $sortDirection = strtolower($sort) === 'asc' ? 'asc' : 'desc';
-        $query = \Illuminate\Support\Facades\DB::table(\Illuminate\Support\Facades\DB::raw("({$unionQuery->toSql()}) as audit_union"))
+        $query = DB::table(DB::raw("({$unionQuery->toSql()}) as audit_union"))
             ->mergeBindings($unionQuery)
             ->orderBy('created_at', $sortDirection);
 
         $paginator = $query->paginate(15);
-        
-        $paginator->getCollection()->transform(function($log) {
+
+        $paginator->getCollection()->transform(function ($log) {
             $actionLabel = $log->action;
             if ($log->type === 'rbac') {
                 $actionLabel = $log->action === 'role_assigned' ? 'Diberikan Hak Akses' : ($log->action === 'role_revoked' ? 'Dicabut Hak Aksesnya' : $log->action);
             } else {
                 $actionLabel = str_replace('_', ' ', strtoupper($log->action));
             }
-            
-            $avatar = $log->actor_avatar ? '/storage/' . $log->actor_avatar : null;
+
+            $avatar = $log->actor_avatar ? '/storage/'.$log->actor_avatar : null;
             $targetStr = trim(str_replace('App\\Models\\', '', $log->target_name));
-            if ($targetStr === '#') $targetStr = '-';
-            
+            if ($targetStr === '#') {
+                $targetStr = '-';
+            }
+
             return [
                 'type' => $log->type,
-                'id' => $log->type . '_' . $log->id,
+                'id' => $log->type.'_'.$log->id,
                 'actor' => $log->actor_name,
                 'actor_avatar' => $avatar,
                 'target' => $targetStr,
@@ -213,8 +220,8 @@ class SecurityController extends Controller
                 'action' => $log->action,
                 'details' => json_decode($log->details, true),
                 'ip_address' => $log->ip_address,
-                'created_at' => \Carbon\Carbon::parse($log->created_at)->format('d M Y, H:i'),
-                'timestamp' => \Carbon\Carbon::parse($log->created_at)->timestamp,
+                'created_at' => Carbon::parse($log->created_at)->format('d M Y, H:i'),
+                'timestamp' => Carbon::parse($log->created_at)->timestamp,
             ];
         });
 
@@ -223,17 +230,17 @@ class SecurityController extends Controller
 
     public function clearAuditLogs(Request $request)
     {
-        if (!$request->user() || (!$request->user()->isCEO() && !$request->user()->isPlatformAdmin())) {
+        if (! $request->user() || (! $request->user()->isCEO() && ! $request->user()->isPlatformAdmin())) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
         $companyId = $request->user()->company_id;
         $timeframe = $request->input('timeframe', 'all');
 
-        $queryEvents = \Illuminate\Support\Facades\DB::table('audit_events')->where('company_id', $companyId);
-        
-        $userIds = \App\Models\User::where('company_id', $companyId)->pluck('id');
-        $queryLogs = \Illuminate\Support\Facades\DB::table('audit_logs')->whereIn('user_id', $userIds);
+        $queryEvents = DB::table('audit_events')->where('company_id', $companyId);
+
+        $userIds = User::where('company_id', $companyId)->pluck('id');
+        $queryLogs = DB::table('audit_logs')->whereIn('user_id', $userIds);
 
         if ($timeframe === 'older_than_7_days') {
             $limitDate = now()->subDays(7);

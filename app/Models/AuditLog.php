@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,7 +18,7 @@ class AuditLog extends Model
         'before_state',
         'after_state',
         'ip_address',
-        'reference_id'
+        'reference_id',
     ];
 
     protected $casts = [

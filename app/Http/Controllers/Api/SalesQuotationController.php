@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -8,7 +10,6 @@ use App\Models\SalesQuotation;
 use App\Services\SalesQuotationService;
 use App\Services\TenantContext;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 
 class SalesQuotationController extends Controller
 {
@@ -29,7 +30,7 @@ class SalesQuotationController extends Controller
     public function index(Request $request, int $leadId)
     {
         $this->authorizeCrm($request);
-        
+
         return response()->json(
             SalesQuotation::query()
                 ->where('lead_id', $leadId)
@@ -43,7 +44,7 @@ class SalesQuotationController extends Controller
     {
         $this->authorizeCrm($request);
         $lead = Lead::findOrFail($leadId);
-        
+
         $data = $request->validate([
             'date' => 'nullable|date',
             'valid_until' => 'nullable|date|after_or_equal:date',
@@ -69,9 +70,10 @@ class SalesQuotationController extends Controller
         $this->service->markAsSent($quotation, $request->user());
 
         // Format pesan
-        $linesText = $quotation->lines->map(function($line) {
+        $linesText = $quotation->lines->map(function ($line) {
             $price = number_format($line->unit_price, 0, ',', '.');
             $total = number_format($line->line_total, 0, ',', '.');
+
             return "- {$line->description} ({$line->quantity} x Rp{$price}) = Rp{$total}";
         })->join("\n");
 
@@ -79,20 +81,20 @@ class SalesQuotationController extends Controller
         $validUntil = $quotation->valid_until ? $quotation->valid_until->format('d/m/Y') : 'Tanpa batas';
 
         $message = "Halo {$quotation->lead->client_name},\n\n"
-                 . "Berikut adalah penawaran harga (Quotation) dari kami:\n"
-                 . "*No. Ref:* {$quotation->number}\n"
-                 . "*Berlaku s/d:* {$validUntil}\n\n"
-                 . "*Rincian:*\n{$linesText}\n\n"
-                 . "*Total Biaya: Rp {$totalFormatted}*\n\n"
-                 . "Jika Anda menyetujui penawaran ini, silakan balas pesan ini.\n"
-                 . "Terima kasih!";
+                 ."Berikut adalah penawaran harga (Quotation) dari kami:\n"
+                 ."*No. Ref:* {$quotation->number}\n"
+                 ."*Berlaku s/d:* {$validUntil}\n\n"
+                 ."*Rincian:*\n{$linesText}\n\n"
+                 ."*Total Biaya: Rp {$totalFormatted}*\n\n"
+                 ."Jika Anda menyetujui penawaran ini, silakan balas pesan ini.\n"
+                 .'Terima kasih!';
 
         // Jika ada controller WhatsAppCloudController, kita bisa panggil, tapi di sini kita hanya
         // return text untuk front-end (atau mock pengiriman jika API key belum tersedia).
         return response()->json([
             'message' => 'Quotation dikirim via WhatsApp.',
             'whatsapp_message_preview' => $message,
-            'whatsapp_url' => 'https://wa.me/' . $quotation->lead->phone . '?text=' . urlencode($message)
+            'whatsapp_url' => 'https://wa.me/'.$quotation->lead->phone.'?text='.urlencode($message),
         ]);
     }
 
@@ -110,9 +112,9 @@ class SalesQuotationController extends Controller
     {
         $this->authorizeCrm($request);
         $quotation = SalesQuotation::findOrFail($id);
-        
+
         $data = $request->validate([
-            'reason' => 'required|string|max:255'
+            'reason' => 'required|string|max:255',
         ]);
 
         $this->service->reject($quotation, $data['reason'], $request->user());

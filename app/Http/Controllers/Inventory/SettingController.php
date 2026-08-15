@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Inventory;
 
 use App\Http\Controllers\Controller;
@@ -11,6 +13,7 @@ class SettingController extends Controller
     public function index()
     {
         $settings = InventorySetting::all();
+
         return view('inventory.settings.index', compact('settings'));
     }
 
@@ -22,6 +25,7 @@ class SettingController extends Controller
                 ['setting_value' => $value]
             );
         }
+
         return redirect()->route('inventory.settings.index')->with('success', 'Pengaturan Inventory berhasil diperbarui.');
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Inventory;
 
 use App\Models\Inventory\Warehouse;
@@ -11,11 +13,11 @@ class WarehouseService
     {
         $query = Warehouse::query();
 
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $search = $filters['search'];
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('code', 'like', "%{$search}%");
+                    ->orWhere('code', 'like', "%{$search}%");
             });
         }
 
@@ -30,6 +32,7 @@ class WarehouseService
     public function updateWarehouse(Warehouse $warehouse, array $data): Warehouse
     {
         $warehouse->update($data);
+
         return $warehouse;
     }
 

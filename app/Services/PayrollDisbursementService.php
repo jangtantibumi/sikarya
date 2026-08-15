@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
+use App\Models\Account;
 use App\Models\JournalEntry;
 use App\Models\Payroll;
 use Illuminate\Support\Str;
@@ -16,7 +19,7 @@ class PayrollDisbursementService
     public function disburse(Payroll $payroll, $actor)
     {
         if ($payroll->status !== 'approved') {
-            throw new \Exception("Only approved payroll can be disbursed.");
+            throw new \Exception('Only approved payroll can be disbursed.');
         }
 
         $payroll->update([
@@ -27,8 +30,8 @@ class PayrollDisbursementService
         $journal = JournalEntry::create([
             'company_id' => $payroll->company_id,
             'entry_date' => now(),
-            'reference' => 'PAYROLL-' . $payroll->id . '-' . Str::random(5),
-            'description' => 'Disbursement of Payroll for ' . $payroll->user->name . ' (' . $payroll->period_start->format('M Y') . ')',
+            'reference' => 'PAYROLL-'.$payroll->id.'-'.Str::random(5),
+            'description' => 'Disbursement of Payroll for '.$payroll->user->name.' ('.$payroll->period_start->format('M Y').')',
             'source_type' => Payroll::class,
             'source_id' => $payroll->id,
             'status' => 'posted',
@@ -36,14 +39,14 @@ class PayrollDisbursementService
             'posted_by_id' => $actor->id,
             'posted_at' => now(),
             'currency' => 'IDR',
-            'exchange_rate' => 1.0
+            'exchange_rate' => 1.0,
         ]);
 
-        $expenseAccount = \App\Models\Account::firstOrCreate(
+        $expenseAccount = Account::firstOrCreate(
             ['code' => '50100', 'company_id' => $payroll->company_id],
             ['name' => 'Salary Expense', 'type' => 'expense', 'normal_balance' => 'debit']
         );
-        $cashAccount = \App\Models\Account::firstOrCreate(
+        $cashAccount = Account::firstOrCreate(
             ['code' => '10100', 'company_id' => $payroll->company_id],
             ['name' => 'Cash in Bank', 'type' => 'asset', 'normal_balance' => 'debit']
         );
@@ -52,14 +55,14 @@ class PayrollDisbursementService
             'account_id' => $expenseAccount->id,
             'debit' => $payroll->net_amount,
             'credit' => 0,
-            'memo' => 'Salary Expense'
+            'memo' => 'Salary Expense',
         ]);
 
         $journal->lines()->create([
             'account_id' => $cashAccount->id,
             'debit' => 0,
             'credit' => $payroll->net_amount,
-            'memo' => 'Cash Disbursement'
+            'memo' => 'Cash Disbursement',
         ]);
 
         $this->audit->record(

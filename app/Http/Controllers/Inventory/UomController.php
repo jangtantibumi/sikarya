@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Inventory;
 
 use App\Http\Controllers\Controller;
@@ -14,9 +16,10 @@ class UomController extends Controller
         $query = Uom::withCount('items');
         if ($request->filled('search')) {
             $query->where('name', 'like', "%{$request->search}%")
-                  ->orWhere('code', 'like', "%{$request->search}%");
+                ->orWhere('code', 'like', "%{$request->search}%");
         }
         $uoms = $query->paginate(15);
+
         return view('inventory.uoms.index', compact('uoms'));
     }
 
@@ -33,18 +36,21 @@ class UomController extends Controller
             'symbol' => 'nullable|string|max:20',
         ]);
         Uom::create($validated);
+
         return redirect()->route('inventory.uoms.index')->with('success', 'UoM berhasil ditambahkan.');
     }
 
     public function show($id)
     {
         $uom = Uom::with('items')->findOrFail($id);
+
         return view('inventory.uoms.show', compact('uom'));
     }
 
     public function edit($id)
     {
         $uom = Uom::findOrFail($id);
+
         return view('inventory.uoms.edit', compact('uom'));
     }
 
@@ -57,6 +63,7 @@ class UomController extends Controller
             'symbol' => 'nullable|string|max:20',
         ]);
         $uom->update($validated);
+
         return redirect()->route('inventory.uoms.index')->with('success', 'UoM berhasil diperbarui.');
     }
 
@@ -64,6 +71,7 @@ class UomController extends Controller
     {
         $uom = Uom::findOrFail($id);
         $uom->delete();
+
         return redirect()->route('inventory.uoms.index')->with('success', 'UoM berhasil dihapus.');
     }
 
@@ -74,6 +82,7 @@ class UomController extends Controller
         foreach ($uoms as $u) {
             $csv .= "{$u->id},\"{$u->code}\",\"{$u->name}\",\"{$u->symbol}\"\n";
         }
+
         return Response::make($csv, 200, [
             'Content-Type' => 'text/csv',
             'Content-Disposition' => 'attachment; filename="uoms.csv"',

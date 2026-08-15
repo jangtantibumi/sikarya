@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Inventory;
 
 use App\Http\Controllers\Controller;
@@ -20,7 +22,7 @@ class StockSummaryController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->whereHas('item', function($q) use ($search) {
+            $query->whereHas('item', function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")->orWhere('sku', 'like', "%{$search}%");
             });
         }
@@ -36,8 +38,9 @@ class StockSummaryController extends Controller
         $summaries = StockSummary::with(['item', 'warehouse', 'bin'])->get();
         $csv = "Item,SKU,Warehouse,Bin,Quantity,Reserved,Allocated\n";
         foreach ($summaries as $s) {
-            $csv .= "\"{$s->item->name}\",\"{$s->item->sku}\",\"{$s->warehouse->name}\",\"" . optional($s->bin)->name . "\",{$s->quantity},{$s->reserved_qty},{$s->allocated_qty}\n";
+            $csv .= "\"{$s->item->name}\",\"{$s->item->sku}\",\"{$s->warehouse->name}\",\"".optional($s->bin)->name."\",{$s->quantity},{$s->reserved_qty},{$s->allocated_qty}\n";
         }
+
         return Response::make($csv, 200, [
             'Content-Type' => 'text/csv',
             'Content-Disposition' => 'attachment; filename="stock_summary.csv"',

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\JournalEntry;
@@ -34,8 +36,7 @@ class AccountingImportService
 
     public function __construct(
         private readonly AccountingService $accounting,
-    ) {
-    }
+    ) {}
 
     public function import(UploadedFile $file, User $actor): array
     {
@@ -116,6 +117,7 @@ class AccountingImportService
                     $row = $this->normalizeRow($raw, $lineNumber);
                     if ($row['reference'] && JournalEntry::query()->where('reference', $row['reference'])->exists()) {
                         $skipped++;
+
                         continue;
                     }
                     $rows[] = $row;

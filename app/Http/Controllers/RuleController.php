@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Models\Rule;
@@ -11,12 +13,11 @@ class RuleController extends Controller
 {
     public function __construct(
         private readonly DataDeletionRequestService $deletions,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request)
     {
-        if (!Rule::query()->exists()) {
+        if (! Rule::query()->exists()) {
             foreach ([
                 ['condition' => 'Score ≥ 85%', 'reward' => 'Bonus 1.5%', 'type' => 'success'],
                 ['condition' => 'Score ≥ 75%', 'reward' => '-D-Point, Bonus 0.5%', 'type' => 'warning'],
@@ -29,7 +30,7 @@ class RuleController extends Controller
         $user = $request->user();
         $query = Rule::query()->with('creator:id,name,username')->orderBy('id');
 
-        if (!$user->isCEO()) {
+        if (! $user->isCEO()) {
             $division = $user->divisionKey();
             $query->where(function ($builder) use ($division): void {
                 $builder->whereNull('division');

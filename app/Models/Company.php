@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -9,6 +11,7 @@ use Illuminate\Support\Str;
 class Company extends Model
 {
     use HasFactory;
+
     protected $fillable = ['uuid', 'name', 'slug', 'industry', 'timezone', 'currency', 'status', 'branding'];
 
     protected function casts(): array

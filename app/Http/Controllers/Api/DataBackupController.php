@@ -1,24 +1,26 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\ApprovalRequest;
 use App\Models\AlumniProfile;
+use App\Models\ApprovalRequest;
 use App\Models\Attendance;
 use App\Models\ChatMessage;
 use App\Models\ClientInflow;
+use App\Models\EmployeeSeparation;
+use App\Models\ErpDocument;
 use App\Models\Goal;
-use App\Models\KpiPlan;
 use App\Models\JournalEntry;
+use App\Models\KpiPlan;
 use App\Models\Lead;
 use App\Models\LeaveRequest;
-use App\Models\ErpDocument;
-use App\Models\EmployeeSeparation;
 use App\Models\Project;
 use App\Models\ResignationRequest;
-use App\Models\Task;
 use App\Models\TalentReview;
+use App\Models\Task;
 use App\Models\TeamRequest;
 use App\Models\User;
 use App\Services\TenantContext;
@@ -27,9 +29,8 @@ use Illuminate\Http\Request;
 
 class DataBackupController extends Controller
 {
-    public function __construct(private readonly TenantContext $tenant)
-    {
-    }
+    public function __construct(private readonly TenantContext $tenant) {}
+
     public function show(Request $request)
     {
         $viewer = $request->user();
@@ -38,9 +39,9 @@ class DataBackupController extends Controller
         $division = $viewer->divisionKey();
 
         $approvalQuery = ApprovalRequest::query()->with(['requester:id,name,username,role', 'steps.approver:id,name,username']);
-        if (!$viewer->isCEO() && !$viewer->isHRD()) {
+        if (! $viewer->isCEO() && ! $viewer->isHRD()) {
             $approvalQuery->whereIn('requester_id', $visibleUserIds);
-        } elseif ($viewer->isHRD() && !$viewer->isCEO()) {
+        } elseif ($viewer->isHRD() && ! $viewer->isCEO()) {
             $approvalQuery->whereIn('request_type', ['leave', 'resignation', 'team_request']);
         }
 
@@ -65,13 +66,13 @@ class DataBackupController extends Controller
             'leave_requests' => LeaveRequest::query()->with('user:id,name,username')->whereIn('user_id', $visibleUserIds)->latest('id')->get(),
             'resignation_requests' => ResignationRequest::query()->with('user:id,name,username')->whereIn('user_id', $visibleUserIds)->latest('id')->get(),
             'approvals' => $approvalQuery->latest('id')->get(),
-            'goals' => Goal::query()->when(!$viewer->isCEO(), fn (Builder $query) => $query->where('division', $division))->get(),
+            'goals' => Goal::query()->when(! $viewer->isCEO(), fn (Builder $query) => $query->where('division', $division))->get(),
             'kpi_plans' => KpiPlan::query()
                 ->with(['goal:id,title,division', 'manager:id,name,username', 'kpis'])
-                ->when(!$viewer->isCEO(), fn (Builder $query) => $query->whereHas('goal', fn (Builder $goal) => $goal->where('division', $division)))
+                ->when(! $viewer->isCEO(), fn (Builder $query) => $query->whereHas('goal', fn (Builder $goal) => $goal->where('division', $division)))
                 ->get(),
             'team_requests' => TeamRequest::query()
-                ->when(!$viewer->isCEO() && !$viewer->isHRD(), fn (Builder $query) => $query->whereIn('requester_username', $visibleUsernames))
+                ->when(! $viewer->isCEO() && ! $viewer->isHRD(), fn (Builder $query) => $query->whereIn('requester_username', $visibleUsernames))
                 ->get()
                 ->map(fn (TeamRequest $item) => array_merge($item->toArray(), [
                     'details' => collect($item->details ?? [])->except(['password'])->all(),
@@ -91,7 +92,7 @@ class DataBackupController extends Controller
             'documents' => ErpDocument::query()
                 ->with(['owner:id,name,username', 'creator:id,name,username', 'signatures.signer:id,name,username'])
                 ->when(
-                    !$viewer->isCEO() && !$viewer->isHRD(),
+                    ! $viewer->isCEO() && ! $viewer->isHRD(),
                     fn (Builder $query) => $query->whereIn('owner_user_id', $visibleUserIds),
                 )
                 ->get()
@@ -112,13 +113,13 @@ class DataBackupController extends Controller
         if ($viewer->isCEO() || $division === 'marketing') {
             $payload['leads'] = Lead::query()
                 ->with('assignee:id,name,username')
-                ->when(!$viewer->isCEO(), fn (Builder $query) => $query->whereIn('assigned_to', $visibleUserIds))
+                ->when(! $viewer->isCEO(), fn (Builder $query) => $query->whereIn('assigned_to', $visibleUserIds))
                 ->get();
         }
 
         if ($viewer->isCEO() || $division === 'finance') {
             $payload['client_inflows'] = ClientInflow::query()
-                ->when(!$viewer->isCEO(), fn (Builder $query) => $query->whereIn('created_by', $visibleUsernames))
+                ->when(! $viewer->isCEO(), fn (Builder $query) => $query->whereIn('created_by', $visibleUsernames))
                 ->get();
             $payload['journal_entries'] = JournalEntry::query()
                 ->with([
@@ -151,7 +152,7 @@ class DataBackupController extends Controller
                 ->get();
         }
 
-        $filename = 'suba-arch-backup-' . $viewer->username . '-' . now()->format('Y-m-d-His') . '.json';
+        $filename = 'suba-arch-backup-'.$viewer->username.'-'.now()->format('Y-m-d-His').'.json';
         $json = json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
         if ($request->boolean('download')) {
@@ -206,11 +207,21 @@ class DataBackupController extends Controller
         if ($viewer->isCEO()) {
             return ['general', 'marketing-team', 'operations-team', 'finance-team', 'hr-team', 'management'];
         }
-        if (in_array($viewer->role, ['mgr_marketing', 'staff_marketing'], true)) $channels[] = 'marketing-team';
-        if (in_array($viewer->role, ['mgr_ops', 'staff_ops'], true)) $channels[] = 'operations-team';
-        if (in_array($viewer->role, ['mgr_finance', 'staff_finance'], true)) $channels[] = 'finance-team';
-        if ($viewer->isHRD()) $channels[] = 'hr-team';
-        if ($viewer->isManager()) $channels[] = 'management';
+        if (in_array($viewer->role, ['mgr_marketing', 'staff_marketing'], true)) {
+            $channels[] = 'marketing-team';
+        }
+        if (in_array($viewer->role, ['mgr_ops', 'staff_ops'], true)) {
+            $channels[] = 'operations-team';
+        }
+        if (in_array($viewer->role, ['mgr_finance', 'staff_finance'], true)) {
+            $channels[] = 'finance-team';
+        }
+        if ($viewer->isHRD()) {
+            $channels[] = 'hr-team';
+        }
+        if ($viewer->isManager()) {
+            $channels[] = 'management';
+        }
 
         return array_values(array_unique($channels));
     }

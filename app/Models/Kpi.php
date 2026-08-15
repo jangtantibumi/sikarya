@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Models\Concerns\BelongsToCompany;
@@ -12,7 +14,7 @@ class Kpi extends Model
 
     protected $fillable = [
         'kpi_plan_id', 'title', 'target_value', 'unit', 'weight',
-        'direction', 'aggregation_type', 'data_source', 'current_value'
+        'direction', 'aggregation_type', 'data_source', 'current_value',
     ];
 
     public function plan()

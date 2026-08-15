@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Models\Concerns\BelongsToCompany;
@@ -11,7 +13,7 @@ class KpiPlan extends Model
     use BelongsToCompany, SoftDeletes;
 
     protected $fillable = [
-        'goal_id', 'title', 'division', 'manager_id', 'status', 'score'
+        'goal_id', 'title', 'division', 'manager_id', 'status', 'score',
     ];
 
     protected $casts = [

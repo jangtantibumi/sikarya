@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Mail\LoginOtpMail;
@@ -18,8 +20,7 @@ class AuthController extends Controller
     public function __construct(
         private readonly SecuritySettingsService $settings,
         private readonly SecurityAuditService $audit,
-    ) {
-    }
+    ) {}
 
     public function sendOtp(Request $request)
     {
@@ -31,7 +32,7 @@ class AuthController extends Controller
         $genericMessage = 'Jika akun aktif dan email terdaftar, kode OTP akan dikirim. Periksa kotak masuk dan folder spam.';
         $user = $this->findActiveUser($identifier);
 
-        if (!$user) {
+        if (! $user) {
             $this->audit->record(
                 'otp.request_unknown',
                 request: $request,
@@ -137,7 +138,7 @@ class AuthController extends Controller
                 ->lockForUpdate()
                 ->first();
 
-            if (!$user) {
+            if (! $user) {
                 $this->audit->record(
                     'otp.verify_failed',
                     request: $request,
@@ -161,7 +162,7 @@ class AuthController extends Controller
                 return $this->otpError('Terlalu banyak percobaan. Akun dikunci sementara. Silakan coba kembali nanti.');
             }
 
-            if (!$user->otp_code || !$user->otp_expires_at || $user->otp_expires_at->isPast()) {
+            if (! $user->otp_code || ! $user->otp_expires_at || $user->otp_expires_at->isPast()) {
                 $user->forceFill([
                     'otp_code' => null,
                     'otp_expires_at' => null,
@@ -184,7 +185,7 @@ class AuthController extends Controller
                 $valid = false;
             }
 
-            if (!$valid) {
+            if (! $valid) {
                 $attempts = ((int) $user->otp_attempts) + 1;
                 $locked = $attempts >= $policy['max_attempts'];
                 $user->forceFill([

@@ -1,26 +1,43 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Shift;
-use App\Models\User;
-use App\Models\Task;
-use App\Models\LeaveRequest;
+use App\Models\Attendance;
+use App\Models\AttendanceSetting;
+use App\Models\Company;
 use App\Models\CompanyDocument;
+use App\Models\CompanyMembership;
+use App\Models\Holiday;
+use App\Models\HrSalaryComponent;
+use App\Models\LeaveRequest;
+use App\Models\OvertimeType;
+use App\Models\Payslip;
+use App\Models\Shift;
+use App\Models\Task;
+use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class HrisController extends Controller
 {
     private function getCompanyId()
     {
         $user = Auth::user();
-        if ($user->company_id) return $user->company_id;
-        
-        $membership = \App\Models\CompanyMembership::where('user_id', $user->id)->first();
-        if ($membership) return $membership->company_id;
-        
-        return \App\Models\Company::first()->id;
+        if ($user->company_id) {
+            return $user->company_id;
+        }
+
+        $membership = CompanyMembership::where('user_id', $user->id)->first();
+        if ($membership) {
+            return $membership->company_id;
+        }
+
+        return Company::first()->id;
     }
 
     // --- CEO / MASTER PORTAL METHODS ---
@@ -28,21 +45,24 @@ class HrisController extends Controller
     public function manageShifts(Request $request)
     {
         $shifts = Shift::where('company_id', $this->getCompanyId())->get();
+
         // Typically returns a view or JSON for the modal
         return response()->json($shifts);
     }
 
     public function storeOvertimeType(Request $request)
     {
-        if (!Auth::user()->isCEO()) abort(403);
+        if (! Auth::user()->isCEO()) {
+            abort(403);
+        }
         $request->validate([
             'name' => 'required|string',
-            'rate_per_hour' => 'required|numeric'
+            'rate_per_hour' => 'required|numeric',
         ]);
 
         $companyId = $this->getCompanyId();
 
-        \App\Models\OvertimeType::create([
+        OvertimeType::create([
             'company_id' => $companyId,
             'name' => $request->name,
             'rate_per_hour' => $request->rate_per_hour,
@@ -53,14 +73,16 @@ class HrisController extends Controller
 
     public function updateOvertimeType(Request $request, $id)
     {
-        if (!Auth::user()->isCEO()) abort(403);
+        if (! Auth::user()->isCEO()) {
+            abort(403);
+        }
         $request->validate([
             'name' => 'required|string',
-            'rate_per_hour' => 'required|numeric'
+            'rate_per_hour' => 'required|numeric',
         ]);
 
         $companyId = $this->getCompanyId();
-        $ot = \App\Models\OvertimeType::where('company_id', $companyId)->findOrFail($id);
+        $ot = OvertimeType::where('company_id', $companyId)->findOrFail($id);
         $ot->update([
             'name' => $request->name,
             'rate_per_hour' => $request->rate_per_hour,
@@ -71,10 +93,12 @@ class HrisController extends Controller
 
     public function destroyOvertimeType($id)
     {
-        if (!Auth::user()->isCEO()) abort(403);
-        
+        if (! Auth::user()->isCEO()) {
+            abort(403);
+        }
+
         $companyId = $this->getCompanyId();
-        $ot = \App\Models\OvertimeType::where('company_id', $companyId)->findOrFail($id);
+        $ot = OvertimeType::where('company_id', $companyId)->findOrFail($id);
         $ot->delete();
 
         return redirect()->back()->with('success', 'Jenis Lembur berhasil dihapus.');
@@ -82,16 +106,18 @@ class HrisController extends Controller
 
     public function storeAttendanceSetting(Request $request)
     {
-        if (!Auth::user()->isCEO()) abort(403);
+        if (! Auth::user()->isCEO()) {
+            abort(403);
+        }
         $request->validate([
             'name' => 'required|string',
             'rest_start_time' => 'required',
-            'rest_end_time' => 'required'
+            'rest_end_time' => 'required',
         ]);
 
         $companyId = $this->getCompanyId();
 
-        \App\Models\AttendanceSetting::create([
+        AttendanceSetting::create([
             'company_id' => $companyId,
             'name' => $request->name,
             'rest_start_time' => $request->rest_start_time,
@@ -103,14 +129,16 @@ class HrisController extends Controller
 
     public function updateAttendanceSetting(Request $request, $id)
     {
-        if (!Auth::user()->isCEO()) abort(403);
+        if (! Auth::user()->isCEO()) {
+            abort(403);
+        }
         $request->validate([
             'name' => 'required|string',
             'rest_start_time' => 'required',
-            'rest_end_time' => 'required'
+            'rest_end_time' => 'required',
         ]);
 
-        $setting = \App\Models\AttendanceSetting::where('company_id', $this->getCompanyId())->findOrFail($id);
+        $setting = AttendanceSetting::where('company_id', $this->getCompanyId())->findOrFail($id);
         $setting->update([
             'name' => $request->name,
             'rest_start_time' => $request->rest_start_time,
@@ -122,8 +150,10 @@ class HrisController extends Controller
 
     public function destroyAttendanceSetting($id)
     {
-        if (!Auth::user()->isCEO()) abort(403);
-        $setting = \App\Models\AttendanceSetting::where('company_id', $this->getCompanyId())->findOrFail($id);
+        if (! Auth::user()->isCEO()) {
+            abort(403);
+        }
+        $setting = AttendanceSetting::where('company_id', $this->getCompanyId())->findOrFail($id);
         $setting->delete();
 
         return redirect()->back()->with('success', 'Pengaturan waktu istirahat berhasil dihapus.');
@@ -131,20 +161,22 @@ class HrisController extends Controller
 
     public function downloadBackup()
     {
-        if (!Auth::user()->isCEO()) abort(403);
+        if (! Auth::user()->isCEO()) {
+            abort(403);
+        }
         $companyId = Auth::user()->company_id;
-        
-        $attendances = \App\Models\Attendance::with('user')
-            ->whereHas('user', function($q) use ($companyId) {
+
+        $attendances = Attendance::with('user')
+            ->whereHas('user', function ($q) use ($companyId) {
                 $q->where('company_id', $companyId);
             })->get();
-            
+
         $csvData = "ID,Karyawan,Waktu Clock In,Waktu Clock Out,Status,Lokasi,Luar Jam Kerja\n";
         foreach ($attendances as $att) {
             $isOutOfHours = $att->is_out_of_hours ? 'Ya' : 'Tidak';
             $csvData .= "{$att->id},\"{$att->user->name}\",{$att->clock_in},{$att->clock_out},{$att->status},\"{$att->location_name}\",{$isOutOfHours}\n";
         }
-        
+
         return response($csvData)
             ->header('Content-Type', 'text/csv')
             ->header('Content-Disposition', 'attachment; filename="backup_absensi_'.date('Ymd').'.csv"');
@@ -152,15 +184,17 @@ class HrisController extends Controller
 
     public function storeShift(Request $request)
     {
-        if (!Auth::user()->isCEO()) abort(403);
+        if (! Auth::user()->isCEO()) {
+            abort(403);
+        }
         $request->validate([
             'name' => 'required|string',
             'start_time' => 'required',
             'end_time' => 'required',
-            'late_tolerance_minutes' => 'nullable|integer|min:0'
+            'late_tolerance_minutes' => 'nullable|integer|min:0',
         ]);
 
-        $shift = new Shift();
+        $shift = new Shift;
         $shift->company_id = $this->getCompanyId();
         $shift->name = $request->name;
         $shift->start_time = $request->start_time;
@@ -174,17 +208,19 @@ class HrisController extends Controller
 
     public function updateShift(Request $request, $id)
     {
-        if (!Auth::user()->isCEO()) abort(403);
+        if (! Auth::user()->isCEO()) {
+            abort(403);
+        }
         $request->validate([
             'name' => 'required|string',
             'start_time' => 'required',
             'end_time' => 'required',
-            'late_tolerance_minutes' => 'nullable|integer|min:0'
+            'late_tolerance_minutes' => 'nullable|integer|min:0',
         ]);
 
         $companyId = $this->getCompanyId();
         $shift = Shift::where('company_id', $companyId)->findOrFail($id);
-        
+
         $shift->update([
             'name' => $request->name,
             'start_time' => $request->start_time,
@@ -197,8 +233,10 @@ class HrisController extends Controller
 
     public function destroyShift($id)
     {
-        if (!Auth::user()->isCEO()) abort(403);
-        
+        if (! Auth::user()->isCEO()) {
+            abort(403);
+        }
+
         $companyId = $this->getCompanyId();
         $shift = Shift::where('company_id', $companyId)->findOrFail($id);
         $shift->delete();
@@ -208,14 +246,16 @@ class HrisController extends Controller
 
     public function storeHoliday(Request $request)
     {
-        if (!Auth::user()->isCEO()) abort(403);
+        if (! Auth::user()->isCEO()) {
+            abort(403);
+        }
         $request->validate([
             'name' => 'required|string',
             'start_date' => 'required|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date'
+            'end_date' => 'nullable|date|after_or_equal:start_date',
         ]);
 
-        $holiday = new \App\Models\Holiday();
+        $holiday = new Holiday;
         $holiday->company_id = $this->getCompanyId();
         $holiday->name = $request->name;
         $holiday->start_date = $request->start_date;
@@ -227,10 +267,12 @@ class HrisController extends Controller
 
     public function destroyHoliday($id)
     {
-        if (!Auth::user()->isCEO()) abort(403);
-        
+        if (! Auth::user()->isCEO()) {
+            abort(403);
+        }
+
         $companyId = $this->getCompanyId();
-        $holiday = \App\Models\Holiday::where('company_id', $companyId)->findOrFail($id);
+        $holiday = Holiday::where('company_id', $companyId)->findOrFail($id);
         $holiday->delete();
 
         return redirect()->back()->with('success', 'Hari libur berhasil dihapus.');
@@ -241,13 +283,15 @@ class HrisController extends Controller
         // Return hierarchy tree
         $companyId = Auth::user()->company_id;
         $users = User::where('company_id', $companyId)->get();
-        
+
         $hierarchy = $this->buildTree($users);
+
         return response()->json($hierarchy);
     }
 
-    private function buildTree($elements, $parentId = null) {
-        $branch = array();
+    private function buildTree($elements, $parentId = null)
+    {
+        $branch = [];
         foreach ($elements as $element) {
             if ($element->reports_to_id == $parentId) {
                 $children = $this->buildTree($elements, $element->id);
@@ -257,6 +301,7 @@ class HrisController extends Controller
                 $branch[] = $element;
             }
         }
+
         return $branch;
     }
 
@@ -279,10 +324,10 @@ class HrisController extends Controller
             'default_shift_id' => $request->default_shift_id,
             'base_salary' => $request->base_salary ?? 0,
             'default_leave_quota' => $request->default_leave_quota ?? 12,
-            'is_approved' => $isApproved
+            'is_approved' => $isApproved,
         ]);
 
-        if (!$isApproved) {
+        if (! $isApproved) {
             // Trigger notification to CEO
             // Notification::send($ceo, new PendingHireNotification($user));
             return redirect()->back()->with('success', 'Staf berhasil diusulkan. Menunggu ACC CEO.');
@@ -293,7 +338,9 @@ class HrisController extends Controller
 
     public function approveEmployee($id)
     {
-        if (!Auth::user()->isCEO()) abort(403);
+        if (! Auth::user()->isCEO()) {
+            abort(403);
+        }
 
         $user = User::findOrFail($id);
         $user->update(['is_approved' => true]);
@@ -337,10 +384,10 @@ class HrisController extends Controller
         $userToEdit = User::findOrFail($request->user_id);
         $currentUser = Auth::user();
 
-        if (!$currentUser->isCEO() && !$currentUser->isHRD() && !$currentUser->isManagerOf($userToEdit) && $currentUser->id != $userToEdit->id) {
+        if (! $currentUser->isCEO() && ! $currentUser->isHRD() && ! $currentUser->isManagerOf($userToEdit) && $currentUser->id != $userToEdit->id) {
             abort(403, 'Unauthorized action.');
         }
-        
+
         $userToEdit->name = $request->name ?? $userToEdit->name;
         $userToEdit->email = $request->email ?? $userToEdit->email;
         if ($request->has('base_salary')) {
@@ -348,20 +395,20 @@ class HrisController extends Controller
         }
         $userToEdit->job_title = $request->job_title ?? $userToEdit->job_title;
         $userToEdit->employment_type = $request->employment_type ?? $userToEdit->employment_type;
-        
+
         if ($request->has('role')) {
-            if (in_array($request->role, ['ceo', 'super_admin', 'platform_admin']) && !$currentUser->isCEO()) {
+            if (in_array($request->role, ['ceo', 'super_admin', 'platform_admin']) && ! $currentUser->isCEO()) {
                 // Ignore if a non-CEO tries to assign CEO/Admin role
             } else {
                 $userToEdit->role = $request->role;
             }
         }
-        
+
         if ($request->has('target_hours_per_month')) {
             $userToEdit->target_hours_per_month = $request->target_hours_per_month;
         }
-        
-        if (!empty($request->password)) {
+
+        if (! empty($request->password)) {
             $userToEdit->password = bcrypt($request->password);
         }
         $userToEdit->save();
@@ -412,8 +459,8 @@ class HrisController extends Controller
         $userId = $request->user_id ?? Auth::id();
 
         // Idempotency / Anti Double Submit Lock (5 seconds)
-        $lockKey = 'task_assign_lock_' . Auth::id() . '_' . md5($request->title . $userId);
-        if (!\Illuminate\Support\Facades\Cache::add($lockKey, true, 5)) {
+        $lockKey = 'task_assign_lock_'.Auth::id().'_'.md5($request->title.$userId);
+        if (! Cache::add($lockKey, true, 5)) {
             if ($request->expectsJson() || $request->ajax()) {
                 return response()->json([
                     'success' => true,
@@ -422,6 +469,7 @@ class HrisController extends Controller
                     // The frontend will ignore missing task data or handle it gracefully.
                 ]);
             }
+
             return redirect()->back();
         }
 
@@ -443,7 +491,7 @@ class HrisController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Tugas / Goal berhasil ditambahkan.',
-                'task' => $task
+                'task' => $task,
             ]);
         }
 
@@ -480,7 +528,7 @@ class HrisController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Tugas / Goal berhasil diperbarui.',
-                'task' => $task
+                'task' => $task,
             ]);
         }
 
@@ -490,13 +538,14 @@ class HrisController extends Controller
     public function deleteTask(Request $request, $id)
     {
         $task = Task::find($id);
-        if (!$task) {
+        if (! $task) {
             if ($request->expectsJson() || $request->ajax()) {
                 return response()->json(['success' => false, 'message' => 'Tugas sudah terhapus atau tidak ditemukan.'], 404);
             }
+
             return redirect()->back()->with('error', 'Tugas sudah terhapus atau tidak ditemukan.');
         }
-        
+
         if ($task->company_id != Auth::user()->company_id) {
             if ($request->expectsJson() || $request->ajax()) {
                 return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
@@ -514,8 +563,10 @@ class HrisController extends Controller
 
     public function uploadPayslip(Request $request)
     {
-        if (!Auth::user()->isCEO() && !Auth::user()->isHRD()) abort(403);
-        
+        if (! Auth::user()->isCEO() && ! Auth::user()->isHRD()) {
+            abort(403);
+        }
+
         $request->validate([
             'user_id' => 'required|exists:users,id',
             'month_year' => 'required|string',
@@ -525,7 +576,7 @@ class HrisController extends Controller
 
         $path = $request->file('file')->store('payslips', 'public');
 
-        \App\Models\Payslip::create([
+        Payslip::create([
             'company_id' => Auth::user()->company_id,
             'user_id' => $request->user_id,
             'month_year' => $request->month_year,
@@ -539,14 +590,16 @@ class HrisController extends Controller
 
     public function deletePayslip($id)
     {
-        if (!Auth::user()->isCEO() && !Auth::user()->isHRD()) abort(403);
-        
-        $payslip = \App\Models\Payslip::findOrFail($id);
-        
-        if ($payslip->file_path) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($payslip->file_path);
+        if (! Auth::user()->isCEO() && ! Auth::user()->isHRD()) {
+            abort(403);
         }
-        
+
+        $payslip = Payslip::findOrFail($id);
+
+        if ($payslip->file_path) {
+            Storage::disk('public')->delete($payslip->file_path);
+        }
+
         $payslip->delete();
 
         return redirect()->back()->with('success', 'Slip Gaji berhasil dihapus.');
@@ -554,40 +607,55 @@ class HrisController extends Controller
 
     public function deleteDocument($id)
     {
-        if (!Auth::user()->isCEO() && !Auth::user()->isHRD()) abort(403);
-        $doc = \App\Models\CompanyDocument::findOrFail($id);
-        if ($doc->company_id != Auth::user()->company_id) abort(403);
-        
+        if (! Auth::user()->isCEO() && ! Auth::user()->isHRD()) {
+            abort(403);
+        }
+        $doc = CompanyDocument::findOrFail($id);
+        if ($doc->company_id != Auth::user()->company_id) {
+            abort(403);
+        }
+
         if ($doc->file_path) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($doc->file_path);
+            Storage::disk('public')->delete($doc->file_path);
         }
         $doc->delete();
+
         return redirect()->back()->with('success', 'Dokumen perusahaan berhasil dihapus.');
     }
 
     public function deleteEmployee(Request $request, $id)
     {
-        if (!Auth::user()->isCEO() && !Auth::user()->isHRD()) abort(403);
-        $employee = \App\Models\User::findOrFail($id);
-        if ($employee->company_id != Auth::user()->company_id) abort(403);
-        
+        if (! Auth::user()->isCEO() && ! Auth::user()->isHRD()) {
+            abort(403);
+        }
+        $employee = User::findOrFail($id);
+        if ($employee->company_id != Auth::user()->company_id) {
+            abort(403);
+        }
+
         // Soft delete / Inactivate user
         $employee->is_approved = false;
         $employee->save();
-        
+
         if ($request->expectsJson()) {
             return response()->json(['success' => true, 'message' => 'Karyawan berhasil dinonaktifkan.']);
         }
+
         return redirect()->back()->with('success', 'Karyawan berhasil dihapus/dinonaktifkan.');
     }
 
     public function deleteShift($id)
     {
-        if (!Auth::user()->isCEO() && !Auth::user()->isHRD()) abort(403);
-        $shift = \App\Models\Shift::findOrFail($id);
-        if ($shift->company_id != Auth::user()->company_id) abort(403);
-        
+        if (! Auth::user()->isCEO() && ! Auth::user()->isHRD()) {
+            abort(403);
+        }
+        $shift = Shift::findOrFail($id);
+        if ($shift->company_id != Auth::user()->company_id) {
+            abort(403);
+        }
+
         $shift->delete();
+
         return redirect()->back()->with('success', 'Shift berhasil dihapus.');
     }
 
@@ -596,15 +664,19 @@ class HrisController extends Controller
     public function cancelLeaveRequest($id)
     {
         $leave = LeaveRequest::findOrFail($id);
-        
-        if ($leave->user_id !== Auth::id()) abort(403);
-        
+
+        if ($leave->user_id !== Auth::id()) {
+            abort(403);
+        }
+
         // Membutuhkan ACC atasan untuk membatalkan cuti yang sudah di-approve
         if ($leave->status === 'approved') {
             $leave->markAsCancellationRequested();
+
             return redirect()->back()->with('success', 'Pengajuan pembatalan cuti telah dikirim ke atasan.');
         } else {
             $leave->markAsRejected(); // Atau cancelled, jika status masih pending
+
             return redirect()->back()->with('success', 'Cuti berhasil dibatalkan.');
         }
     }
@@ -613,17 +685,17 @@ class HrisController extends Controller
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'password' => 'required|min:8'
+            'password' => 'required|min:8',
         ]);
 
-        $user = \App\Models\User::findOrFail($request->user_id);
-        
+        $user = User::findOrFail($request->user_id);
+
         // Authorization check (only CEO or HR can reset password for others)
-        if (!auth()->user()->isCEO() && auth()->user()->role !== 'hr') {
+        if (! auth()->user()->isCEO() && auth()->user()->role !== 'hr') {
             abort(403, 'Unauthorized action.');
         }
 
-        $user->password = \Illuminate\Support\Facades\Hash::make($request->password);
+        $user->password = Hash::make($request->password);
         $user->save();
 
         return redirect()->back()->with('success', 'Password pengguna berhasil direset.');
@@ -631,15 +703,17 @@ class HrisController extends Controller
 
     public function storeSalaryComponent(Request $request)
     {
-        if (!auth()->user()->isCEO()) abort(403);
+        if (! auth()->user()->isCEO()) {
+            abort(403);
+        }
         $request->validate([
             'code' => 'required|string',
             'name' => 'required|string',
             'type' => 'required|in:allowance,deduction',
-            'default_amount' => 'required|numeric'
+            'default_amount' => 'required|numeric',
         ]);
 
-        \App\Models\HrSalaryComponent::create([
+        HrSalaryComponent::create([
             'company_id' => $this->getCompanyId(),
             'code' => $request->code,
             'name' => $request->name,
@@ -653,14 +727,16 @@ class HrisController extends Controller
 
     public function updateSalaryComponent(Request $request, $id)
     {
-        if (!auth()->user()->isCEO()) abort(403);
+        if (! auth()->user()->isCEO()) {
+            abort(403);
+        }
         $request->validate([
             'name' => 'required|string',
             'type' => 'required|in:allowance,deduction',
-            'default_amount' => 'required|numeric'
+            'default_amount' => 'required|numeric',
         ]);
 
-        $comp = \App\Models\HrSalaryComponent::where('company_id', $this->getCompanyId())->findOrFail($id);
+        $comp = HrSalaryComponent::where('company_id', $this->getCompanyId())->findOrFail($id);
         $comp->update([
             'name' => $request->name,
             'type' => $request->type,
@@ -673,8 +749,10 @@ class HrisController extends Controller
 
     public function destroySalaryComponent($id)
     {
-        if (!auth()->user()->isCEO()) abort(403);
-        $comp = \App\Models\HrSalaryComponent::where('company_id', $this->getCompanyId())->findOrFail($id);
+        if (! auth()->user()->isCEO()) {
+            abort(403);
+        }
+        $comp = HrSalaryComponent::where('company_id', $this->getCompanyId())->findOrFail($id);
         $comp->delete();
 
         return redirect()->back()->with('success', 'Komponen gaji berhasil dihapus.');

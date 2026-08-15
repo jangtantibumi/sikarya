@@ -11,7 +11,7 @@ class CustomerPortalMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
-        if (!session()->has('customer_portal_id')) {
+        if (! session()->has('customer_portal_id')) {
             return redirect()->route('portal.login');
         }
 

@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Attendance;
+use App\Models\HrEmployeeSalaryComponent;
+use App\Models\HrSalaryComponent;
 use App\Models\LeaveRequest;
 use App\Models\Payroll;
 use App\Models\User;
-use App\Models\HrSalaryComponent;
-use App\Models\HrEmployeeSalaryComponent;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -19,7 +21,7 @@ class PayrollCalculatorService
             ->where('is_active', true)
             ->where('base_salary', '>', 0)
             ->get();
-            
+
         $defaultComponents = HrSalaryComponent::where('company_id', $companyId)
             ->where('is_default', true)
             ->get();
@@ -54,8 +56,8 @@ class PayrollCalculatorService
                     $totalAllowances += $overtimeAllowance;
                     $items[] = [
                         'type' => 'allowance',
-                        'name' => 'Holiday Overtime (' . $overtimeDays . ' days)',
-                        'amount' => $overtimeAllowance
+                        'name' => 'Holiday Overtime ('.$overtimeDays.' days)',
+                        'amount' => $overtimeAllowance,
                     ];
                 }
 
@@ -65,36 +67,40 @@ class PayrollCalculatorService
                     ->where('type', 'unpaid')
                     ->whereBetween('start_date', [$periodStart, $periodEnd])
                     ->get();
-                
+
                 $unpaidDays = 0;
                 foreach ($unpaidLeaves as $leave) {
                     $start = Carbon::parse($leave->start_date)->max($periodStart);
                     $end = Carbon::parse($leave->end_date)->min($periodEnd);
                     $unpaidDays += $start->diffInDays($end) + 1;
                 }
-                
+
                 if ($unpaidDays > 0) {
                     $unpaidDeduction = $unpaidDays * $dailyRate;
                     $totalDeductions += $unpaidDeduction;
                     $items[] = [
                         'type' => 'deduction',
-                        'name' => 'Unpaid Leave (' . $unpaidDays . ' days)',
-                        'amount' => $unpaidDeduction
+                        'name' => 'Unpaid Leave ('.$unpaidDays.' days)',
+                        'amount' => $unpaidDeduction,
                     ];
                 }
 
                 // 3. Process Salary Components (Defaults and User-Specific)
                 $userComponents = HrEmployeeSalaryComponent::where('user_id', $user->id)->get()->keyBy('salary_component_id');
                 $processedComponentIds = [];
-                
+
                 $allComponents = $defaultComponents->merge(
-                    $userComponents->map(function($uc) { return $uc->salaryComponent; })->filter()
+                    $userComponents->map(function ($uc) {
+                        return $uc->salaryComponent;
+                    })->filter()
                 )->unique('id');
 
                 foreach ($allComponents as $comp) {
-                    if (in_array($comp->id, $processedComponentIds)) continue;
+                    if (in_array($comp->id, $processedComponentIds)) {
+                        continue;
+                    }
                     $processedComponentIds[] = $comp->id;
-                    
+
                     $amount = $comp->default_amount;
                     if ($userComponents->has($comp->id)) {
                         $amount = $userComponents->get($comp->id)->amount;
@@ -120,7 +126,7 @@ class PayrollCalculatorService
                         $items[] = [
                             'type' => $comp->type,
                             'name' => $comp->name,
-                            'amount' => $amount
+                            'amount' => $amount,
                         ];
                     }
                 }
@@ -135,7 +141,7 @@ class PayrollCalculatorService
                     'total_allowances' => $totalAllowances,
                     'total_deductions' => $totalDeductions,
                     'net_amount' => $user->base_salary + $totalAllowances - $totalDeductions,
-                    'status' => 'draft'
+                    'status' => 'draft',
                 ]);
 
                 // Create Items
@@ -143,7 +149,7 @@ class PayrollCalculatorService
                     $payroll->items()->create([
                         'type' => $item['type'],
                         'description' => $item['name'], // Note: the migration uses 'description'
-                        'amount' => $item['amount']
+                        'amount' => $item['amount'],
                     ]);
                 }
 

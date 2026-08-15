@@ -1,12 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Lead;
 use App\Models\SalesQuotation;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
 
 class SalesQuotationService
 {
@@ -14,11 +15,11 @@ class SalesQuotationService
     {
         return DB::transaction(function () use ($lead, $data, $lines, $actor) {
             $totalAmount = 0;
-            
+
             $quotation = SalesQuotation::query()->create([
                 'company_id' => $lead->company_id,
                 'lead_id' => $lead->id,
-                'number' => 'SQ-' . now()->format('YmdHis') . '-' . $lead->id,
+                'number' => 'SQ-'.now()->format('YmdHis').'-'.$lead->id,
                 'date' => $data['date'] ?? today(),
                 'valid_until' => $data['valid_until'] ?? today()->addDays(30),
                 'status' => 'draft',
@@ -57,7 +58,7 @@ class SalesQuotationService
                 'type' => 'note',
                 'channel' => 'internal',
                 'direction' => 'internal',
-                'body' => "Quotation {$quotation->number} sebesar Rp " . number_format($totalAmount, 0, ',', '.') . " telah dibuat.",
+                'body' => "Quotation {$quotation->number} sebesar Rp ".number_format($totalAmount, 0, ',', '.').' telah dibuat.',
                 'occurred_at' => now(),
             ]);
 
@@ -68,9 +69,9 @@ class SalesQuotationService
     public function markAsSent(SalesQuotation $quotation, User $actor): void
     {
         abort_unless($quotation->status === 'draft', 422, 'Hanya Quotation draft yang bisa dikirim.');
-        
+
         $quotation->update(['status' => 'sent']);
-        
+
         $quotation->lead->activities()->create([
             'user_id' => $actor->id,
             'type' => 'message',
@@ -87,12 +88,12 @@ class SalesQuotationService
 
         DB::transaction(function () use ($quotation, $actor) {
             $quotation->update(['status' => 'accepted']);
-            
+
             $lead = $quotation->lead;
             $lead->update([
                 'status' => 'deal',
                 'won_at' => now(),
-                'project_value' => $quotation->total_amount
+                'project_value' => $quotation->total_amount,
             ]);
 
             $lead->activities()->create([
@@ -120,11 +121,11 @@ class SalesQuotationService
 
         DB::transaction(function () use ($quotation, $reason, $actor) {
             $quotation->update(['status' => 'rejected']);
-            
+
             $lead = $quotation->lead;
             $lead->update([
                 'status' => 'lost',
-                'lost_reason' => "Quotation {$quotation->number} ditolak: {$reason}"
+                'lost_reason' => "Quotation {$quotation->number} ditolak: {$reason}",
             ]);
 
             $lead->activities()->create([

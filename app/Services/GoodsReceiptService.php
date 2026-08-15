@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\GoodsReceipt;
 use App\Models\PurchaseOrder;
-use App\Models\Warehouse;
 use App\Models\User;
+use App\Models\Warehouse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -19,36 +21,36 @@ class GoodsReceiptService
     public function receive(PurchaseOrder $po, Warehouse $warehouse, array $lines, User $actor): GoodsReceipt
     {
         return DB::transaction(function () use ($po, $warehouse, $lines, $actor) {
-            if (!in_array($po->status, ['approved', 'partially_received'])) {
+            if (! in_array($po->status, ['approved', 'partially_received'])) {
                 throw ValidationException::withMessages(['purchase_order' => 'PO harus disetujui.']);
             }
-            
+
             $po->load('lines.product');
-            
+
             $receipt = GoodsReceipt::query()->create([
                 'company_id' => $po->company_id,
                 'purchase_order_id' => $po->id,
                 'warehouse_id' => $warehouse->id,
-                'number' => 'GR-' . now()->format('YmdHis') . '-' . $po->id,
+                'number' => 'GR-'.now()->format('YmdHis').'-'.$po->id,
                 'received_date' => today(),
-                'received_by_id' => $actor->id
+                'received_by_id' => $actor->id,
             ]);
 
             $totalValue = 0;
 
             foreach ($lines as $line) {
                 $poLine = $po->lines->firstWhere('id', $line['purchase_order_line_id']);
-                
-                if (!$poLine || $line['quantity'] <= 0 || $poLine->received_quantity + $line['quantity'] > $poLine->ordered_quantity) {
+
+                if (! $poLine || $line['quantity'] <= 0 || $poLine->received_quantity + $line['quantity'] > $poLine->ordered_quantity) {
                     throw ValidationException::withMessages(['lines' => 'Kuantitas penerimaan tidak valid.']);
                 }
-                
+
                 $receipt->lines()->create([
                     'company_id' => $po->company_id,
                     'purchase_order_line_id' => $poLine->id,
-                    'received_quantity' => $line['quantity']
+                    'received_quantity' => $line['quantity'],
                 ]);
-                
+
                 $poLine->increment('received_quantity', $line['quantity']);
                 $this->ledger->move($poLine->product, $warehouse, $line['quantity'], 'purchase_receipt', $actor, $receipt->number);
 
@@ -63,7 +65,7 @@ class GoodsReceiptService
                     "Penerimaan barang dari PO {$po->number} (Receipt: {$receipt->number})",
                     [
                         ['system_key' => 'inventory', 'debit' => $totalValue],
-                        ['system_key' => 'accounts_payable', 'credit' => $totalValue]
+                        ['system_key' => 'accounts_payable', 'credit' => $totalValue],
                     ],
                     'goods_receipt',
                     $receipt->id,
@@ -73,9 +75,9 @@ class GoodsReceiptService
 
             $po->refresh();
             $po->update([
-                'status' => $po->lines()->whereColumn('received_quantity', '<', 'ordered_quantity')->exists() ? 'partially_received' : 'received'
+                'status' => $po->lines()->whereColumn('received_quantity', '<', 'ordered_quantity')->exists() ? 'partially_received' : 'received',
             ]);
-            
+
             return $receipt;
         });
     }

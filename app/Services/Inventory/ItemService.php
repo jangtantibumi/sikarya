@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Inventory;
 
 use App\Models\Inventory\Item;
@@ -11,16 +13,16 @@ class ItemService
     {
         $query = Item::with(['category', 'brand', 'uom']);
 
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $search = $filters['search'];
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('code', 'like', "%{$search}%")
-                  ->orWhere('sku', 'like', "%{$search}%");
+                    ->orWhere('code', 'like', "%{$search}%")
+                    ->orWhere('sku', 'like', "%{$search}%");
             });
         }
-        
-        if (!empty($filters['category_id'])) {
+
+        if (! empty($filters['category_id'])) {
             $query->where('category_id', $filters['category_id']);
         }
 
@@ -35,6 +37,7 @@ class ItemService
     public function updateItem(Item $item, array $data): Item
     {
         $item->update($data);
+
         return $item;
     }
 

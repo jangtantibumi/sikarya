@@ -1,13 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Models\CrmCustomer;
-use App\Models\CrmCustomerTimeline;
 use App\Models\CrmCustomerPointHistory;
-use App\Models\CrmTag;
+use App\Models\CrmCustomerTimeline;
 use App\Models\CrmSegment;
+use App\Models\CrmTag;
 use App\Services\CrmCustomerService;
+use App\Services\CrmMarketingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -27,7 +30,7 @@ class CrmController extends Controller
     {
         $totalCustomers = CrmCustomer::count();
         $newCustomers = CrmCustomer::whereMonth('created_at', now()->month)
-                        ->whereYear('created_at', now()->year)->count();
+            ->whereYear('created_at', now()->year)->count();
         $repeatCustomers = CrmCustomer::whereHas('timelines', function ($q) {
             $q->whereIn('action', ['ORDER', 'POS_SALE', 'POINT_ADD']);
         }, '>=', 2)->count();
@@ -43,15 +46,15 @@ class CrmController extends Controller
         $customersThisYear = CrmCustomer::whereYear('created_at', now()->year)->get();
         $growthData = collect();
         foreach (range(1, 12) as $m) {
-            $count = $customersThisYear->filter(function($c) use ($m) {
+            $count = $customersThisYear->filter(function ($c) use ($m) {
                 return $c->created_at && $c->created_at->month == $m;
             })->count();
-            
+
             if ($count > 0) {
-                $growthData->push((object)[
+                $growthData->push((object) [
                     'month' => $m,
                     'year' => now()->year,
-                    'total' => $count
+                    'total' => $count,
                 ]);
             }
         }
@@ -59,7 +62,7 @@ class CrmController extends Controller
         if ($request->wantsJson()) {
             return response()->json([
                 'status' => 'success',
-                'data' => compact('totalCustomers', 'newCustomers', 'repeatCustomers', 'totalSpending', 'topCustomers', 'membershipDistribution', 'growthData')
+                'data' => compact('totalCustomers', 'newCustomers', 'repeatCustomers', 'totalSpending', 'topCustomers', 'membershipDistribution', 'growthData'),
             ]);
         }
 
@@ -80,10 +83,10 @@ class CrmController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('customer_code', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('referral_code', 'like', "%{$search}%");
+                    ->orWhere('customer_code', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('referral_code', 'like', "%{$search}%");
             });
         }
 
@@ -112,6 +115,7 @@ class CrmController extends Controller
 
         if ($request->wantsJson()) {
             $customers = $query->paginate($request->get('per_page', 10));
+
             return response()->json(['status' => 'success', 'data' => $customers]);
         }
 
@@ -129,34 +133,35 @@ class CrmController extends Controller
     {
         $tags = CrmTag::all();
         $segments = CrmSegment::all();
+
         return view('crm.customers.create', compact('tags', 'segments'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name'       => 'required|string|max:255',
-            'phone'      => 'required|string|max:20',
-            'email'      => 'nullable|email|max:255',
-            'gender'     => 'nullable|in:male,female,other',
+            'name' => 'required|string|max:255',
+            'phone' => 'required|string|max:20',
+            'email' => 'nullable|email|max:255',
+            'gender' => 'nullable|in:male,female,other',
             'birth_date' => 'nullable|date',
-            'address'    => 'nullable|string|max:1000',
-            'notes'      => 'nullable|string|max:2000',
+            'address' => 'nullable|string|max:1000',
+            'notes' => 'nullable|string|max:2000',
             'referral_code_used' => 'nullable|string',
-            'tags'       => 'nullable|array',
-            'tags.*'     => 'exists:crm_tags,id',
+            'tags' => 'nullable|array',
+            'tags.*' => 'exists:crm_tags,id',
             'segment_id' => 'nullable|exists:crm_segments,id',
         ]);
 
         $customer = CrmCustomer::create($validated);
 
-        if (!empty($validated['tags'])) {
+        if (! empty($validated['tags'])) {
             $customer->tags()->sync($validated['tags']);
         }
 
         // Proses rujukan referral jika ada
-        if (!empty($validated['referral_code_used'])) {
-            app(\App\Services\CrmMarketingService::class)->processReferral($customer, $validated['referral_code_used']);
+        if (! empty($validated['referral_code_used'])) {
+            app(CrmMarketingService::class)->processReferral($customer, $validated['referral_code_used']);
         }
 
         CrmCustomerTimeline::create([
@@ -167,14 +172,14 @@ class CrmController extends Controller
 
         if ($request->wantsJson()) {
             return response()->json([
-                'status'  => 'success',
+                'status' => 'success',
                 'message' => 'Customer berhasil dibuat',
-                'data'    => $customer->load('tags')
+                'data' => $customer->load('tags'),
             ], 201);
         }
 
         return redirect()->route('crm.customers.index')
-            ->with('success', 'Customer ' . $customer->name . ' berhasil ditambahkan dengan kode ' . $customer->customer_code);
+            ->with('success', 'Customer '.$customer->name.' berhasil ditambahkan dengan kode '.$customer->customer_code);
     }
 
     // =====================
@@ -183,8 +188,8 @@ class CrmController extends Controller
     public function show(Request $request, $id)
     {
         $customer = CrmCustomer::with([
-            'timelines' => fn($q) => $q->orderBy('created_at', 'desc'),
-            'pointHistories' => fn($q) => $q->orderBy('created_at', 'desc'),
+            'timelines' => fn ($q) => $q->orderBy('created_at', 'desc'),
+            'pointHistories' => fn ($q) => $q->orderBy('created_at', 'desc'),
             'tags',
             'segment',
             'referredBy',
@@ -208,6 +213,7 @@ class CrmController extends Controller
         $customer = CrmCustomer::with('tags')->findOrFail($id);
         $tags = CrmTag::all();
         $segments = CrmSegment::all();
+
         return view('crm.customers.edit', compact('customer', 'tags', 'segments'));
     }
 
@@ -216,18 +222,18 @@ class CrmController extends Controller
         $customer = CrmCustomer::findOrFail($id);
 
         $validated = $request->validate([
-            'name'       => 'required|string|max:255',
-            'phone'      => 'required|string|max:20',
-            'email'      => 'nullable|email|max:255',
-            'gender'     => 'nullable|in:male,female,other',
+            'name' => 'required|string|max:255',
+            'phone' => 'required|string|max:20',
+            'email' => 'nullable|email|max:255',
+            'gender' => 'nullable|in:male,female,other',
             'birth_date' => 'nullable|date',
-            'address'    => 'nullable|string|max:1000',
-            'notes'      => 'nullable|string|max:2000',
-            'is_active'  => 'nullable|boolean',
+            'address' => 'nullable|string|max:1000',
+            'notes' => 'nullable|string|max:2000',
+            'is_active' => 'nullable|boolean',
             'membership_level' => 'nullable|string',
             'segment_id' => 'nullable|exists:crm_segments,id',
-            'tags'       => 'nullable|array',
-            'tags.*'     => 'exists:crm_tags,id',
+            'tags' => 'nullable|array',
+            'tags.*' => 'exists:crm_tags,id',
         ]);
 
         $oldLevel = $customer->membership_level;
@@ -241,14 +247,14 @@ class CrmController extends Controller
 
         CrmCustomerTimeline::create([
             'customer_id' => $customer->id,
-            'action'      => 'UPDATE',
+            'action' => 'UPDATE',
             'description' => 'Data customer diperbarui',
         ]);
 
         if ($oldLevel !== $customer->membership_level) {
             CrmCustomerTimeline::create([
                 'customer_id' => $customer->id,
-                'action'      => 'MEMBERSHIP_UPGRADE',
+                'action' => 'MEMBERSHIP_UPGRADE',
                 'description' => "Membership naik dari {$oldLevel} ke {$customer->membership_level}",
             ]);
         }
@@ -288,12 +294,12 @@ class CrmController extends Controller
             'blacklist_reason' => 'nullable|string|max:500',
         ]);
 
-        $customer->is_blacklisted = !$customer->is_blacklisted;
+        $customer->is_blacklisted = ! $customer->is_blacklisted;
         $customer->blacklist_reason = $customer->is_blacklisted ? ($validated['blacklist_reason'] ?? 'Di-blacklist oleh admin') : null;
         $customer->save();
 
         $actionText = $customer->is_blacklisted ? 'BLACKLIST_ADDED' : 'BLACKLIST_REMOVED';
-        $descText = $customer->is_blacklisted ? "Customer dimasukkan ke blacklist. Alasan: {$customer->blacklist_reason}" : "Customer dikeluarkan dari blacklist.";
+        $descText = $customer->is_blacklisted ? "Customer dimasukkan ke blacklist. Alasan: {$customer->blacklist_reason}" : 'Customer dikeluarkan dari blacklist.';
 
         CrmCustomerTimeline::create([
             'customer_id' => $customer->id,
@@ -318,6 +324,7 @@ class CrmController extends Controller
     public function mergeDuplicatesForm()
     {
         $customers = CrmCustomer::orderBy('name', 'asc')->get();
+
         return view('crm.customers.merge', compact('customers'));
     }
 
@@ -369,7 +376,7 @@ class CrmController extends Controller
         $customer = CrmCustomer::findOrFail($id);
 
         $validated = $request->validate([
-            'points'      => 'required|integer|min:1',
+            'points' => 'required|integer|min:1',
             'description' => 'required|string|max:255',
         ]);
 
@@ -378,20 +385,20 @@ class CrmController extends Controller
 
         CrmCustomerPointHistory::create([
             'customer_id' => $customer->id,
-            'points'      => $validated['points'],
+            'points' => $validated['points'],
             'description' => $validated['description'],
         ]);
 
         CrmCustomerTimeline::create([
             'customer_id' => $customer->id,
-            'action'      => 'POINT_ADD',
+            'action' => 'POINT_ADD',
             'description' => "Point ditambahkan: +{$validated['points']} — {$validated['description']}",
         ]);
 
         if ($request->wantsJson()) {
             return response()->json([
-                'status'       => 'success',
-                'message'      => "Berhasil menambah {$validated['points']} point",
+                'status' => 'success',
+                'message' => "Berhasil menambah {$validated['points']} point",
                 'total_points' => $customer->total_points,
             ]);
         }
@@ -404,7 +411,7 @@ class CrmController extends Controller
         $customer = CrmCustomer::findOrFail($id);
 
         $validated = $request->validate([
-            'points'      => 'required|integer|min:1',
+            'points' => 'required|integer|min:1',
             'description' => 'required|string|max:255',
         ]);
 
@@ -412,6 +419,7 @@ class CrmController extends Controller
             if ($request->wantsJson()) {
                 return response()->json(['status' => 'error', 'message' => 'Point tidak mencukupi'], 422);
             }
+
             return back()->withErrors(['points' => 'Point tidak mencukupi untuk redeem']);
         }
 
@@ -420,20 +428,20 @@ class CrmController extends Controller
 
         CrmCustomerPointHistory::create([
             'customer_id' => $customer->id,
-            'points'      => -$validated['points'],
+            'points' => -$validated['points'],
             'description' => $validated['description'],
         ]);
 
         CrmCustomerTimeline::create([
             'customer_id' => $customer->id,
-            'action'      => 'POINT_REDEEM',
+            'action' => 'POINT_REDEEM',
             'description' => "Point diredeem: -{$validated['points']} — {$validated['description']}",
         ]);
 
         if ($request->wantsJson()) {
             return response()->json([
-                'status'       => 'success',
-                'message'      => "Berhasil redeem {$validated['points']} point",
+                'status' => 'success',
+                'message' => "Berhasil redeem {$validated['points']} point",
                 'total_points' => $customer->total_points,
             ]);
         }
@@ -449,10 +457,14 @@ class CrmController extends Controller
         $query = CrmCustomer::query();
         if ($request->filled('search')) {
             $s = $request->search;
-            $query->where(fn($q) => $q->where('name', 'like', "%$s%")->orWhere('customer_code', 'like', "%$s%")->orWhere('phone', 'like', "%$s%"));
+            $query->where(fn ($q) => $q->where('name', 'like', "%$s%")->orWhere('customer_code', 'like', "%$s%")->orWhere('phone', 'like', "%$s%"));
         }
-        if ($request->filled('membership_level')) $query->where('membership_level', $request->membership_level);
-        if ($request->filled('is_active')) $query->where('is_active', $request->is_active);
+        if ($request->filled('membership_level')) {
+            $query->where('membership_level', $request->membership_level);
+        }
+        if ($request->filled('is_active')) {
+            $query->where('is_active', $request->is_active);
+        }
 
         $customers = $query->get();
 
@@ -469,10 +481,14 @@ class CrmController extends Controller
         $query = CrmCustomer::query();
         if ($request->filled('search')) {
             $s = $request->search;
-            $query->where(fn($q) => $q->where('name', 'like', "%$s%")->orWhere('customer_code', 'like', "%$s%")->orWhere('phone', 'like', "%$s%"));
+            $query->where(fn ($q) => $q->where('name', 'like', "%$s%")->orWhere('customer_code', 'like', "%$s%")->orWhere('phone', 'like', "%$s%"));
         }
-        if ($request->filled('membership_level')) $query->where('membership_level', $request->membership_level);
-        if ($request->filled('is_active')) $query->where('is_active', $request->is_active);
+        if ($request->filled('membership_level')) {
+            $query->where('membership_level', $request->membership_level);
+        }
+        if ($request->filled('is_active')) {
+            $query->where('is_active', $request->is_active);
+        }
 
         $customers = $query->get();
 
@@ -490,7 +506,7 @@ class CrmController extends Controller
 
         $file = $request->file('import_file');
         $handle = fopen($file->getPathname(), 'r');
-        
+
         $header = fgetcsv($handle);
         $importedCount = 0;
 
@@ -499,9 +515,9 @@ class CrmController extends Controller
                 CrmCustomer::create([
                     'name' => $row[0] ?? 'Unknown',
                     'phone' => $row[1] ?? '',
-                    'email' => !empty($row[2]) ? $row[2] : null,
+                    'email' => ! empty($row[2]) ? $row[2] : null,
                     'gender' => in_array(strtolower($row[3] ?? ''), ['male', 'female', 'other']) ? strtolower($row[3]) : null,
-                    'birth_date' => !empty($row[4]) ? $row[4] : null,
+                    'birth_date' => ! empty($row[4]) ? $row[4] : null,
                     'address' => $row[5] ?? null,
                     'notes' => $row[6] ?? null,
                 ]);

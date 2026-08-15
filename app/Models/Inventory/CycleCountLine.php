@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\Inventory;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,6 +13,7 @@ class CycleCountLine extends Model
     use HasFactory;
 
     protected $table = 'inv_cycle_count_lines';
+
     protected $guarded = [];
 
     public function cycleCount(): BelongsTo

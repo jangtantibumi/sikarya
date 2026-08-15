@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -11,7 +13,7 @@ class ProductionRoutingStep extends Model
         'sequence',
         'work_center',
         'expected_duration_minutes',
-        'instructions'
+        'instructions',
     ];
 
     protected $casts = [

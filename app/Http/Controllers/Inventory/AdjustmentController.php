@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Inventory;
 
 use App\Http\Controllers\Controller;
 use App\Models\Inventory\Adjustment;
 use App\Models\Inventory\AdjustmentLine;
-use App\Models\Inventory\Warehouse;
 use App\Models\Inventory\Item;
+use App\Models\Inventory\Warehouse;
 use App\Services\InventoryService;
 use Illuminate\Http\Request;
 
@@ -19,6 +21,7 @@ class AdjustmentController extends Controller
             $query->where('number', 'like', "%{$request->search}%");
         }
         $adjustments = $query->paginate(15);
+
         return view('inventory.adjustments.index', compact('adjustments'));
     }
 
@@ -26,6 +29,7 @@ class AdjustmentController extends Controller
     {
         $warehouses = Warehouse::all();
         $items = Item::all();
+
         return view('inventory.adjustments.create', compact('warehouses', 'items'));
     }
 
@@ -69,6 +73,7 @@ class AdjustmentController extends Controller
     public function show($id)
     {
         $adjustment = Adjustment::with(['warehouse', 'lines.item'])->findOrFail($id);
+
         return view('inventory.adjustments.show', compact('adjustment'));
     }
 
@@ -83,14 +88,15 @@ class AdjustmentController extends Controller
             $service->recordMovement([
                 'reference_number' => $adj->number,
                 'transaction_type' => 'adjustment',
-                'item_id'          => $line->item_id,
-                'warehouse_id'     => $adj->warehouse_id,
-                'quantity'         => $line->adjustment_qty,
-                'notes'            => 'Stock Adjustment (' . $adj->type . '): ' . $line->reason,
+                'item_id' => $line->item_id,
+                'warehouse_id' => $adj->warehouse_id,
+                'quantity' => $line->adjustment_qty,
+                'notes' => 'Stock Adjustment ('.$adj->type.'): '.$line->reason,
             ]);
         }
 
         $adj->update(['status' => 'approved', 'approved_by' => 'Head of Auditor']);
+
         return redirect()->route('inventory.adjustments.index')->with('success', 'Adjustment disetujui & stok berhasil diperbarui.');
     }
 
@@ -98,6 +104,7 @@ class AdjustmentController extends Controller
     {
         $adj = Adjustment::findOrFail($id);
         $adj->update(['status' => 'rejected']);
+
         return redirect()->route('inventory.adjustments.index')->with('success', 'Adjustment ditolak.');
     }
 
@@ -105,6 +112,7 @@ class AdjustmentController extends Controller
     {
         $adj = Adjustment::findOrFail($id);
         $adj->delete();
+
         return redirect()->route('inventory.adjustments.index')->with('success', 'Adjustment dihapus.');
     }
 }

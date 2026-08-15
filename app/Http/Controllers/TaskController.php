@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Models\ApprovalRequest;
@@ -24,8 +26,7 @@ class TaskController extends Controller
         private readonly WorkflowNotificationService $notifications,
         private readonly DataDeletionRequestService $deletions,
         private readonly RecordAttachmentService $attachments,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request)
     {
@@ -34,7 +35,7 @@ class TaskController extends Controller
         $user = $request->user();
         $query = Task::query()->with(['user', 'kpi.plan.goal', 'creator', 'attachments']);
 
-        if (!$user->isCEO() && !$user->isHRD()) {
+        if (! $user->isCEO() && ! $user->isHRD()) {
             if ($user->isManager()) {
                 $query->where(function ($builder) use ($user): void {
                     $builder
@@ -49,7 +50,7 @@ class TaskController extends Controller
         $tasks = $query->orderByDesc('created_at')->get();
 
         $approvalMap = ApprovalRequest::query()
-            ->where('subject_type', (new Task())->getMorphClass())
+            ->where('subject_type', (new Task)->getMorphClass())
             ->whereIn('subject_id', $tasks->pluck('id'))
             ->latest('id')
             ->get()
@@ -79,7 +80,7 @@ class TaskController extends Controller
             ? User::query()->where('username', $validated['username'])->firstOrFail()
             : $actor;
 
-        if ($target->id !== $actor->id && !$actor->isCEO() && !$actor->isManagerOf($target)) {
+        if ($target->id !== $actor->id && ! $actor->isCEO() && ! $actor->isManagerOf($target)) {
             abort(403, 'Anda hanya dapat memberikan task kepada anggota tim sendiri.');
         }
 
@@ -102,7 +103,7 @@ class TaskController extends Controller
         $requiresApproval = $actor->id === $target->id && ! $actor->isCEO();
         $manager = $requiresApproval && $actor->isStaff() ? $actor->manager() : null;
 
-        if ($requiresApproval && $actor->isStaff() && !$manager) {
+        if ($requiresApproval && $actor->isStaff() && ! $manager) {
             throw ValidationException::withMessages([
                 'approval' => 'Atasan langsung belum terdaftar untuk menyetujui task ini.',
             ]);
@@ -268,7 +269,7 @@ class TaskController extends Controller
         $approval = $task->approvalRequest()->latest('id')->first();
 
         if ($task->status === 'pending_manager') {
-            if (!$actor->isManager() || !$actor->isManagerOf($task->user) || !$approval) {
+            if (! $actor->isManager() || ! $actor->isManagerOf($task->user) || ! $approval) {
                 abort(403, 'Task ini masih menunggu keputusan manager terkait.');
             }
 
@@ -288,7 +289,7 @@ class TaskController extends Controller
 
             $task->refresh();
         } elseif ($requestedStatus === 'submitted_for_review') {
-            if ($actor->id !== $task->user_id || !in_array($task->status, ['in_progress', 'revision_requested'], true)) {
+            if ($actor->id !== $task->user_id || ! in_array($task->status, ['in_progress', 'revision_requested'], true)) {
                 throw ValidationException::withMessages([
                     'status' => 'Hanya pemilik task aktif yang dapat mengirim hasil untuk ditinjau.',
                 ]);
@@ -328,7 +329,7 @@ class TaskController extends Controller
                 ? $actor->isManagerOf($task->user)
                 : $actor->isCEO();
 
-            if (!$canReview || $task->status !== 'submitted_for_review') {
+            if (! $canReview || $task->status !== 'submitted_for_review') {
                 throw ValidationException::withMessages([
                     'status' => 'Task hanya dapat diverifikasi oleh atasan setelah hasil dikirim.',
                 ]);
@@ -345,14 +346,14 @@ class TaskController extends Controller
                 $requestedStatus === 'verified' ? 'Task berhasil diverifikasi' : 'Task memerlukan perbaikan',
                 $requestedStatus === 'verified'
                     ? "Task \"{$task->title}\" telah diverifikasi oleh {$actor->name}."
-                    : "Task \"{$task->title}\" dikembalikan oleh {$actor->name}. " . ($validated['feedback'] ?? ''),
-                "task:{$task->id}:{$requestedStatus}:" . now()->format('YmdHis') . ':owner',
+                    : "Task \"{$task->title}\" dikembalikan oleh {$actor->name}. ".($validated['feedback'] ?? ''),
+                "task:{$task->id}:{$requestedStatus}:".now()->format('YmdHis').':owner',
                 'task',
                 '/#kpi-tasks',
                 ['task_id' => $task->id, 'status' => $requestedStatus],
             );
         } elseif ($requestedStatus === 'cancelled') {
-            if ($actor->id !== $task->user_id && !$actor->isCEO()) {
+            if ($actor->id !== $task->user_id && ! $actor->isCEO()) {
                 abort(403);
             }
 

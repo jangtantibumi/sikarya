@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Services\WhatsAppCloudService;
@@ -11,8 +13,7 @@ class WhatsAppWebhookController extends Controller
 {
     public function __construct(
         private readonly WhatsAppCloudService $whatsApp,
-    ) {
-    }
+    ) {}
 
     public function verify(Request $request): Response
     {

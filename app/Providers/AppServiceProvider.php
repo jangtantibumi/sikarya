@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers;
 
 use App\Models\ApprovalRequest;
@@ -17,12 +19,13 @@ use App\Policies\KpiPolicy;
 use App\Policies\LeavePolicy;
 use App\Policies\TaskPolicy;
 use App\Services\TenantContext;
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Http\Request;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -59,15 +62,15 @@ class AppServiceProvider extends ServiceProvider
 
         // Security: Login Bruteforce Protection (Max 5 attempts per username+IP)
         RateLimiter::for('login', function (Request $request) {
-            return Limit::perMinute(5)->by($request->input('email', $request->ip()) . '|' . $request->ip());
+            return Limit::perMinute(5)->by($request->input('email', $request->ip()).'|'.$request->ip());
         });
 
         // UI/UX: Global Decimal & Currency Formatter
-        \Illuminate\Support\Facades\Blade::directive('decimal', function ($expression) {
+        Blade::directive('decimal', function ($expression) {
             return "<?php echo number_format((float)($expression), 2, ',', '.'); ?>";
         });
 
-        \Illuminate\Support\Facades\Blade::directive('currency', function ($expression) {
+        Blade::directive('currency', function ($expression) {
             return "<?php echo 'Rp ' . number_format((float)($expression), 0, ',', '.'); ?>";
         });
     }

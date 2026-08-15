@@ -11,8 +11,7 @@ class RegisterNewEmployeeAction
 {
     /**
      * Execute the action.
-     * 
-     * @param array $employeeData
+     *
      * @return object Employee mock object
      */
     public function execute(array $employeeData): object
@@ -20,7 +19,7 @@ class RegisterNewEmployeeAction
         return DB::transaction(function () use ($employeeData) {
             // 1. Insert into Database
             // $employee = Employee::create($employeeData);
-            
+
             // Mock employee object for demonstration
             $employee = (object) [
                 'id' => rand(1000, 9999),

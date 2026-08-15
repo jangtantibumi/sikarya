@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Inventory;
 
 use App\Http\Controllers\Controller;
+use App\Models\Inventory\Item;
 use App\Models\Inventory\Transfer;
 use App\Models\Inventory\TransferLine;
 use App\Models\Inventory\Warehouse;
-use App\Models\Inventory\Item;
 use App\Services\InventoryService;
 use Illuminate\Http\Request;
 
@@ -19,6 +21,7 @@ class TransferController extends Controller
             $query->where('number', 'like', "%{$request->search}%");
         }
         $transfers = $query->paginate(15);
+
         return view('inventory.transfers.index', compact('transfers'));
     }
 
@@ -26,6 +29,7 @@ class TransferController extends Controller
     {
         $warehouses = Warehouse::all();
         $items = Item::all();
+
         return view('inventory.transfers.create', compact('warehouses', 'items'));
     }
 
@@ -65,6 +69,7 @@ class TransferController extends Controller
     public function show($id)
     {
         $transfer = Transfer::with(['sourceWarehouse', 'destinationWarehouse', 'lines.item'])->findOrFail($id);
+
         return view('inventory.transfers.show', compact('transfer'));
     }
 
@@ -80,24 +85,25 @@ class TransferController extends Controller
             $service->recordMovement([
                 'reference_number' => $transfer->number,
                 'transaction_type' => 'transfer_out',
-                'item_id'          => $line->item_id,
-                'warehouse_id'     => $transfer->source_warehouse_id,
-                'quantity'         => -$line->quantity,
-                'notes'            => 'Transfer keluar ke ' . $transfer->destinationWarehouse->name,
+                'item_id' => $line->item_id,
+                'warehouse_id' => $transfer->source_warehouse_id,
+                'quantity' => -$line->quantity,
+                'notes' => 'Transfer keluar ke '.$transfer->destinationWarehouse->name,
             ]);
 
             // Add destination
             $service->recordMovement([
                 'reference_number' => $transfer->number,
                 'transaction_type' => 'transfer_in',
-                'item_id'          => $line->item_id,
-                'warehouse_id'     => $transfer->destination_warehouse_id,
-                'quantity'         => $line->quantity,
-                'notes'            => 'Transfer masuk dari ' . $transfer->sourceWarehouse->name,
+                'item_id' => $line->item_id,
+                'warehouse_id' => $transfer->destination_warehouse_id,
+                'quantity' => $line->quantity,
+                'notes' => 'Transfer masuk dari '.$transfer->sourceWarehouse->name,
             ]);
         }
 
         $transfer->update(['status' => 'approved', 'approved_by' => 'Logistics Admin']);
+
         return redirect()->route('inventory.transfers.index')->with('success', 'Transfer barang berhasil disetujui & stok berpindah.');
     }
 
@@ -105,6 +111,7 @@ class TransferController extends Controller
     {
         $transfer = Transfer::findOrFail($id);
         $transfer->update(['status' => 'rejected']);
+
         return redirect()->route('inventory.transfers.index')->with('success', 'Transfer barang ditolak.');
     }
 
@@ -112,6 +119,7 @@ class TransferController extends Controller
     {
         $transfer = Transfer::findOrFail($id);
         $transfer->delete();
+
         return redirect()->route('inventory.transfers.index')->with('success', 'Transfer barang dihapus.');
     }
 }

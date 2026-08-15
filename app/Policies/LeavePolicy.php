@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
 use App\Models\LeaveRequest;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class LeavePolicy
 {
@@ -21,10 +22,18 @@ class LeavePolicy
      */
     public function view(User $user, LeaveRequest $leaveRequest): bool
     {
-        if ($user->isCEO()) return true;
-        if ($user->isHRD()) return true;
-        if ($user->id === $leaveRequest->user_id) return true;
-        if ($user->isManager() && $user->isManagerOf($leaveRequest->user)) return true;
+        if ($user->isCEO()) {
+            return true;
+        }
+        if ($user->isHRD()) {
+            return true;
+        }
+        if ($user->id === $leaveRequest->user_id) {
+            return true;
+        }
+        if ($user->isManager() && $user->isManagerOf($leaveRequest->user)) {
+            return true;
+        }
 
         return false;
     }
@@ -43,7 +52,10 @@ class LeavePolicy
     public function update(User $user, LeaveRequest $leaveRequest): bool
     {
         // Only requester can update if status is still pending_manager
-        if ($user->id === $leaveRequest->user_id && $leaveRequest->status === 'pending_manager') return true;
+        if ($user->id === $leaveRequest->user_id && $leaveRequest->status === 'pending_manager') {
+            return true;
+        }
+
         return false;
     }
 
@@ -53,7 +65,10 @@ class LeavePolicy
     public function delete(User $user, LeaveRequest $leaveRequest): bool
     {
         // Only requester can delete if status is still pending_manager
-        if ($user->id === $leaveRequest->user_id && $leaveRequest->status === 'pending_manager') return true;
+        if ($user->id === $leaveRequest->user_id && $leaveRequest->status === 'pending_manager') {
+            return true;
+        }
+
         return false;
     }
 

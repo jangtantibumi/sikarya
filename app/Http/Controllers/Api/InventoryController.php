@@ -1,18 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Brand;
+use App\Models\Category;
 use App\Models\Company;
 use App\Models\Product;
-use App\Models\Warehouse;
-use App\Models\Category;
-use App\Models\Brand;
 use App\Models\StockMovement;
-use App\Models\StockBatch;
-use App\Models\WarehouseRack;
-use App\Models\WarehouseBin;
-use App\Models\InventoryAudit;
+use App\Models\Warehouse;
 use App\Services\InventoryLedgerService;
 use App\Services\TenantContext;
 use Illuminate\Http\Request;
@@ -24,6 +22,7 @@ class InventoryController extends Controller
     private function company(): Company
     {
         abort_unless($this->tenant->id(), 422, 'Akun belum dipetakan ke perusahaan.');
+
         return Company::findOrFail($this->tenant->id());
     }
 
@@ -31,24 +30,28 @@ class InventoryController extends Controller
     {
         $company = $this->company();
         $warehouses = Warehouse::query()->get();
-        
+
         $query = Product::query()->with(['category', 'brand']);
-        
+
         if ($search = $request->input('search')) {
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('sku', 'like', "%{$search}%")
-                  ->orWhere('barcode', 'like', "%{$search}%");
+                    ->orWhere('sku', 'like', "%{$search}%")
+                    ->orWhere('barcode', 'like', "%{$search}%");
             });
         }
-        
-        if ($cat = $request->input('category_id')) $query->where('category_id', $cat);
-        if ($brand = $request->input('brand_id')) $query->where('brand_id', $brand);
-        
+
+        if ($cat = $request->input('category_id')) {
+            $query->where('category_id', $cat);
+        }
+        if ($brand = $request->input('brand_id')) {
+            $query->where('brand_id', $brand);
+        }
+
         $products = $query->paginate($request->input('per_page', 15));
-        
+
         // Append balances to items
-        $products->getCollection()->transform(function($p) use ($warehouses) {
+        $products->getCollection()->transform(function ($p) use ($warehouses) {
             return [
                 'id' => $p->id,
                 'sku' => $p->sku,
@@ -57,10 +60,10 @@ class InventoryController extends Controller
                 'brand' => $p->brand?->name,
                 'unit' => $p->unit,
                 'reorder_level' => $p->reorder_level,
-                'balances' => $warehouses->map(fn($w) => [
+                'balances' => $warehouses->map(fn ($w) => [
                     'warehouse' => $w->name,
-                    'quantity' => $this->ledger->balance($p, $w)
-                ])
+                    'quantity' => $this->ledger->balance($p, $w),
+                ]),
             ];
         });
 
@@ -89,15 +92,15 @@ class InventoryController extends Controller
             'has_batches' => 'boolean',
             'has_serial_numbers' => 'boolean',
         ]);
-        
+
         return response()->json(Product::query()->create($data), 201);
     }
-    
+
     public function updateProduct(Request $request, $id)
     {
         $this->company();
         $product = Product::findOrFail($id);
-        
+
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'category_id' => 'nullable|integer|exists:categories,id',
@@ -110,8 +113,9 @@ class InventoryController extends Controller
             'has_batches' => 'boolean',
             'has_serial_numbers' => 'boolean',
         ]);
-        
+
         $product->update($data);
+
         return response()->json($product);
     }
 
@@ -129,16 +133,16 @@ class InventoryController extends Controller
             'bin_id' => 'nullable|integer|exists:warehouse_bins,id',
             'notes' => 'nullable|string',
         ]);
-        
+
         $product = Product::query()->findOrFail($data['product_id']);
         $warehouse = Warehouse::query()->findOrFail($data['warehouse_id']);
-        
+
         return response()->json($this->ledger->move(
-            $product, 
-            $warehouse, 
-            (float) $data['quantity'], 
-            $data['type'], 
-            $request->user(), 
+            $product,
+            $warehouse,
+            (float) $data['quantity'],
+            $data['type'],
+            $request->user(),
             $data['reference'] ?? null,
             $data['batch_id'] ?? null,
             $data['rack_id'] ?? null,
@@ -158,11 +162,11 @@ class InventoryController extends Controller
             'reference' => 'nullable|string|max:100',
             'batch_id' => 'nullable|integer|exists:stock_batches,id',
         ]);
-        
+
         $product = Product::findOrFail($data['product_id']);
         $from = Warehouse::findOrFail($data['from_warehouse_id']);
         $to = Warehouse::findOrFail($data['to_warehouse_id']);
-        
+
         return response()->json($this->ledger->transfer(
             $product,
             $from,
@@ -173,33 +177,37 @@ class InventoryController extends Controller
             $data['batch_id'] ?? null
         ), 201);
     }
-    
+
     public function stockCard(Request $request, $productId)
     {
         $this->company();
-        
+
         $query = StockMovement::query()
             ->with(['warehouse', 'batch', 'rack', 'bin'])
             ->where('product_id', $productId)
             ->orderBy('created_at', 'desc');
-            
+
         if ($wh = $request->input('warehouse_id')) {
             $query->where('warehouse_id', $wh);
         }
-        
+
         return response()->json($query->paginate($request->input('per_page', 20)));
     }
-    
+
     // Master Data Endpoints
-    public function storeCategory(Request $request) {
+    public function storeCategory(Request $request)
+    {
         $this->company();
         $data = $request->validate(['name' => 'required|string|max:255', 'description' => 'nullable|string']);
+
         return response()->json(Category::create($data), 201);
     }
-    
-    public function storeBrand(Request $request) {
+
+    public function storeBrand(Request $request)
+    {
         $this->company();
         $data = $request->validate(['name' => 'required|string|max:255', 'description' => 'nullable|string']);
+
         return response()->json(Brand::create($data), 201);
     }
 }

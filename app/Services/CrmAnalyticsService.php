@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\CrmCustomer;
 use App\Models\CrmCustomerTimeline;
-use Illuminate\Support\Facades\DB;
 
 class CrmAnalyticsService
 {
@@ -13,7 +14,7 @@ class CrmAnalyticsService
         $totalCustomers = CrmCustomer::count();
         $activeCustomers = CrmCustomer::where('is_active', true)->where('is_blacklisted', false)->count();
         $totalSpending = CrmCustomer::sum('total_spending') ?: 0;
-        
+
         $clvData = $this->getClvMetrics();
         $rfmData = $this->getRfmAnalysis();
         $repeatData = $this->getRepeatCustomerMetrics();
@@ -58,6 +59,7 @@ class CrmAnalyticsService
             $orderCount = $c->timelines()->whereIn('action', ['ORDER', 'POS_SALE', 'POINT_ADD'])->count() ?: 1;
             $aov = $c->total_spending / max($orderCount, 1);
             $c->estimated_clv = $aov * $orderCount * $avgLifespanYears;
+
             return $c;
         });
 
@@ -86,29 +88,47 @@ class CrmAnalyticsService
 
         $classifiedCustomers = $customers->map(function ($customer) use (&$segments) {
             $daysSinceVisit = $customer->last_visit ? now()->diffInDays($customer->last_visit) : 999;
-            
+
             // Recency Score (1 - 5)
-            if ($daysSinceVisit <= 7) $rScore = 5;
-            elseif ($daysSinceVisit <= 30) $rScore = 4;
-            elseif ($daysSinceVisit <= 60) $rScore = 3;
-            elseif ($daysSinceVisit <= 90) $rScore = 2;
-            else $rScore = 1;
+            if ($daysSinceVisit <= 7) {
+                $rScore = 5;
+            } elseif ($daysSinceVisit <= 30) {
+                $rScore = 4;
+            } elseif ($daysSinceVisit <= 60) {
+                $rScore = 3;
+            } elseif ($daysSinceVisit <= 90) {
+                $rScore = 2;
+            } else {
+                $rScore = 1;
+            }
 
             // Frequency Score (1 - 5)
             $freq = $customer->frequency ?: 1;
-            if ($freq >= 10) $fScore = 5;
-            elseif ($freq >= 5) $fScore = 4;
-            elseif ($freq >= 3) $fScore = 3;
-            elseif ($freq >= 2) $fScore = 2;
-            else $fScore = 1;
+            if ($freq >= 10) {
+                $fScore = 5;
+            } elseif ($freq >= 5) {
+                $fScore = 4;
+            } elseif ($freq >= 3) {
+                $fScore = 3;
+            } elseif ($freq >= 2) {
+                $fScore = 2;
+            } else {
+                $fScore = 1;
+            }
 
             // Monetary Score (1 - 5)
             $spend = (float) $customer->total_spending;
-            if ($spend >= 10000000) $mScore = 5;
-            elseif ($spend >= 5000000) $mScore = 4;
-            elseif ($spend >= 2000000) $mScore = 3;
-            elseif ($spend >= 500000) $mScore = 2;
-            else $mScore = 1;
+            if ($spend >= 10000000) {
+                $mScore = 5;
+            } elseif ($spend >= 5000000) {
+                $mScore = 4;
+            } elseif ($spend >= 2000000) {
+                $mScore = 3;
+            } elseif ($spend >= 500000) {
+                $mScore = 2;
+            } else {
+                $mScore = 1;
+            }
 
             $avgScore = ($rScore + $fScore + $mScore) / 3;
 
@@ -186,7 +206,7 @@ class CrmAnalyticsService
 
         $churnedCustomers = CrmCustomer::where(function ($q) use ($cutoffDate) {
             $q->where('last_visit', '<', $cutoffDate)
-              ->orWhereNull('last_visit');
+                ->orWhereNull('last_visit');
         })->get();
 
         $churnedCount = $churnedCustomers->count();
@@ -226,7 +246,7 @@ class CrmAnalyticsService
                 $custSpending = CrmCustomer::whereMonth('created_at', $monthNum)
                     ->whereYear('created_at', $yearNum)
                     ->sum('total_spending') ?: 0;
-                $monthlySpending = (float)$custSpending;
+                $monthlySpending = (float) $custSpending;
             }
 
             $months->push([

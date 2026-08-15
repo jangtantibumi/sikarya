@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,7 +17,7 @@ class Shift extends Model
         'start_time',
         'end_time',
         'late_tolerance_minutes',
-        'created_by_id'
+        'created_by_id',
     ];
 
     public function company()

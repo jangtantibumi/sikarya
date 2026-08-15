@@ -1,16 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Payroll;
+use App\Models\User;
 use App\Services\PayrollCalculatorService;
 use App\Services\PayrollDisbursementService;
 use App\Services\TenantContext;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use App\Models\User;
-use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\DB;
 
 class PayrollController extends Controller
 {
@@ -58,7 +61,7 @@ class PayrollController extends Controller
         $result = $this->calculator->generateMonthly($companyId, $start, $end, $actor->id);
 
         return response()->json([
-            'message' => 'Payroll generated successfully for ' . $result['count'] . ' employees.',
+            'message' => 'Payroll generated successfully for '.$result['count'].' employees.',
         ]);
     }
 
@@ -131,7 +134,7 @@ class PayrollController extends Controller
             'items.*.amount' => 'required|numeric|min:0',
         ]);
 
-        \Illuminate\Support\Facades\DB::transaction(function () use ($request, $payroll) {
+        DB::transaction(function () use ($request, $payroll) {
             $payroll->base_amount = $request->base_amount;
             $payroll->save();
 
@@ -140,21 +143,21 @@ class PayrollController extends Controller
                 $payroll->items()->delete();
                 $totalAllowances = 0;
                 $totalDeductions = 0;
-                
+
                 foreach ($request->items as $itemData) {
                     $payroll->items()->create([
                         'type' => $itemData['type'],
                         'description' => $itemData['description'],
                         'amount' => $itemData['amount'],
                     ]);
-                    
+
                     if ($itemData['type'] === 'allowance') {
                         $totalAllowances += $itemData['amount'];
                     } else {
                         $totalDeductions += $itemData['amount'];
                     }
                 }
-                
+
                 $payroll->total_allowances = $totalAllowances;
                 $payroll->total_deductions = $totalDeductions;
                 $payroll->net_amount = $payroll->base_amount + $totalAllowances - $totalDeductions;
@@ -182,39 +185,43 @@ class PayrollController extends Controller
         $user = User::findOrFail($employee);
         $payroll = Payroll::with('items')->where('user_id', $user->id)->latest('period_end')->first();
 
-        $allowances  = 0;
-        $deductions  = 0;
-        $items       = [];
+        $allowances = 0;
+        $deductions = 0;
+        $items = [];
 
         if ($payroll) {
             foreach ($payroll->items as $item) {
                 $items[] = [
                     'description' => $item->description,
-                    'type'        => $item->type,
-                    'amount'      => $item->amount,
+                    'type' => $item->type,
+                    'amount' => $item->amount,
                 ];
-                if ($item->type === 'allowance') $allowances += $item->amount;
-                if ($item->type === 'deduction')  $deductions += $item->amount;
+                if ($item->type === 'allowance') {
+                    $allowances += $item->amount;
+                }
+                if ($item->type === 'deduction') {
+                    $deductions += $item->amount;
+                }
             }
         }
 
         return response()->json([
             'user' => [
-                'id'              => $user->id,
-                'name'            => $user->name,
-                'employee_code'   => $user->employee_code,
-                'job_title'       => $user->job_title,
-                'division'        => $user->divisionLabel(),
+                'id' => $user->id,
+                'name' => $user->name,
+                'employee_code' => $user->employee_code,
+                'job_title' => $user->job_title,
+                'division' => $user->divisionLabel(),
                 'employment_type' => $user->employment_type,
             ],
             'payroll' => [
                 'period_start' => $payroll ? Carbon::parse($payroll->period_start)->format('Y-m-d') : Carbon::now()->startOfMonth()->format('Y-m-d'),
-                'period_end'   => $payroll ? Carbon::parse($payroll->period_end)->format('Y-m-d')   : Carbon::now()->endOfMonth()->format('Y-m-d'),
-                'base_amount'  => $payroll ? $payroll->base_amount  : ($user->base_salary ?? 5000000),
-                'net_amount'   => $payroll ? $payroll->net_amount   : ($user->base_salary ?? 5000000),
-                'allowances'   => $allowances,
-                'deductions'   => $deductions,
-                'items'        => $items,
+                'period_end' => $payroll ? Carbon::parse($payroll->period_end)->format('Y-m-d') : Carbon::now()->endOfMonth()->format('Y-m-d'),
+                'base_amount' => $payroll ? $payroll->base_amount : ($user->base_salary ?? 5000000),
+                'net_amount' => $payroll ? $payroll->net_amount : ($user->base_salary ?? 5000000),
+                'allowances' => $allowances,
+                'deductions' => $deductions,
+                'items' => $items,
             ],
         ]);
     }
@@ -228,27 +235,27 @@ class PayrollController extends Controller
         $user = User::findOrFail($employee);
 
         // Build a plain object from the request so the Blade view is decoupled
-        $payrollData              = new \stdClass();
+        $payrollData = new \stdClass;
         $payrollData->period_start = $request->input('period_start', Carbon::now()->startOfMonth()->format('Y-m-d'));
-        $payrollData->period_end   = $request->input('period_end',   Carbon::now()->endOfMonth()->format('Y-m-d'));
-        $payrollData->base_amount  = (float) $request->input('base_amount', $user->base_salary ?? 5000000);
-        $payrollData->net_amount   = (float) $request->input('net_amount',  $user->base_salary ?? 5000000);
-        $payrollData->items        = collect($request->input('items', []));
+        $payrollData->period_end = $request->input('period_end', Carbon::now()->endOfMonth()->format('Y-m-d'));
+        $payrollData->base_amount = (float) $request->input('base_amount', $user->base_salary ?? 5000000);
+        $payrollData->net_amount = (float) $request->input('net_amount', $user->base_salary ?? 5000000);
+        $payrollData->items = collect($request->input('items', []));
 
         // Allow overriding user display fields from the form
-        $displayUser              = clone $user;
-        $displayUser->name        = $request->input('name',      $user->name);
-        $displayUser->job_title   = $request->input('job_title', $user->job_title);
-        $displayUser->division    = $request->input('division',  $user->divisionLabel());
+        $displayUser = clone $user;
+        $displayUser->name = $request->input('name', $user->name);
+        $displayUser->job_title = $request->input('job_title', $user->job_title);
+        $displayUser->division = $request->input('division', $user->divisionLabel());
 
         $data = [
-            'user'      => $displayUser,
-            'payroll'   => $payrollData,
+            'user' => $displayUser,
+            'payroll' => $payrollData,
             'signature' => $request->input('signature', 'HR Department'),
         ];
 
         $pdf = Pdf::loadView('pdf.salary-slip', $data);
-        return $pdf->download('Slip_Gaji_' . $user->employee_code . '.pdf');
-    }
 
+        return $pdf->download('Slip_Gaji_'.$user->employee_code.'.pdf');
+    }
 }

@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Inventory;
 
 use App\Http\Controllers\Controller;
-use App\Models\Inventory\Item;
-use App\Models\Inventory\Category;
-use App\Models\Inventory\Brand;
-use App\Models\Inventory\Uom;
 use App\Models\Inventory\Barcode;
+use App\Models\Inventory\Brand;
+use App\Models\Inventory\Category;
+use App\Models\Inventory\Item;
+use App\Models\Inventory\Uom;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 
@@ -19,10 +21,10 @@ class ItemController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('sku', 'like', "%{$search}%")
-                  ->orWhere('barcode', 'like', "%{$search}%");
+                    ->orWhere('sku', 'like', "%{$search}%")
+                    ->orWhere('barcode', 'like', "%{$search}%");
             });
         }
 
@@ -46,6 +48,7 @@ class ItemController extends Controller
         $categories = Category::all();
         $brands = Brand::all();
         $uoms = Uom::all();
+
         return view('inventory.items.create', compact('categories', 'brands', 'uoms'));
     }
 
@@ -73,7 +76,7 @@ class ItemController extends Controller
                 'item_id' => $item->id,
                 'barcode' => $request->barcode,
                 'barcode_type' => 'CODE128',
-                'is_primary' => true
+                'is_primary' => true,
             ]);
         }
 
@@ -83,6 +86,7 @@ class ItemController extends Controller
     public function show($id)
     {
         $item = Item::with(['category', 'brand', 'uom', 'stockSummaries.warehouse'])->findOrFail($id);
+
         return view('inventory.items.show', compact('item'));
     }
 
@@ -92,6 +96,7 @@ class ItemController extends Controller
         $categories = Category::all();
         $brands = Brand::all();
         $uoms = Uom::all();
+
         return view('inventory.items.edit', compact('item', 'categories', 'brands', 'uoms'));
     }
 
@@ -123,6 +128,7 @@ class ItemController extends Controller
     {
         $item = Item::findOrFail($id);
         $item->delete();
+
         return redirect()->route('inventory.items.index')->with('success', 'Master Item berhasil dihapus.');
     }
 
@@ -137,12 +143,12 @@ class ItemController extends Controller
         foreach ($items as $item) {
             $csvData[] = implode(',', [
                 $item->id,
-                '"' . $item->sku . '"',
-                '"' . $item->barcode . '"',
-                '"' . str_replace('"', '""', $item->name) . '"',
-                '"' . optional($item->category)->name . '"',
-                '"' . optional($item->brand)->name . '"',
-                '"' . optional($item->uom)->name . '"',
+                '"'.$item->sku.'"',
+                '"'.$item->barcode.'"',
+                '"'.str_replace('"', '""', $item->name).'"',
+                '"'.optional($item->category)->name.'"',
+                '"'.optional($item->brand)->name.'"',
+                '"'.optional($item->uom)->name.'"',
                 $item->cost_price,
                 $item->selling_price,
                 $item->min_stock,
@@ -151,6 +157,7 @@ class ItemController extends Controller
         }
 
         $content = implode("\n", $csvData);
+
         return Response::make($content, 200, [
             'Content-Type' => 'text/csv',
             'Content-Disposition' => 'attachment; filename="inventory_items_export.csv"',
@@ -165,6 +172,7 @@ class ItemController extends Controller
     public function print($id)
     {
         $item = Item::with(['category', 'brand', 'uom'])->findOrFail($id);
+
         return view('inventory.items.print', compact('item'));
     }
 }

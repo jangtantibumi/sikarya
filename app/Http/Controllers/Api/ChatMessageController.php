@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -16,8 +18,7 @@ class ChatMessageController extends Controller
     public function __construct(
         private readonly WorkflowNotificationService $notifications,
         private readonly ChatChannelService $channels,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request)
     {
@@ -29,7 +30,7 @@ class ChatMessageController extends Controller
 
         $channels = $this->allowedChannels($request->user());
         $requestedChannel = $validated['channel'] ?? null;
-        if ($requestedChannel && !in_array($requestedChannel, $channels, true)) {
+        if ($requestedChannel && ! in_array($requestedChannel, $channels, true)) {
             abort(403, 'Anda tidak memiliki akses ke kanal ini.');
         }
 
@@ -68,12 +69,12 @@ class ChatMessageController extends Controller
         ]);
 
         $user = $request->user();
-        if (!in_array($validated['channel'], $this->allowedChannels($user), true)) {
+        if (! in_array($validated['channel'], $this->allowedChannels($user), true)) {
             abort(403, 'Anda tidak memiliki akses untuk mengirim ke kanal ini.');
         }
 
         $type = $validated['type'] ?? 'message';
-        if ($type === 'holiday_announcement' && !$user->isHRD() && !$user->isCEO()) {
+        if ($type === 'holiday_announcement' && ! $user->isHRD() && ! $user->isCEO()) {
             abort(403, 'Pengumuman hari libur hanya dapat dibuat oleh HRD atau CEO.');
         }
 
@@ -133,11 +134,11 @@ class ChatMessageController extends Controller
 
     public function download(Request $request, ChatMessage $chatMessage)
     {
-        if (!in_array($chatMessage->channel, $this->allowedChannels($request->user()), true)) {
+        if (! in_array($chatMessage->channel, $this->allowedChannels($request->user()), true)) {
             abort(403, 'Anda tidak memiliki akses ke lampiran ini.');
         }
 
-        if (!$chatMessage->attachment_path || !Storage::exists($chatMessage->attachment_path)) {
+        if (! $chatMessage->attachment_path || ! Storage::exists($chatMessage->attachment_path)) {
             abort(404, 'Lampiran tidak ditemukan.');
         }
 

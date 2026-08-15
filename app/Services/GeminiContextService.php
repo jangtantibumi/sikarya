@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\ApprovalRequest;
@@ -16,12 +18,11 @@ class GeminiContextService
 {
     public function __construct(
         private readonly ChatChannelService $channels,
-    ) {
-    }
+    ) {}
 
     public function for(User $viewer, ?string $channel = null): array
     {
-        if ($channel && !$this->channels->canAccess($viewer, $channel)) {
+        if ($channel && ! $this->channels->canAccess($viewer, $channel)) {
             abort(403, 'Anda tidak memiliki akses ke konteks kanal tersebut.');
         }
 
@@ -94,12 +95,12 @@ class GeminiContextService
                 ]),
             'active_goals' => Goal::query()
                 ->where('status', 'active')
-                ->when(!$viewer->isCEO(), fn (Builder $query) => $query->where('division', $division))
+                ->when(! $viewer->isCEO(), fn (Builder $query) => $query->where('division', $division))
                 ->get(['id', 'title', 'description', 'division', 'year', 'progress']),
             'approved_kpi_plans' => KpiPlan::query()
                 ->with(['goal:id,title,division,progress', 'manager:id,name,username', 'kpis:id,kpi_plan_id,title,target_value,unit,weight,current_value'])
                 ->where('status', 'approved')
-                ->when(!$viewer->isCEO(), fn (Builder $query) => $query->whereHas('goal', fn (Builder $goal) => $goal->where('division', $division)))
+                ->when(! $viewer->isCEO(), fn (Builder $query) => $query->whereHas('goal', fn (Builder $goal) => $goal->where('division', $division)))
                 ->get(),
             'pending_approvals' => $approvalQuery
                 ->latest('submitted_at')

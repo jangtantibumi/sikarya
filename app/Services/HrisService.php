@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Attendance;
@@ -11,7 +13,6 @@ use App\Models\HrDepartment;
 use App\Models\HrDivision;
 use App\Models\HrEmployeeCertification;
 use App\Models\HrEmployeeContract;
-use App\Models\HrEmployeeDocument;
 use App\Models\HrEmployeeEducation;
 use App\Models\HrEmployeeEmergencyContact;
 use App\Models\HrEmployeeFamily;
@@ -27,7 +28,6 @@ use App\Models\HrPerformanceReview;
 use App\Models\HrPosition;
 use App\Models\HrPromotionRecommendation;
 use App\Models\HrRoster;
-use App\Models\HrSalaryComponent;
 use App\Models\LeaveQuota;
 use App\Models\LeaveRequest;
 use App\Models\Payroll;
@@ -90,9 +90,10 @@ class HrisService
 
     public function generateNik(Company $company): string
     {
-        $prefix = 'EMP-' . date('Ym') . '-';
+        $prefix = 'EMP-'.date('Ym').'-';
         $count = User::where('company_id', $company->id)->count() + 1;
-        return $prefix . str_pad($count, 4, '0', STR_PAD_LEFT);
+
+        return $prefix.str_pad($count, 4, '0', STR_PAD_LEFT);
     }
 
     public function createEmployee(Company $company, array $userData, array $profileData = [], array $contractData = []): User
@@ -102,7 +103,7 @@ class HrisService
                 'company_id' => $company->id,
                 'name' => $userData['name'],
                 'email' => $userData['email'],
-                'username' => $userData['username'] ?? Str::slug($userData['name']) . rand(100, 999),
+                'username' => $userData['username'] ?? Str::slug($userData['name']).rand(100, 999),
                 'password' => Hash::make($userData['password'] ?? 'password123'),
                 'role' => $userData['role'] ?? 'staff',
                 'job_title' => $userData['job_title'] ?? 'Staff Member',
@@ -120,10 +121,10 @@ class HrisService
                 'nik' => $nik,
             ]));
 
-            if (!empty($contractData)) {
+            if (! empty($contractData)) {
                 HrEmployeeContract::create(array_merge($contractData, [
                     'user_id' => $user->id,
-                    'contract_number' => $contractData['contract_number'] ?? 'CTR/' . date('Y') . '/' . rand(1000, 9999),
+                    'contract_number' => $contractData['contract_number'] ?? 'CTR/'.date('Y').'/'.rand(1000, 9999),
                     'start_date' => $contractData['start_date'] ?? date('Y-m-d'),
                     'status' => 'active',
                 ]));
@@ -143,6 +144,7 @@ class HrisService
     {
         $profile = HrEmployeeProfile::firstOrCreate(['user_id' => $user->id]);
         $profile->update($data);
+
         return $profile;
     }
 
@@ -192,7 +194,7 @@ class HrisService
         $shiftStartTime = $shift ? $shift->start_time : '08:00:00';
         $tolerance = $shift ? ($shift->late_tolerance_minutes ?? 15) : 15;
 
-        $scheduledStart = Carbon::parse($today . ' ' . $shiftStartTime);
+        $scheduledStart = Carbon::parse($today.' '.$shiftStartTime);
         $actualClockIn = Carbon::parse($clockInTime);
 
         $lateMinutes = 0;
@@ -217,13 +219,13 @@ class HrisService
     {
         $today = date('Y-m-d');
         $attendance = Attendance::where('user_id', $user->id)
-            ->where(function($q) use ($today) {
+            ->where(function ($q) use ($today) {
                 $q->where('date', $today)->orWhereDate('clock_in', $today);
             })
             ->latest()
             ->first();
 
-        if (!$attendance) {
+        if (! $attendance) {
             $attendance = Attendance::create([
                 'user_id' => $user->id,
                 'company_id' => $user->company_id,
@@ -236,7 +238,7 @@ class HrisService
         $shift = $roster ? $roster->shift : Shift::first();
 
         $shiftEndTime = $shift ? $shift->end_time : '17:00:00';
-        $scheduledEnd = Carbon::parse($today . ' ' . $shiftEndTime);
+        $scheduledEnd = Carbon::parse($today.' '.$shiftEndTime);
         $actualClockOut = Carbon::parse($clockOutTime);
 
         $earlyLeaveMinutes = 0;
@@ -363,7 +365,7 @@ class HrisService
 
                 // Attendance sync: count overtime & late penalties for month
                 $attendances = Attendance::where('user_id', $user->id)
-                    ->where('date', 'like', Carbon::createFromFormat('m-Y', $monthYear)->format('Y-m') . '%')
+                    ->where('date', 'like', Carbon::createFromFormat('m-Y', $monthYear)->format('Y-m').'%')
                     ->get();
 
                 $totalOvertimeHours = $attendances->sum('overtime_hours');
@@ -374,12 +376,12 @@ class HrisService
 
                 // Additional fixed components
                 $allowanceComponents = $user->hrSalaryComponents()
-                    ->whereHas('salaryComponent', fn($q) => $q->where('type', 'allowance'))
+                    ->whereHas('salaryComponent', fn ($q) => $q->where('type', 'allowance'))
                     ->get();
                 $otherAllowances = $allowanceComponents->sum('amount');
 
                 $deductionComponents = $user->hrSalaryComponents()
-                    ->whereHas('salaryComponent', fn($q) => $q->where('type', 'deduction'))
+                    ->whereHas('salaryComponent', fn ($q) => $q->where('type', 'deduction'))
                     ->get();
                 $otherDeductions = $deductionComponents->sum('amount');
 
@@ -471,23 +473,28 @@ class HrisService
         // Compute OKR score
         $okrs = HrOkr::where('user_id', $user->id)->get();
         $okrScore = $okrs->count() > 0
-            ? round($okrs->avg(fn($o) => ($o->current_value / max(1, $o->target_value)) * 100), 2)
+            ? round($okrs->avg(fn ($o) => ($o->current_value / max(1, $o->target_value)) * 100), 2)
             : 85;
 
         $kpiScore = $data['kpi_score'] ?? 85;
         $overall = round(($kpiScore * 0.4) + ($okrScore * 0.4) + ($taskScore * 0.2), 2);
 
         $grade = 'B';
-        if ($overall >= 90) $grade = 'A';
-        elseif ($overall >= 75) $grade = 'B';
-        elseif ($overall >= 60) $grade = 'C';
-        else $grade = 'D';
+        if ($overall >= 90) {
+            $grade = 'A';
+        } elseif ($overall >= 75) {
+            $grade = 'B';
+        } elseif ($overall >= 60) {
+            $grade = 'C';
+        } else {
+            $grade = 'D';
+        }
 
         return HrPerformanceReview::create([
             'company_id' => $company->id,
             'user_id' => $user->id,
             'reviewer_id' => $reviewer->id,
-            'review_period' => $data['review_period'] ?? date('Y') . '-Annual',
+            'review_period' => $data['review_period'] ?? date('Y').'-Annual',
             'kpi_score' => $kpiScore,
             'okr_score' => $okrScore,
             'task_score' => $taskScore,

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\FeatureFlag;
@@ -15,7 +17,7 @@ class FeatureManager
     public function enabled(string $key): bool
     {
         $definition = config("features.{$key}");
-        if (!is_array($definition)) {
+        if (! is_array($definition)) {
             return false;
         }
 
@@ -35,7 +37,7 @@ class FeatureManager
                 ])
                 ->all();
 
-            if (!Schema::hasTable('feature_flags')) {
+            if (! Schema::hasTable('feature_flags')) {
                 return $defaults;
             }
 
@@ -72,7 +74,7 @@ class FeatureManager
     public function set(string $key, bool $enabled, User $actor): array
     {
         $definition = config("features.{$key}");
-        if (!is_array($definition)) {
+        if (! is_array($definition)) {
             throw ValidationException::withMessages([
                 'feature' => 'Modul tidak dikenal.',
             ]);
@@ -84,7 +86,7 @@ class FeatureManager
             ]);
         }
 
-        if ($enabled && !($definition['available'] ?? true)) {
+        if ($enabled && ! ($definition['available'] ?? true)) {
             throw ValidationException::withMessages([
                 'feature' => 'Modul ini masih berada dalam roadmap dan belum dapat diaktifkan.',
             ]);

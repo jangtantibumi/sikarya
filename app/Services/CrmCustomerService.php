@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
-use App\Models\CrmCustomer;
-use App\Models\CrmCustomerTimeline;
-use App\Models\CrmCustomerPointHistory;
-use App\Models\CrmReservation;
-use App\Models\CrmFeedback;
-use App\Models\CrmCustomerVoucher;
 use App\Models\CrmBroadcastLog;
+use App\Models\CrmCustomer;
+use App\Models\CrmCustomerPointHistory;
+use App\Models\CrmCustomerTimeline;
+use App\Models\CrmCustomerVoucher;
+use App\Models\CrmFeedback;
+use App\Models\CrmReservation;
 use Illuminate\Support\Facades\DB;
 
 class CrmCustomerService
@@ -20,7 +22,7 @@ class CrmCustomerService
             $target = CrmCustomer::findOrFail($targetId);
 
             if ($source->id === $target->id) {
-                throw new \InvalidArgumentException("Customer sumber dan target tidak boleh sama.");
+                throw new \InvalidArgumentException('Customer sumber dan target tidak boleh sama.');
             }
 
             // 1. Gabungkan total poin dan pengeluaran
@@ -28,7 +30,7 @@ class CrmCustomerService
             $target->total_spending += $source->total_spending;
 
             // Update tanggal kunjungan terakhir jika sumber lebih baru
-            if ($source->last_visit && (!$target->last_visit || $source->last_visit->gt($target->last_visit))) {
+            if ($source->last_visit && (! $target->last_visit || $source->last_visit->gt($target->last_visit))) {
                 $target->last_visit = $source->last_visit;
             }
 
@@ -44,7 +46,7 @@ class CrmCustomerService
 
             // 3. Gabungkan Tags
             $sourceTagIds = $source->tags()->pluck('crm_tags.id')->toArray();
-            if (!empty($sourceTagIds)) {
+            if (! empty($sourceTagIds)) {
                 $target->tags()->syncWithoutDetaching($sourceTagIds);
             }
 
@@ -52,7 +54,7 @@ class CrmCustomerService
             CrmCustomerTimeline::create([
                 'customer_id' => $target->id,
                 'action' => 'MERGE_DUPLICATE',
-                'description' => "Penggabungan data dari customer {$source->name} ({$source->customer_code}). Poin (+{$source->points} pts) & Spending (+Rp " . number_format($source->total_spending, 0, ',', '.') . ") ditransfer.",
+                'description' => "Penggabungan data dari customer {$source->name} ({$source->customer_code}). Poin (+{$source->points} pts) & Spending (+Rp ".number_format($source->total_spending, 0, ',', '.').') ditransfer.',
             ]);
 
             // 5. Soft delete customer sumber
@@ -64,7 +66,7 @@ class CrmCustomerService
 
     public function exportExcel($customers)
     {
-        $filename = 'customers-export-' . now()->format('Y-m-d-His') . '.csv';
+        $filename = 'customers-export-'.now()->format('Y-m-d-His').'.csv';
         $headers = [
             'Content-Type' => 'text/csv; charset=UTF-8',
             'Content-Disposition' => "attachment; filename=\"{$filename}\"",

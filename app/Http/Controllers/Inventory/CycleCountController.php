@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Inventory;
 
 use App\Http\Controllers\Controller;
 use App\Models\Inventory\CycleCount;
 use App\Models\Inventory\CycleCountLine;
-use App\Models\Inventory\Warehouse;
 use App\Models\Inventory\Item;
+use App\Models\Inventory\Warehouse;
 use Illuminate\Http\Request;
 
 class CycleCountController extends Controller
@@ -18,6 +20,7 @@ class CycleCountController extends Controller
             $query->where('number', 'like', "%{$request->search}%");
         }
         $cycleCounts = $query->paginate(15);
+
         return view('inventory.cycle-counts.index', compact('cycleCounts'));
     }
 
@@ -25,6 +28,7 @@ class CycleCountController extends Controller
     {
         $warehouses = Warehouse::all();
         $items = Item::all();
+
         return view('inventory.cycle-counts.create', compact('warehouses', 'items'));
     }
 
@@ -67,6 +71,7 @@ class CycleCountController extends Controller
     public function show($id)
     {
         $cycleCount = CycleCount::with(['warehouse', 'lines.item'])->findOrFail($id);
+
         return view('inventory.cycle-counts.show', compact('cycleCount'));
     }
 
@@ -74,6 +79,7 @@ class CycleCountController extends Controller
     {
         $cc = CycleCount::findOrFail($id);
         $cc->delete();
+
         return redirect()->route('inventory.cycle-counts.index')->with('success', 'Data Cycle Count dihapus.');
     }
 }

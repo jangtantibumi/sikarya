@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -13,8 +15,7 @@ class DataDeletionController extends Controller
 {
     public function __construct(
         private readonly DataDeletionRequestService $deletions,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request)
     {
@@ -25,7 +26,7 @@ class DataDeletionController extends Controller
             'approvalRequest.steps.approver:id,name,username,role',
         ]);
 
-        if (!$viewer->isCEO()) {
+        if (! $viewer->isCEO()) {
             if ($viewer->isManager()) {
                 $query->where(function (Builder $builder) use ($viewer): void {
                     $builder

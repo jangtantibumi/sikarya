@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -12,8 +14,7 @@ class GoalController extends Controller
 {
     public function __construct(
         private readonly WorkflowNotificationService $notifications,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request)
     {
@@ -25,11 +26,11 @@ class GoalController extends Controller
             'kpiPlans' => fn ($plans) => $plans->with(['manager:id,name,username,role', 'kpis']),
         ]);
 
-        if (!$user->isCEO()) {
+        if (! $user->isCEO()) {
             $query->where('division', $user->divisionKey());
         }
 
-        if (!$request->boolean('include_inactive')) {
+        if (! $request->boolean('include_inactive')) {
             $query->where('status', 'active');
         }
 

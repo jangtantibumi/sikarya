@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Inventory;
 
 use App\Http\Controllers\Controller;
+use App\Models\Inventory\Item;
 use App\Models\Inventory\StockIn;
 use App\Models\Inventory\StockInLine;
 use App\Models\Inventory\Warehouse;
-use App\Models\Inventory\Item;
 use App\Services\InventoryService;
 use Illuminate\Http\Request;
 
@@ -17,9 +19,10 @@ class StockInController extends Controller
         $query = StockIn::with(['warehouse', 'lines.item']);
         if ($request->filled('search')) {
             $query->where('number', 'like', "%{$request->search}%")
-                  ->orWhere('supplier_name', 'like', "%{$request->search}%");
+                ->orWhere('supplier_name', 'like', "%{$request->search}%");
         }
         $stockIns = $query->paginate(15);
+
         return view('inventory.stock-in.index', compact('stockIns'));
     }
 
@@ -27,6 +30,7 @@ class StockInController extends Controller
     {
         $warehouses = Warehouse::all();
         $items = Item::all();
+
         return view('inventory.stock-in.create', compact('warehouses', 'items'));
     }
 
@@ -75,6 +79,7 @@ class StockInController extends Controller
     public function show($id)
     {
         $stockIn = StockIn::with(['warehouse', 'lines.item'])->findOrFail($id);
+
         return view('inventory.stock-in.show', compact('stockIn'));
     }
 
@@ -89,18 +94,18 @@ class StockInController extends Controller
             $service->recordMovement([
                 'reference_number' => $stockIn->number,
                 'transaction_type' => 'stock_in',
-                'item_id'          => $line->item_id,
-                'warehouse_id'     => $stockIn->warehouse_id,
-                'bin_id'           => $line->bin_id,
-                'quantity'         => $line->quantity,
-                'unit_cost'        => $line->unit_price,
-                'notes'            => 'Penerimaan Stock In: ' . $stockIn->number,
+                'item_id' => $line->item_id,
+                'warehouse_id' => $stockIn->warehouse_id,
+                'bin_id' => $line->bin_id,
+                'quantity' => $line->quantity,
+                'unit_cost' => $line->unit_price,
+                'notes' => 'Penerimaan Stock In: '.$stockIn->number,
             ]);
         }
 
         $stockIn->update([
             'status' => 'approved',
-            'approved_by' => 'Manager Inventory'
+            'approved_by' => 'Manager Inventory',
         ]);
 
         return redirect()->route('inventory.stock-in.index')->with('success', 'Transaksi Stock In disetujui & stok berhasil ditambahkan.');
@@ -110,6 +115,7 @@ class StockInController extends Controller
     {
         $stockIn = StockIn::findOrFail($id);
         $stockIn->update(['status' => 'rejected']);
+
         return redirect()->route('inventory.stock-in.index')->with('success', 'Transaksi Stock In ditolak.');
     }
 
@@ -117,6 +123,7 @@ class StockInController extends Controller
     {
         $stockIn = StockIn::findOrFail($id);
         $stockIn->delete();
+
         return redirect()->route('inventory.stock-in.index')->with('success', 'Transaksi Stock In dihapus.');
     }
 }

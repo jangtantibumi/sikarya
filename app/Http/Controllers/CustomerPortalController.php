@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Models\CrmCustomer;
-use App\Models\CrmReservation;
-use App\Models\CrmFeedback;
-use App\Models\CrmVoucher;
-use App\Models\CrmCustomerVoucher;
 use App\Models\CrmCustomerPointHistory;
 use App\Models\CrmCustomerTimeline;
+use App\Models\CrmCustomerVoucher;
+use App\Models\CrmFeedback;
+use App\Models\CrmReservation;
+use App\Models\CrmVoucher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 
@@ -36,6 +38,7 @@ class CustomerPortalController extends Controller
             }
 
             Session::put('customer_portal_id', $customer->id);
+
             return redirect()->route('portal.dashboard');
         }
 
@@ -45,15 +48,16 @@ class CustomerPortalController extends Controller
     public function logout()
     {
         Session::forget('customer_portal_id');
+
         return redirect()->route('portal.login');
     }
 
     public function dashboard()
     {
         $customerId = Session::get('customer_portal_id');
-        $customer = CrmCustomer::with(['pointHistories' => function($q) {
+        $customer = CrmCustomer::with(['pointHistories' => function ($q) {
             $q->orderBy('created_at', 'desc')->take(5);
-        }, 'reservations' => function($q) {
+        }, 'reservations' => function ($q) {
             $q->orderBy('reservation_date', 'desc')->take(5);
         }])->findOrFail($customerId);
 
@@ -122,6 +126,7 @@ class CustomerPortalController extends Controller
     {
         $customerId = Session::get('customer_portal_id');
         $customer = CrmCustomer::findOrFail($customerId);
+
         return view('portal.profile', compact('customer'));
     }
 

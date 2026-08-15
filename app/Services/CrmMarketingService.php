@@ -1,16 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
-use App\Models\CrmCustomer;
-use App\Models\CrmCampaign;
 use App\Models\CrmBroadcastLog;
-use App\Models\CrmPromotion;
-use App\Models\CrmVoucher;
+use App\Models\CrmCampaign;
 use App\Models\CrmCoupon;
-use App\Models\CrmReferral;
-use App\Models\CrmCustomerTimeline;
+use App\Models\CrmCustomer;
 use App\Models\CrmCustomerPointHistory;
+use App\Models\CrmCustomerTimeline;
+use App\Models\CrmPromotion;
+use App\Models\CrmReferral;
+use App\Models\CrmVoucher;
 
 class CrmMarketingService
 {
@@ -138,7 +140,7 @@ class CrmMarketingService
             ->where('is_active', true)
             ->first();
 
-        if (!$promotion) {
+        if (! $promotion) {
             return ['valid' => false, 'message' => 'Kode promosi tidak ditemukan atau tidak aktif.'];
         }
 
@@ -151,7 +153,7 @@ class CrmMarketingService
         }
 
         if ($cartTotal < $promotion->min_spend) {
-            return ['valid' => false, 'message' => 'Minimum transaksi untuk promo ini adalah Rp ' . number_format($promotion->min_spend, 0, ',', '.')];
+            return ['valid' => false, 'message' => 'Minimum transaksi untuk promo ini adalah Rp '.number_format($promotion->min_spend, 0, ',', '.')];
         }
 
         if ($promotion->discount_type === 'percentage') {
@@ -178,7 +180,7 @@ class CrmMarketingService
     {
         $voucher = CrmVoucher::findOrFail($voucherId);
 
-        $couponCode = 'CPN-' . strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 8));
+        $couponCode = 'CPN-'.strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 8));
 
         $coupon = CrmCoupon::create([
             'coupon_code' => $couponCode,
@@ -198,7 +200,7 @@ class CrmMarketingService
             ->where('coupon_code', strtoupper($couponCode))
             ->first();
 
-        if (!$coupon) {
+        if (! $coupon) {
             return ['valid' => false, 'message' => 'Kode kupon tidak valid.'];
         }
 
@@ -228,7 +230,7 @@ class CrmMarketingService
         }
 
         $referrer = CrmCustomer::where('referral_code', strtoupper($referralCode))->first();
-        if (!$referrer || $referrer->id === $newCustomer->id) {
+        if (! $referrer || $referrer->id === $newCustomer->id) {
             return null;
         }
 

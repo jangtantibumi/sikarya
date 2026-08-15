@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
@@ -21,14 +23,14 @@ class ImportPortableErpData extends Command
 
     public function handle(): int
     {
-        if (app()->environment('production') && !$this->option('force')) {
+        if (app()->environment('production') && ! $this->option('force')) {
             $this->error('Tambahkan --force untuk import pada environment production.');
 
             return self::FAILURE;
         }
 
         $path = $this->absolutePath((string) $this->argument('path'));
-        if (!File::isFile($path)) {
+        if (! File::isFile($path)) {
             $this->error("File import tidak ditemukan: {$path}");
 
             return self::FAILURE;
@@ -49,7 +51,7 @@ class ImportPortableErpData extends Command
                 }
 
                 foreach (ExportPortableErpData::TABLES as $table) {
-                    if (!Schema::hasTable($table) || !isset($tables[$table])) {
+                    if (! Schema::hasTable($table) || ! isset($tables[$table])) {
                         continue;
                     }
 
@@ -82,7 +84,7 @@ class ImportPortableErpData extends Command
     {
         if (($payload['format'] ?? null) !== 'suba-arch-erp-portable-data'
             || (int) ($payload['version'] ?? 0) !== 1
-            || !is_array($payload['tables'] ?? null)) {
+            || ! is_array($payload['tables'] ?? null)) {
             throw new RuntimeException('Format file import tidak dikenali.');
         }
 
@@ -90,12 +92,12 @@ class ImportPortableErpData extends Command
             $payload['tables'],
             JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR,
         );
-        if (!hash_equals((string) ($payload['integrity_sha256'] ?? ''), hash('sha256', $encodedTables))) {
+        if (! hash_equals((string) ($payload['integrity_sha256'] ?? ''), hash('sha256', $encodedTables))) {
             throw new RuntimeException('Pemeriksaan integritas gagal. File data berubah atau rusak.');
         }
 
         $expectedKey = hash('sha256', (string) config('app.key'));
-        if (!hash_equals((string) ($payload['app_key_fingerprint'] ?? ''), $expectedKey)) {
+        if (! hash_equals((string) ($payload['app_key_fingerprint'] ?? ''), $expectedKey)) {
             throw new RuntimeException(
                 'APP_KEY server berbeda dari sumber. Import dihentikan agar SMTP, API key, dan tanda tangan terenkripsi tidak rusak.',
             );

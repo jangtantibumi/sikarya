@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\ApprovalRequest;
@@ -18,8 +20,7 @@ class ApprovalWorkflowService
         private readonly WorkflowNotificationService $notifications,
         private readonly MetricAggregationService $metrics,
         private readonly DataDeletionExecutor $deletionExecutor,
-    ) {
-    }
+    ) {}
 
     public function createRequest(
         string $type,
@@ -156,7 +157,7 @@ class ApprovalWorkflowService
 
     private function assertCanDecide(ApprovalRequest $request, User $approver): void
     {
-        if (!in_array($request->status, ['pending_manager', 'pending_ceo'], true)) {
+        if (! in_array($request->status, ['pending_manager', 'pending_ceo'], true)) {
             throw ValidationException::withMessages([
                 'approval' => 'Pengajuan ini sudah diproses sebelumnya.',
             ]);
@@ -168,7 +169,7 @@ class ApprovalWorkflowService
 
         $isCeoDecision = $request->status === 'pending_ceo' && $approver->isCEO();
 
-        if (!$isManagerDecision && !$isCeoDecision) {
+        if (! $isManagerDecision && ! $isCeoDecision) {
             throw ValidationException::withMessages([
                 'approval' => 'Anda bukan pihak yang berwenang memproses tahap pengajuan ini.',
             ]);
@@ -188,12 +189,13 @@ class ApprovalWorkflowService
     {
         $subject = $request->subject;
 
-        if (!$subject) {
+        if (! $subject) {
             return;
         }
 
         if (method_exists($subject, 'markAsPendingCeo')) {
             $subject->markAsPendingCeo();
+
             return;
         }
 
@@ -206,12 +208,13 @@ class ApprovalWorkflowService
     {
         $subject = $request->subject;
 
-        if (!$subject) {
+        if (! $subject) {
             return;
         }
 
         if ($subject instanceof DataDeletionRequest) {
             $this->deletionExecutor->execute($subject, $approver);
+
             return;
         }
 
@@ -249,12 +252,13 @@ class ApprovalWorkflowService
     {
         $subject = $request->subject;
 
-        if (!$subject) {
+        if (! $subject) {
             return;
         }
 
         if (method_exists($subject, 'markAsRejected')) {
             $subject->markAsRejected();
+
             return;
         }
 

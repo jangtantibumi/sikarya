@@ -1,8 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Models\Attendance;
+use App\Models\LeaveRequest;
+use App\Models\OvertimeRequest;
+use App\Models\Shift;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 
@@ -16,7 +21,7 @@ class MasterAttendanceController extends Controller
         $request->validate([
             'shift_id' => 'nullable|exists:shifts,id',
             'location_coordinates' => 'nullable|string',
-            'is_out_of_hours' => 'nullable|boolean'
+            'is_out_of_hours' => 'nullable|boolean',
         ]);
 
         $user = auth()->user();
@@ -33,7 +38,7 @@ class MasterAttendanceController extends Controller
             ->first();
 
         if ($existing) {
-            return back()->with('attendance_error', 'Anda sudah clock in hari ini pada ' . $existing->clock_in->timezone($timezone)->format('H:i') . ' WIB.');
+            return back()->with('attendance_error', 'Anda sudah clock in hari ini pada '.$existing->clock_in->timezone($timezone)->format('H:i').' WIB.');
         }
 
         $status = 'Present';
@@ -42,14 +47,14 @@ class MasterAttendanceController extends Controller
         $lateMinutes = 0;
 
         if ($request->shift_id) {
-            $shift = \App\Models\Shift::findOrFail($request->shift_id);
+            $shift = Shift::findOrFail($request->shift_id);
             $shiftName = $shift->name;
             $shiftStartTime = CarbonImmutable::parse($shift->start_time, $timezone);
             $tolerance = $shift->late_tolerance_minutes ?? 15;
-            
+
             $limitLateTime = $shiftStartTime->addMinutes($tolerance)->format('H:i');
             $currentTime = $now->format('H:i');
-            
+
             if ($currentTime > $limitLateTime) {
                 $status = 'Late';
                 $lateMinutes = max(0, $now->diffInMinutes($shiftStartTime));
@@ -69,7 +74,8 @@ class MasterAttendanceController extends Controller
         ]);
 
         $typeLabel = $isOutOfHours ? 'Luar Jam Kerja' : 'Reguler';
-        return back()->with('attendance_success', 'Clock in ' . $typeLabel . ' berhasil pada ' . $now->format('H:i') . ' WIB (Shift: ' . $shiftName . '). Status: ' . $status);
+
+        return back()->with('attendance_success', 'Clock in '.$typeLabel.' berhasil pada '.$now->format('H:i').' WIB (Shift: '.$shiftName.'). Status: '.$status);
     }
 
     /**
@@ -88,11 +94,11 @@ class MasterAttendanceController extends Controller
             ->latest('clock_in')
             ->first();
 
-        if (!$attendance) {
+        if (! $attendance) {
             return back()->with('attendance_error', 'Anda belum clock in atau sudah clock out hari ini.');
         }
 
-        if ($attendance->rest_start && !$attendance->rest_end) {
+        if ($attendance->rest_start && ! $attendance->rest_end) {
             return back()->with('attendance_error', 'Anda belum mengakhiri waktu istirahat! Harap tekan \'Selesai Istirahat\' sebelum melakukan Clock Out.');
         }
 
@@ -118,7 +124,7 @@ class MasterAttendanceController extends Controller
             ->latest('clock_in')
             ->first();
 
-        if (!$attendance) {
+        if (! $attendance) {
             return back()->with('attendance_error', 'Anda harus Clock In terlebih dahulu.');
         }
 
@@ -141,7 +147,7 @@ class MasterAttendanceController extends Controller
             ->latest('clock_in')
             ->first();
 
-        if (!$attendance) {
+        if (! $attendance) {
             return back()->with('attendance_error', 'Anda belum mulai istirahat.');
         }
 
@@ -158,7 +164,7 @@ class MasterAttendanceController extends Controller
             'hours' => 'required|numeric|min:0.5',
         ]);
 
-        \App\Models\OvertimeRequest::create([
+        OvertimeRequest::create([
             'user_id' => auth()->id(),
             'overtime_type_id' => $request->overtime_type_id,
             'date' => $request->date,
@@ -177,7 +183,7 @@ class MasterAttendanceController extends Controller
             'reason' => 'required|string',
         ]);
 
-        \App\Models\LeaveRequest::create([
+        LeaveRequest::create([
             'user_id' => auth()->id(),
             'company_id' => auth()->user()->company_id,
             'type' => 'annual',

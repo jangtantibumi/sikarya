@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -12,8 +14,7 @@ class DashboardMetricController extends Controller
 {
     public function __construct(
         private readonly MetricAggregationService $metrics,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request)
     {
@@ -22,14 +23,14 @@ class DashboardMetricController extends Controller
 
         $goals = Goal::query()
             ->with(['kpiPlans' => fn ($plans) => $plans->where('status', 'approved')->with('kpis', 'manager:id,name,username')])
-            ->when(!$user->isCEO(), fn ($query) => $query->where('division', $user->divisionKey()))
+            ->when(! $user->isCEO(), fn ($query) => $query->where('division', $user->divisionKey()))
             ->where('status', 'active')
             ->get();
 
         $plans = KpiPlan::query()
             ->with(['goal:id,title,division,progress', 'manager:id,name,username,role', 'kpis'])
             ->where('status', 'approved')
-            ->when(!$user->isCEO(), fn ($query) => $query->whereHas(
+            ->when(! $user->isCEO(), fn ($query) => $query->whereHas(
                 'goal',
                 fn ($goal) => $goal->where('division', $user->divisionKey())
             ))

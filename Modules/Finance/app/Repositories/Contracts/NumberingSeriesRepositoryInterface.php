@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Finance\Repositories\Contracts;
 
 use Illuminate\Database\Eloquent\Collection;

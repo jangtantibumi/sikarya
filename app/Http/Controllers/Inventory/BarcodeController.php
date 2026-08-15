@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Inventory;
 
 use App\Http\Controllers\Controller;
@@ -17,6 +19,7 @@ class BarcodeController extends Controller
         }
         $barcodes = $query->paginate(15);
         $items = Item::all();
+
         return view('inventory.barcodes.index', compact('barcodes', 'items'));
     }
 
@@ -28,6 +31,7 @@ class BarcodeController extends Controller
             'barcode_type' => 'required|string',
         ]);
         Barcode::create($validated);
+
         return redirect()->route('inventory.barcodes.index')->with('success', 'Barcode berhasil dibuat.');
     }
 
@@ -35,6 +39,7 @@ class BarcodeController extends Controller
     {
         $bc = Barcode::findOrFail($id);
         $bc->delete();
+
         return redirect()->route('inventory.barcodes.index')->with('success', 'Barcode dihapus.');
     }
 }

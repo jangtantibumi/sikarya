@@ -1,15 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
-use App\Models\CrmCampaign;
 use App\Models\CrmBroadcastLog;
-use App\Models\CrmPromotion;
+use App\Models\CrmCampaign;
 use App\Models\CrmCoupon;
+use App\Models\CrmPromotion;
 use App\Models\CrmReferral;
-use App\Models\CrmVoucher;
-use App\Models\CrmTag;
 use App\Models\CrmSegment;
+use App\Models\CrmTag;
+use App\Models\CrmVoucher;
 use App\Services\CrmMarketingService;
 use Illuminate\Http\Request;
 
@@ -80,12 +82,14 @@ class CrmMarketingController extends Controller
     public function sendCampaign($id)
     {
         $count = $this->marketingService->executeCampaign($id);
+
         return back()->with('success', "Broadcast campaign berhasil dikirimkan ke {$count} customer.");
     }
 
     public function broadcastLogs()
     {
         $logs = CrmBroadcastLog::with(['campaign', 'customer'])->orderBy('id', 'desc')->paginate(20);
+
         return view('crm.marketing.broadcast_logs', compact('logs'));
     }
 
@@ -95,12 +99,14 @@ class CrmMarketingController extends Controller
     public function birthdays()
     {
         $upcomingBirthdays = $this->marketingService->getUpcomingBirthdays();
+
         return view('crm.marketing.birthdays', compact('upcomingBirthdays'));
     }
 
     public function sendBirthdayReward(Request $request, $customerId)
     {
         $customer = $this->marketingService->sendBirthdayRewards($customerId);
+
         return back()->with('success', "Bonus ulang tahun berhasil dikirimkan ke {$customer->name}.");
     }
 
@@ -110,6 +116,7 @@ class CrmMarketingController extends Controller
     public function promotions()
     {
         $promotions = CrmPromotion::orderBy('id', 'desc')->paginate(15);
+
         return view('crm.marketing.promotions', compact('promotions'));
     }
 
@@ -130,6 +137,7 @@ class CrmMarketingController extends Controller
         $validated['promo_code'] = strtoupper($validated['promo_code']);
 
         CrmPromotion::create($validated);
+
         return redirect()->route('crm.marketing.promotions')->with('success', 'Promo berhasil dibuat.');
     }
 
@@ -141,6 +149,7 @@ class CrmMarketingController extends Controller
         ]);
 
         $result = $this->marketingService->applyPromotion($validated['promo_code'], $validated['cart_total']);
+
         return response()->json($result);
     }
 
@@ -151,6 +160,7 @@ class CrmMarketingController extends Controller
     {
         $coupons = CrmCoupon::with(['voucher', 'customer'])->orderBy('id', 'desc')->paginate(15);
         $vouchers = CrmVoucher::where('is_active', true)->get();
+
         return view('crm.marketing.coupons', compact('coupons', 'vouchers'));
     }
 
@@ -177,6 +187,7 @@ class CrmMarketingController extends Controller
         ]);
 
         $result = $this->marketingService->validateCoupon($validated['coupon_code']);
+
         return response()->json($result);
     }
 
@@ -186,6 +197,7 @@ class CrmMarketingController extends Controller
     public function referrals()
     {
         $referrals = CrmReferral::with(['referrer', 'referee'])->orderBy('id', 'desc')->paginate(15);
+
         return view('crm.marketing.referrals', compact('referrals'));
     }
 }

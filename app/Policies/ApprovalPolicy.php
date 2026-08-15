@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
 use App\Models\ApprovalRequest;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class ApprovalPolicy
 {
@@ -21,13 +22,23 @@ class ApprovalPolicy
      */
     public function view(User $user, ApprovalRequest $approvalRequest): bool
     {
-        if ($user->isCEO()) return true;
-        if ($user->id === $approvalRequest->requester_id) return true;
-        if ($user->id === $approvalRequest->current_approver_id) return true;
-        if ($user->isHRD() && in_array($approvalRequest->request_type, ['leave', 'team_request', 'resignation'])) return true;
+        if ($user->isCEO()) {
+            return true;
+        }
+        if ($user->id === $approvalRequest->requester_id) {
+            return true;
+        }
+        if ($user->id === $approvalRequest->current_approver_id) {
+            return true;
+        }
+        if ($user->isHRD() && in_array($approvalRequest->request_type, ['leave', 'team_request', 'resignation'])) {
+            return true;
+        }
 
         // Managers can view if requester is their staff
-        if ($user->isManager() && $user->isManagerOf($approvalRequest->requester)) return true;
+        if ($user->isManager() && $user->isManagerOf($approvalRequest->requester)) {
+            return true;
+        }
 
         return false;
     }

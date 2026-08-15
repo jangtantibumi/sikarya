@@ -1,16 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
 use App\Models\Attendance;
 use App\Models\DailyReport;
-use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
 class LockDailyReports extends Command
 {
     protected $signature = 'hr:lock-daily-reports';
+
     protected $description = 'Locks daily reports and marks attendances as absent if no report is submitted within 24 hours';
 
     public function handle()
@@ -30,7 +32,7 @@ class LockDailyReports extends Command
         foreach ($attendances as $attendance) {
             $attendance->update([
                 'status' => 'absent',
-                'notes' => trim($attendance->notes . ' (Absen otomatis: Tidak ada laporan harian dalam 24 jam)'),
+                'notes' => trim($attendance->notes.' (Absen otomatis: Tidak ada laporan harian dalam 24 jam)'),
             ]);
             $count++;
         }

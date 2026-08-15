@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class PaklaringController extends Controller
 {
@@ -20,21 +22,21 @@ class PaklaringController extends Controller
 
         return response()->json([
             'user' => [
-                'id'            => $user->id,
-                'name'          => $user->name,
+                'id' => $user->id,
+                'name' => $user->name,
                 'employee_code' => $user->employee_code,
-                'job_title'     => $user->job_title,
-                'division'      => $user->divisionLabel(),
+                'job_title' => $user->job_title,
+                'division' => $user->divisionLabel(),
             ],
             'letter' => [
                 'company_name' => 'Northstar Group',
-                'join_date'    => $user->created_at->format('d F Y'),
-                'resign_date'  => $user->deactivated_at
+                'join_date' => $user->created_at->format('d F Y'),
+                'resign_date' => $user->deactivated_at
                     ? Carbon::parse($user->deactivated_at)->format('d F Y')
                     : Carbon::now()->format('d F Y'),
-                'today_date'   => Carbon::now()->format('d F Y'),
-                'hr_name'      => 'HR Department',
-                'content'      => 'Selama bekerja di perusahaan kami, yang bersangkutan telah menunjukkan dedikasi, kedisiplinan, dan kinerja yang baik serta tidak pernah melakukan tindakan yang merugikan perusahaan. Kami mengucapkan terima kasih atas segala kontribusi yang telah diberikan dan berharap kesuksesan di masa mendatang.',
+                'today_date' => Carbon::now()->format('d F Y'),
+                'hr_name' => 'HR Department',
+                'content' => 'Selama bekerja di perusahaan kami, yang bersangkutan telah menunjukkan dedikasi, kedisiplinan, dan kinerja yang baik serta tidak pernah melakukan tindakan yang merugikan perusahaan. Kami mengucapkan terima kasih atas segala kontribusi yang telah diberikan dan berharap kesuksesan di masa mendatang.',
             ],
         ]);
     }
@@ -48,22 +50,23 @@ class PaklaringController extends Controller
         $user = User::findOrFail($employee);
 
         $data = [
-            'user'         => $user,
+            'user' => $user,
             'company_name' => $request->input('company_name', 'Northstar Group'),
-            'join_date'    => $request->input('join_date',    $user->created_at->format('d F Y')),
-            'resign_date'  => $request->input('resign_date',  Carbon::now()->format('d F Y')),
-            'today_date'   => Carbon::now()->format('d F Y'),
-            'hr_name'      => $request->input('hr_name',      'HR Department'),
-            'content'      => $request->input('content',      'Selama bekerja di perusahaan kami, yang bersangkutan telah menunjukkan dedikasi dan kinerja yang baik.'),
+            'join_date' => $request->input('join_date', $user->created_at->format('d F Y')),
+            'resign_date' => $request->input('resign_date', Carbon::now()->format('d F Y')),
+            'today_date' => Carbon::now()->format('d F Y'),
+            'hr_name' => $request->input('hr_name', 'HR Department'),
+            'content' => $request->input('content', 'Selama bekerja di perusahaan kami, yang bersangkutan telah menunjukkan dedikasi dan kinerja yang baik.'),
             // Override display fields
-            'override_name'     => $request->input('name',       $user->name),
-            'override_code'     => $request->input('employee_code', $user->employee_code),
-            'override_position' => $request->input('job_title',  $user->job_title),
-            'override_division' => $request->input('division',   $user->divisionLabel()),
+            'override_name' => $request->input('name', $user->name),
+            'override_code' => $request->input('employee_code', $user->employee_code),
+            'override_position' => $request->input('job_title', $user->job_title),
+            'override_division' => $request->input('division', $user->divisionLabel()),
         ];
 
         $pdf = Pdf::loadView('pdf.paklaring', $data);
-        return $pdf->download('Paklaring_' . $user->employee_code . '.pdf');
+
+        return $pdf->download('Paklaring_'.$user->employee_code.'.pdf');
     }
 
     /**

@@ -1,8 +1,9 @@
 <?php
 
 use App\Providers\AppServiceProvider;
+use Modules\Finance\Providers\FinanceServiceProvider;
 
 return [
     AppServiceProvider::class,
-    Modules\Finance\Providers\FinanceServiceProvider::class,
+    FinanceServiceProvider::class,
 ];

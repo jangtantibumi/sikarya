@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -48,12 +50,12 @@ class OrganizationChartController extends Controller
                         || $viewer->isHRD()
                         || $isDirectReport,
                 ];
-                
+
                 if ($canViewPerformance) {
                     $data['employee_code'] = $person->employee_code;
                 }
 
-                return [ $person->username => $data ];
+                return [$person->username => $data];
             });
 
         return response()->json([

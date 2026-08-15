@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Http\Middleware\EnsureErpAccessGate;
@@ -14,12 +16,11 @@ class AccessGateController extends Controller
     public function __construct(
         private readonly SecuritySettingsService $settings,
         private readonly SecurityAuditService $audit,
-    ) {
-    }
+    ) {}
 
     public function show(): View|RedirectResponse
     {
-        if (!$this->settings->gateEnabled()) {
+        if (! $this->settings->gateEnabled()) {
             return redirect('/');
         }
 
@@ -34,7 +35,7 @@ class AccessGateController extends Controller
             'access_password' => ['required', 'string', 'max:255'],
         ]);
 
-        if (!$this->settings->gateEnabled() || !$this->settings->verifyGatePassword($validated['access_password'])) {
+        if (! $this->settings->gateEnabled() || ! $this->settings->verifyGatePassword($validated['access_password'])) {
             $this->audit->record('access_gate.failed', request: $request);
 
             return back()

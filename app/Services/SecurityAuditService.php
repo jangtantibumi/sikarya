@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\AuditEvent;
@@ -27,6 +29,7 @@ class SecurityAuditService
             'ip_address' => $ipAddress,
         ]);
     }
+
     public function record(
         string $eventType,
         ?User $actor = null,
@@ -35,7 +38,7 @@ class SecurityAuditService
         ?string $subjectType = null,
         string|int|null $subjectId = null,
     ): ?AuditEvent {
-        if (!Schema::hasTable('audit_events')) {
+        if (! Schema::hasTable('audit_events')) {
             return null;
         }
 

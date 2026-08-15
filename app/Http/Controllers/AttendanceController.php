@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Models\Attendance;
@@ -16,8 +18,7 @@ class AttendanceController extends Controller
     public function __construct(
         private readonly MetricAggregationService $metrics,
         private readonly WorkflowNotificationService $notifications,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request)
     {
@@ -29,7 +30,7 @@ class AttendanceController extends Controller
                 ->where('account_status', 'active'))
             ->orderByDesc('clock_in');
 
-        if (!$user->isCEO() && !$user->isHRD()) {
+        if (! $user->isCEO() && ! $user->isHRD()) {
             if ($user->isManager()) {
                 $query->whereHas('user', function ($staff) use ($user): void {
                     $staff
@@ -58,8 +59,8 @@ class AttendanceController extends Controller
                 'id' => $attendance->id,
                 'username' => $attendance->user?->username ?? 'unknown',
                 'status' => $attendance->status,
-                'time' => $clockIn ? $clockIn->format('H:i:s') . ' WIB' : '',
-                'timeOut' => $clockOut ? $clockOut->format('H:i') . ' WIB' : '',
+                'time' => $clockIn ? $clockIn->format('H:i:s').' WIB' : '',
+                'timeOut' => $clockOut ? $clockOut->format('H:i').' WIB' : '',
                 'date' => $clockIn?->format('Y-m-d') ?? $attendance->created_at?->timezone($timezone)->format('Y-m-d'),
                 'duration_hours' => round($durationMinutes / 60, 2),
                 'clock_in_at' => $clockIn?->toIso8601String(),
@@ -104,7 +105,7 @@ class AttendanceController extends Controller
 
         $user = $request->user();
         abort_if($user->isAlumni(), 403, 'Portal alumni tidak memiliki akses clock in.');
-        if (!empty($validated['username']) && $validated['username'] !== $user->username) {
+        if (! empty($validated['username']) && $validated['username'] !== $user->username) {
             abort(403, 'Absensi hanya dapat dilakukan untuk akun yang sedang masuk.');
         }
 
@@ -138,7 +139,7 @@ class AttendanceController extends Controller
             'user_id' => $user->id,
             'clock_in' => $serverNow,
             'status' => $status,
-            'location_coordinates' => $validated['lat'] . ',' . $validated['lng'],
+            'location_coordinates' => $validated['lat'].','.$validated['lng'],
             'work_type' => $validated['type'],
             'location_name' => $locationName,
             'is_holiday_work' => $holiday['is_holiday'],
@@ -160,7 +161,7 @@ class AttendanceController extends Controller
             'message' => 'Clock in berhasil dicatat berdasarkan waktu server.',
             'server_time' => $serverNow->toIso8601String(),
             'attendance_date' => $serverNow->format('Y-m-d'),
-            'display_time' => $serverNow->format('H:i') . ' WIB',
+            'display_time' => $serverNow->format('H:i').' WIB',
             'attendance' => $attendance,
         ]);
     }
@@ -173,7 +174,7 @@ class AttendanceController extends Controller
 
         $user = $request->user();
         abort_if($user->isAlumni(), 403, 'Portal alumni tidak memiliki akses clock out.');
-        if (!empty($validated['username']) && $validated['username'] !== $user->username) {
+        if (! empty($validated['username']) && $validated['username'] !== $user->username) {
             abort(403, 'Absensi hanya dapat dilakukan untuk akun yang sedang masuk.');
         }
 
@@ -186,7 +187,7 @@ class AttendanceController extends Controller
             ->latest('clock_in')
             ->first();
 
-        if (!$attendance) {
+        if (! $attendance) {
             return response()->json(['error' => 'Anda belum clock in hari ini.'], 422);
         }
 
@@ -212,7 +213,7 @@ class AttendanceController extends Controller
             'message' => 'Clock out berhasil dicatat berdasarkan waktu server.',
             'server_time' => $serverNow->toIso8601String(),
             'attendance_date' => $serverNow->format('Y-m-d'),
-            'display_time' => $serverNow->format('H:i') . ' WIB',
+            'display_time' => $serverNow->format('H:i').' WIB',
             'attendance' => $attendance->fresh(),
         ]);
     }
@@ -226,7 +227,7 @@ class AttendanceController extends Controller
         }
 
         try {
-            $response = (new Client())->get('https://nominatim.openstreetmap.org/reverse', [
+            $response = (new Client)->get('https://nominatim.openstreetmap.org/reverse', [
                 'query' => [
                     'format' => 'json',
                     'lat' => $lat,
@@ -261,7 +262,9 @@ class AttendanceController extends Controller
         $holidayDates = $this->holidayDates($monthStart, $monthEnd);
         $workingDays = 0;
         for ($date = $monthStart; $date->lte($monthEnd); $date = $date->addDay()) {
-            if (! $date->isWeekend() && ! isset($holidayDates[$date->toDateString()])) $workingDays++;
+            if (! $date->isWeekend() && ! isset($holidayDates[$date->toDateString()])) {
+                $workingDays++;
+            }
         }
 
         $minutes = Attendance::query()
@@ -291,6 +294,7 @@ class AttendanceController extends Controller
         $dateKey = $date->toDateString();
         $holidayDates = $this->holidayDates($date->startOfMonth(), $date->endOfMonth());
         $weekend = $date->isWeekend();
+
         return [
             'is_holiday' => $weekend || isset($holidayDates[$dateKey]),
             'label' => $holidayDates[$dateKey] ?? ($weekend ? 'Akhir pekan' : null),
@@ -304,13 +308,16 @@ class AttendanceController extends Controller
             ->get()
             ->flatMap(function (ChatMessage $message): array {
                 $metadata = $message->metadata ?? [];
-                if (empty($metadata['start_date']) || empty($metadata['end_date'])) return [];
+                if (empty($metadata['start_date']) || empty($metadata['end_date'])) {
+                    return [];
+                }
                 $start = CarbonImmutable::parse($metadata['start_date']);
                 $end = CarbonImmutable::parse($metadata['end_date']);
                 $dates = [];
                 for ($date = $start; $date->lte($end); $date = $date->addDay()) {
                     $dates[$date->toDateString()] = $metadata['title'] ?? 'Hari libur';
                 }
+
                 return $dates;
             })
             ->filter(fn ($label, $date) => $date >= $from->toDateString() && $date <= $to->toDateString())

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Models\Concerns\BelongsToCompany;
@@ -8,8 +10,9 @@ use Illuminate\Database\Eloquent\Model;
 class MetricSnapshot extends Model
 {
     use BelongsToCompany;
+
     protected $fillable = [
-        'subject_type', 'subject_id', 'snapshot_date', 'data'
+        'subject_type', 'subject_id', 'snapshot_date', 'data',
     ];
 
     protected $casts = [

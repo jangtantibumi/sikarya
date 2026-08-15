@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
-use App\Models\CrmReservation;
 use App\Models\CrmCustomer;
 use App\Models\CrmCustomerTimeline;
+use App\Models\CrmReservation;
 use Illuminate\Http\Request;
 
 class CrmReservationController extends Controller
@@ -22,13 +24,14 @@ class CrmReservationController extends Controller
         }
 
         $reservations = $query->paginate(15);
-        
+
         return view('crm.reservations.index', compact('reservations'));
     }
 
     public function create()
     {
         $customers = CrmCustomer::where('is_active', true)->get();
+
         return view('crm.reservations.create', compact('customers'));
     }
 
@@ -58,6 +61,7 @@ class CrmReservationController extends Controller
     public function edit(CrmReservation $reservation)
     {
         $customers = CrmCustomer::where('is_active', true)->get();
+
         return view('crm.reservations.edit', compact('reservation', 'customers'));
     }
 
@@ -91,6 +95,7 @@ class CrmReservationController extends Controller
     public function destroy(CrmReservation $reservation)
     {
         $reservation->delete();
+
         return redirect()->route('crm.reservations.index')->with('success', 'Reservasi berhasil dihapus');
     }
 }

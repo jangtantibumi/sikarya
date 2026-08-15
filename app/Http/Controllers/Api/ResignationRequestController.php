@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -13,8 +15,7 @@ class ResignationRequestController extends Controller
 {
     public function __construct(
         private readonly ApprovalWorkflowService $workflowService,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request)
     {
@@ -26,7 +27,7 @@ class ResignationRequestController extends Controller
             ->get();
 
         $approvalMap = ApprovalRequest::query()
-            ->where('subject_type', (new ResignationRequest())->getMorphClass())
+            ->where('subject_type', (new ResignationRequest)->getMorphClass())
             ->whereIn('subject_id', $requests->pluck('id'))
             ->latest('id')
             ->get()
@@ -73,7 +74,7 @@ class ResignationRequestController extends Controller
         }
 
         $initialManager = $user->isStaff() ? $user->manager() : null;
-        if ($user->isStaff() && !$initialManager) {
+        if ($user->isStaff() && ! $initialManager) {
             throw ValidationException::withMessages([
                 'approval' => 'Atasan langsung belum terdaftar. Hubungi HRD sebelum mengajukan resign.',
             ]);

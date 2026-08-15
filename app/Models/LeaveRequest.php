@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Models\Concerns\BelongsToCompany;
@@ -11,7 +13,7 @@ class LeaveRequest extends Model
     use BelongsToCompany, SoftDeletes;
 
     protected $fillable = [
-        'company_id', 'user_id', 'start_date', 'end_date', 'reason', 'type', 'leave_type', 'total_days', 'status', 'approved_by'
+        'company_id', 'user_id', 'start_date', 'end_date', 'reason', 'type', 'leave_type', 'total_days', 'status', 'approved_by',
     ];
 
     protected $casts = [

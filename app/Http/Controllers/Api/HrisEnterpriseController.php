@@ -1,16 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\HrAttendanceCorrection;
 use App\Models\HrCandidate;
-use App\Models\HrDepartment;
 use App\Models\HrExitClearance;
-use App\Models\HrJobGrade;
 use App\Models\HrJobVacancy;
-use App\Models\HrPosition;
 use App\Models\LeaveRequest;
 use App\Models\Payroll;
 use App\Models\User;
@@ -39,6 +38,7 @@ class HrisEnterpriseController extends Controller
     public function getOrgTree(Request $request): JsonResponse
     {
         $tree = $this->hrisService->getOrganizationTree($this->getCompany($request));
+
         return response()->json(['status' => 'success', 'data' => $tree]);
     }
 
@@ -52,6 +52,7 @@ class HrisEnterpriseController extends Controller
         ]);
 
         $dept = $this->hrisService->createDepartment($this->getCompany($request), $validated);
+
         return response()->json(['status' => 'success', 'message' => 'Department created successfully', 'data' => $dept], 201);
     }
 
@@ -64,6 +65,7 @@ class HrisEnterpriseController extends Controller
         ]);
 
         $div = $this->hrisService->createDivision($this->getCompany($request), $validated);
+
         return response()->json(['status' => 'success', 'message' => 'Division created successfully', 'data' => $div], 201);
     }
 
@@ -78,6 +80,7 @@ class HrisEnterpriseController extends Controller
         ]);
 
         $pos = $this->hrisService->createPosition($this->getCompany($request), $validated);
+
         return response()->json(['status' => 'success', 'message' => 'Position created successfully', 'data' => $pos], 201);
     }
 
@@ -92,6 +95,7 @@ class HrisEnterpriseController extends Controller
         ]);
 
         $grade = $this->hrisService->createJobGrade($this->getCompany($request), $validated);
+
         return response()->json(['status' => 'success', 'message' => 'Job Grade created successfully', 'data' => $grade], 201);
     }
 
@@ -150,6 +154,7 @@ class HrisEnterpriseController extends Controller
         ]);
 
         $attendance = $this->hrisService->processClockIn($request->user(), $validated['clock_in_time']);
+
         return response()->json(['status' => 'success', 'message' => 'Clock In recorded successfully', 'data' => $attendance]);
     }
 
@@ -160,6 +165,7 @@ class HrisEnterpriseController extends Controller
         ]);
 
         $attendance = $this->hrisService->processClockOut($request->user(), $validated['clock_out_time']);
+
         return response()->json(['status' => 'success', 'message' => 'Clock Out recorded successfully', 'data' => $attendance]);
     }
 
@@ -174,12 +180,14 @@ class HrisEnterpriseController extends Controller
         ]);
 
         $correction = $this->hrisService->submitAttendanceCorrection($request->user(), $validated);
+
         return response()->json(['status' => 'success', 'message' => 'Attendance correction submitted', 'data' => $correction], 201);
     }
 
     public function approveCorrection(Request $request, HrAttendanceCorrection $correction): JsonResponse
     {
         $this->hrisService->approveAttendanceCorrection($correction, $request->user());
+
         return response()->json(['status' => 'success', 'message' => 'Attendance correction approved']);
     }
 
@@ -197,12 +205,14 @@ class HrisEnterpriseController extends Controller
         ]);
 
         $leave = $this->hrisService->submitLeaveRequest($request->user(), $validated);
+
         return response()->json(['status' => 'success', 'message' => 'Leave request submitted', 'data' => $leave], 201);
     }
 
     public function approveLeave(Request $request, LeaveRequest $leaveRequest): JsonResponse
     {
         $this->hrisService->approveLeaveRequest($leaveRequest, $request->user());
+
         return response()->json(['status' => 'success', 'message' => 'Leave request approved']);
     }
 
@@ -217,12 +227,14 @@ class HrisEnterpriseController extends Controller
         ]);
 
         $payrolls = $this->hrisService->calculateAndGeneratePayroll($this->getCompany($request), $validated['month_year']);
-        return response()->json(['status' => 'success', 'message' => 'Payroll generated successfully for ' . $validated['month_year'], 'data' => $payrolls]);
+
+        return response()->json(['status' => 'success', 'message' => 'Payroll generated successfully for '.$validated['month_year'], 'data' => $payrolls]);
     }
 
     public function approvePayroll(Request $request, Payroll $payroll): JsonResponse
     {
         $this->hrisService->approvePayroll($payroll);
+
         return response()->json(['status' => 'success', 'message' => 'Payroll approved']);
     }
 
@@ -240,6 +252,7 @@ class HrisEnterpriseController extends Controller
         ]);
 
         $okr = $this->hrisService->createOkr($this->getCompany($request), $request->user(), $validated);
+
         return response()->json(['status' => 'success', 'message' => 'OKR created successfully', 'data' => $okr], 201);
     }
 
@@ -252,6 +265,7 @@ class HrisEnterpriseController extends Controller
         ]);
 
         $review = $this->hrisService->recordPerformanceReview($this->getCompany($request), $employee, $request->user(), $validated);
+
         return response()->json(['status' => 'success', 'message' => 'Performance review recorded', 'data' => $review], 201);
     }
 
@@ -270,6 +284,7 @@ class HrisEnterpriseController extends Controller
         ]);
 
         $vacancy = $this->hrisService->createJobVacancy($this->getCompany($request), $validated);
+
         return response()->json(['status' => 'success', 'message' => 'Job vacancy created successfully', 'data' => $vacancy], 201);
     }
 
@@ -282,12 +297,14 @@ class HrisEnterpriseController extends Controller
         ]);
 
         $candidate = $this->hrisService->applyCandidate($this->getCompany($request), $vacancy, $validated);
+
         return response()->json(['status' => 'success', 'message' => 'Application submitted successfully', 'data' => $candidate], 201);
     }
 
     public function hireCandidate(Request $request, HrCandidate $candidate): JsonResponse
     {
         $employee = $this->hrisService->hireCandidate($candidate);
+
         return response()->json(['status' => 'success', 'message' => 'Candidate hired & converted to Employee Master', 'data' => $employee]);
     }
 
@@ -303,12 +320,14 @@ class HrisEnterpriseController extends Controller
         ]);
 
         $resignation = $this->hrisService->processResignation($request->user(), $validated['reason'], $validated['effective_date']);
+
         return response()->json(['status' => 'success', 'message' => 'Resignation & Exit Clearance initiated', 'data' => $resignation], 201);
     }
 
     public function approveClearance(Request $request, HrExitClearance $clearance): JsonResponse
     {
         $this->hrisService->clearExitItem($clearance, $request->user());
+
         return response()->json(['status' => 'success', 'message' => 'Exit Clearance item cleared']);
     }
 }

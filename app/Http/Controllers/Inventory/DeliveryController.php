@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Inventory;
 
 use App\Http\Controllers\Controller;
 use App\Models\Inventory\Delivery;
 use App\Models\Inventory\DeliveryLine;
-use App\Models\Inventory\Packing;
 use App\Models\Inventory\Item;
+use App\Models\Inventory\Packing;
 use Illuminate\Http\Request;
 
 class DeliveryController extends Controller
@@ -16,10 +18,11 @@ class DeliveryController extends Controller
         $query = Delivery::with(['packing', 'lines.item']);
         if ($request->filled('search')) {
             $query->where('number', 'like', "%{$request->search}%")
-                  ->orWhere('courier_name', 'like', "%{$request->search}%")
-                  ->orWhere('tracking_number', 'like', "%{$request->search}%");
+                ->orWhere('courier_name', 'like', "%{$request->search}%")
+                ->orWhere('tracking_number', 'like', "%{$request->search}%");
         }
         $deliveries = $query->paginate(15);
+
         return view('inventory.deliveries.index', compact('deliveries'));
     }
 
@@ -27,6 +30,7 @@ class DeliveryController extends Controller
     {
         $packings = Packing::all();
         $items = Item::all();
+
         return view('inventory.deliveries.create', compact('packings', 'items'));
     }
 
@@ -70,6 +74,7 @@ class DeliveryController extends Controller
     public function show($id)
     {
         $delivery = Delivery::with(['packing', 'lines.item'])->findOrFail($id);
+
         return view('inventory.deliveries.show', compact('delivery'));
     }
 
@@ -77,6 +82,7 @@ class DeliveryController extends Controller
     {
         $del = Delivery::findOrFail($id);
         $del->delete();
+
         return redirect()->route('inventory.deliveries.index')->with('success', 'Data Delivery dihapus.');
     }
 }

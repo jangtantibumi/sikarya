@@ -1,16 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\PurchaseRequest;
-use App\Models\PurchaseOrder;
 use App\Models\GoodsReceipt;
 use App\Models\Product;
-use App\Models\Supplier;
+use App\Models\PurchaseOrder;
+use App\Models\PurchaseRequest;
 use App\Models\Warehouse;
-use App\Services\InventoryLedgerService;
 use App\Services\AccountingService;
+use App\Services\InventoryLedgerService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -30,7 +31,7 @@ class PurchasingController extends Controller
 
         PurchaseRequest::create([
             'company_id' => $user->company_id ?? 1,
-            'number' => 'PR-' . strtoupper(Str::random(6)),
+            'number' => 'PR-'.strtoupper(Str::random(6)),
             'title' => $request->title,
             'reason' => $request->reason,
             'status' => $isCeo ? 'approved' : 'pending_ceo',
@@ -42,9 +43,12 @@ class PurchasingController extends Controller
 
     public function approvePR($id)
     {
-        if (!Auth::user()->isCEO()) abort(403);
+        if (! Auth::user()->isCEO()) {
+            abort(403);
+        }
         $pr = PurchaseRequest::findOrFail($id);
         $pr->update(['status' => 'approved']);
+
         return redirect()->back()->with('success', 'Purchase Request disetujui.');
     }
 
@@ -62,7 +66,7 @@ class PurchasingController extends Controller
         PurchaseOrder::create([
             'company_id' => $user->company_id ?? 1,
             'supplier_id' => $request->supplier_id,
-            'number' => 'PO-' . strtoupper(Str::random(6)),
+            'number' => 'PO-'.strtoupper(Str::random(6)),
             'order_date' => today(),
             'total_amount' => $request->total_amount,
             'status' => $isCeo ? 'approved' : 'pending_ceo',
@@ -74,11 +78,14 @@ class PurchasingController extends Controller
 
     public function approvePO($id)
     {
-        if (!Auth::user()->isCEO()) abort(403);
+        if (! Auth::user()->isCEO()) {
+            abort(403);
+        }
         $po = PurchaseOrder::findOrFail($id);
         $po->update(['status' => 'approved']);
         // Post journal entry for approved Purchase Order
         app(AccountingService::class)->postPurchaseOrderJournal(Auth::user(), $po);
+
         return redirect()->back()->with('success', 'Purchase Order disetujui.');
     }
 
@@ -102,8 +109,8 @@ class PurchasingController extends Controller
         $isCeo = $user->isCEO();
         $companyId = $user->company_id ?? 1;
         $warehouse = Warehouse::where('company_id', $companyId)->first();
-        
-        if (!$warehouse) {
+
+        if (! $warehouse) {
             return redirect()->back()->withErrors(['error' => 'Gudang utama belum dikonfigurasi.']);
         }
 
@@ -112,7 +119,7 @@ class PurchasingController extends Controller
                 'company_id' => $companyId,
                 'purchase_order_id' => $request->purchase_order_id,
                 'warehouse_id' => $warehouse->id,
-                'number' => 'GR-' . strtoupper(Str::random(6)),
+                'number' => 'GR-'.strtoupper(Str::random(6)),
                 'received_date' => today(),
                 'status' => $isCeo ? 'approved' : 'pending_ceo',
                 'received_by_id' => $user->id,
@@ -140,10 +147,12 @@ class PurchasingController extends Controller
 
     public function approveGR($id, InventoryLedgerService $inventoryService)
     {
-        if (!Auth::user()->isCEO()) abort(403);
-        
+        if (! Auth::user()->isCEO()) {
+            abort(403);
+        }
+
         $gr = GoodsReceipt::findOrFail($id);
-        
+
         DB::transaction(function () use ($gr, $inventoryService) {
             $gr->update(['status' => 'approved']);
 

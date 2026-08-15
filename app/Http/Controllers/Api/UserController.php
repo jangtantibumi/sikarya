@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\EmployeeSeparation;
 use App\Models\User;
 use App\Services\EmployeeIdentityService;
 use App\Services\EmployeeSeparationService;
@@ -164,7 +167,7 @@ class UserController extends Controller
         ]);
     }
 
-    public function downloadSeparationBackup(Request $request, \App\Models\EmployeeSeparation $employeeSeparation)
+    public function downloadSeparationBackup(Request $request, EmployeeSeparation $employeeSeparation)
     {
         $actor = $request->user();
         abort_unless($actor->isCEO() || $actor->isHRD() || $employeeSeparation->initiated_by_id === $actor->id, 403);
@@ -172,7 +175,7 @@ class UserController extends Controller
 
         return Storage::disk('local')->download(
             $employeeSeparation->backup_path,
-            'arsip-karyawan-' . $employeeSeparation->user_id . '.json',
+            'arsip-karyawan-'.$employeeSeparation->user_id.'.json',
             ['Content-Type' => 'application/json; charset=UTF-8'],
         );
     }

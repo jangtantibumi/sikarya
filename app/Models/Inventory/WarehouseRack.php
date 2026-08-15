@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\Inventory;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,6 +14,7 @@ class WarehouseRack extends Model
     use HasFactory;
 
     protected $table = 'inv_warehouse_racks';
+
     protected $guarded = [];
 
     public function zone(): BelongsTo

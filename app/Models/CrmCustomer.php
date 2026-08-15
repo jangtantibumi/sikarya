@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -47,7 +49,7 @@ class CrmCustomer extends Model
         static::creating(function ($customer) {
             if (empty($customer->customer_code)) {
                 $latest = static::max('id') + 1;
-                $customer->customer_code = 'CUST-' . str_pad($latest, 5, '0', STR_PAD_LEFT);
+                $customer->customer_code = 'CUST-'.str_pad($latest, 5, '0', STR_PAD_LEFT);
             }
             if (empty($customer->referral_code)) {
                 $customer->referral_code = strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 8));

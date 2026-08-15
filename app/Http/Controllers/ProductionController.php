@@ -1,20 +1,25 @@
 <?php
 
-namespace App\Http\Controllers;
+declare(strict_types=1);
 
-use Illuminate\Http\Request;
-use App\Models\Recipe;
-use App\Models\Warehouse;
-use App\Services\InventoryLedgerService;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
+namespace App\Http\Controllers;
 
 use App\Models\BillOfMaterial;
 use App\Models\BomLine;
-use App\Models\ProductionOrder;
+use App\Models\Product;
 use App\Models\ProductionMaterial;
+use App\Models\ProductionOrder;
+use App\Models\ProductionRouting;
+use App\Models\ProductionRoutingStep;
 use App\Models\ProductionWaste;
+use App\Models\Recipe;
+use App\Models\Warehouse;
+use App\Services\InventoryLedgerService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class ProductionController extends Controller
 {
@@ -22,7 +27,7 @@ class ProductionController extends Controller
     {
         $request->validate([
             'recipe_id' => 'required|exists:recipes,id',
-            'batch_quantity' => 'required|numeric|min:0.1'
+            'batch_quantity' => 'required|numeric|min:0.1',
         ]);
 
         $recipe = Recipe::with('items.product')->findOrFail($request->recipe_id);
@@ -30,8 +35,8 @@ class ProductionController extends Controller
 
         // Ambil warehouse pertama (default) untuk perusahaan ini
         $warehouse = Warehouse::where('company_id', $companyId)->first();
-        
-        if (!$warehouse) {
+
+        if (! $warehouse) {
             return redirect()->back()->withErrors(['error' => 'Tidak ada gudang aktif untuk melakukan backflush.']);
         }
 
@@ -39,26 +44,26 @@ class ProductionController extends Controller
             DB::transaction(function () use ($recipe, $request, $inventoryService, $warehouse) {
                 foreach ($recipe->items as $item) {
                     $deductionQuantity = -($item->quantity * $request->batch_quantity);
-                    
+
                     // Akan throw ValidationException jika stok tidak mencukupi (diatur di InventoryLedgerService)
                     $inventoryService->move(
-                        $item->product, 
-                        $warehouse, 
-                        $deductionQuantity, 
-                        'out_production_backflush', 
-                        Auth::user(), 
+                        $item->product,
+                        $warehouse,
+                        $deductionQuantity,
+                        'out_production_backflush',
+                        Auth::user(),
                         "Backflush for Recipe: {$recipe->name} Batch: {$request->batch_quantity}"
                     );
                 }
             });
 
             return redirect()->back()->with('success', "Produksi {$recipe->name} sebanyak {$request->batch_quantity} batch berhasil. Stok bahan baku otomatis dipotong.");
-            
+
         } catch (ValidationException $e) {
             // Tangkap exception jika stok minus
             return redirect()->back()->withErrors(['error' => 'Gagal memproses produksi: Stok bahan baku tidak mencukupi untuk backflush. (Sistem mengunci stok agar tidak minus).']);
         } catch (\Exception $e) {
-            return redirect()->back()->withErrors(['error' => 'Terjadi kesalahan sistem: ' . $e->getMessage()]);
+            return redirect()->back()->withErrors(['error' => 'Terjadi kesalahan sistem: '.$e->getMessage()]);
         }
     }
 
@@ -96,14 +101,14 @@ class ProductionController extends Controller
             }
 
             if ($request->has('routings') && count($request->routings) > 0) {
-                $routing = \App\Models\ProductionRouting::create([
+                $routing = ProductionRouting::create([
                     'company_id' => $companyId,
                     'bill_of_material_id' => $bom->id,
-                    'name' => $bom->name . ' Routing'
+                    'name' => $bom->name.' Routing',
                 ]);
-                
+
                 foreach ($request->routings as $index => $rStep) {
-                    \App\Models\ProductionRoutingStep::create([
+                    ProductionRoutingStep::create([
                         'production_routing_id' => $routing->id,
                         'sequence' => $index + 1,
                         'work_center' => $rStep['work_center'],
@@ -128,11 +133,11 @@ class ProductionController extends Controller
         $companyId = Auth::user()->company_id ?? 1;
 
         DB::transaction(function () use ($request, $companyId) {
-            foreach($request->work_orders as $woData) {
+            foreach ($request->work_orders as $woData) {
                 $bom = BillOfMaterial::with('lines')->findOrFail($woData['bill_of_material_id']);
-                
-                $poNumber = 'WO-' . date('Ymd') . '-' . strtoupper(\Illuminate\Support\Str::random(4));
-                
+
+                $poNumber = 'WO-'.date('Ymd').'-'.strtoupper(Str::random(4));
+
                 $wo = ProductionOrder::create([
                     'company_id' => $companyId,
                     'number' => $poNumber,
@@ -170,20 +175,20 @@ class ProductionController extends Controller
         $wo = ProductionOrder::findOrFail($id);
         $material = ProductionMaterial::where('production_order_id', $wo->id)
             ->findOrFail($request->material_id);
-            
+
         $warehouse = Warehouse::where('company_id', $wo->company_id)->first();
-        if (!$warehouse) {
+        if (! $warehouse) {
             return redirect()->back()->withErrors(['error' => 'Tidak ada gudang aktif.']);
         }
 
         try {
             DB::transaction(function () use ($wo, $material, $request, $inventoryService, $warehouse) {
                 $inventoryService->move(
-                    $material->product, 
-                    $warehouse, 
-                    -$request->quantity, 
-                    'out_production_issue', 
-                    Auth::user(), 
+                    $material->product,
+                    $warehouse,
+                    -$request->quantity,
+                    'out_production_issue',
+                    Auth::user(),
                     "Issue bahan WO: {$wo->number}"
                 );
 
@@ -191,6 +196,7 @@ class ProductionController extends Controller
                 $material->status = 'issued';
                 $material->save();
             });
+
             return redirect()->back()->with('success', 'Bahan baku berhasil di-issue dari gudang.');
         } catch (ValidationException $e) {
             return redirect()->back()->withErrors(['error' => 'Gagal: Stok tidak mencukupi untuk di-issue.']);
@@ -207,9 +213,9 @@ class ProductionController extends Controller
         $wo = ProductionOrder::findOrFail($id);
         $material = ProductionMaterial::where('production_order_id', $wo->id)
             ->findOrFail($request->material_id);
-            
+
         if ($material->issued_quantity < $material->actual_quantity + $request->quantity) {
-             return redirect()->back()->withErrors(['error' => 'Bahan yang dikonsumsi melebihi yang telah di-issue oleh gudang.']);
+            return redirect()->back()->withErrors(['error' => 'Bahan yang dikonsumsi melebihi yang telah di-issue oleh gudang.']);
         }
 
         DB::transaction(function () use ($wo, $material, $request) {
@@ -221,6 +227,7 @@ class ProductionController extends Controller
             $material->status = 'consumed';
             $material->save();
         });
+
         return redirect()->back()->with('success', 'Bahan baku berhasil dikonsumsi dalam produksi.');
     }
 
@@ -230,25 +237,25 @@ class ProductionController extends Controller
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|numeric|min:0.01',
             'reason' => 'required|string|max:255',
-            'type' => 'required|in:waste,reject,scrap'
+            'type' => 'required|in:waste,reject,scrap',
         ]);
 
         $wo = ProductionOrder::findOrFail($id);
         $warehouse = Warehouse::where('company_id', $wo->company_id)->first();
-        if (!$warehouse) {
+        if (! $warehouse) {
             return redirect()->back()->withErrors(['error' => 'Tidak ada gudang aktif.']);
         }
 
         try {
             DB::transaction(function () use ($wo, $request, $inventoryService, $warehouse) {
-                $product = \App\Models\Product::findOrFail($request->product_id);
-                
+                $product = Product::findOrFail($request->product_id);
+
                 $inventoryService->move(
-                    $product, 
-                    $warehouse, 
-                    -$request->quantity, 
-                    'out_production_waste', 
-                    Auth::user(), 
+                    $product,
+                    $warehouse,
+                    -$request->quantity,
+                    'out_production_waste',
+                    Auth::user(),
                     "Waste WO: {$wo->number} - {$request->reason}"
                 );
 
@@ -261,6 +268,7 @@ class ProductionController extends Controller
                     'reason' => $request->reason,
                 ]);
             });
+
             return redirect()->back()->with('success', 'Waste produksi berhasil dicatat.');
         } catch (ValidationException $e) {
             return redirect()->back()->withErrors(['error' => 'Gagal: Stok tidak mencukupi untuk mencatat waste ini.']);
@@ -279,18 +287,18 @@ class ProductionController extends Controller
         }
 
         $warehouse = Warehouse::where('company_id', $wo->company_id)->first();
-        if (!$warehouse) {
+        if (! $warehouse) {
             return redirect()->back()->withErrors(['error' => 'Tidak ada gudang aktif.']);
         }
 
         DB::transaction(function () use ($wo, $request, $inventoryService, $warehouse) {
             // Tambah barang jadi ke gudang
             $inventoryService->move(
-                $wo->product, 
-                $warehouse, 
-                $request->completed_quantity, 
-                'in_production', 
-                Auth::user(), 
+                $wo->product,
+                $warehouse,
+                $request->completed_quantity,
+                'in_production',
+                Auth::user(),
                 "Penyelesaian WO: {$wo->number}"
             );
 

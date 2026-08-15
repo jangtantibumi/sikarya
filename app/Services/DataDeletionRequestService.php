@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Attendance;
@@ -63,8 +65,7 @@ class DataDeletionRequestService
         private readonly ApprovalWorkflowService $workflow,
         private readonly DataDeletionExecutor $executor,
         private readonly SecurityAuditService $audit,
-    ) {
-    }
+    ) {}
 
     public function supportedTypes(): array
     {
@@ -170,7 +171,7 @@ class DataDeletionRequestService
     private function findTarget(string $resourceType, int $targetId): Model
     {
         $class = self::RESOURCE_MODELS[$resourceType] ?? null;
-        if (!$class) {
+        if (! $class) {
             throw ValidationException::withMessages(['resource_type' => 'Jenis data tidak didukung.']);
         }
 
@@ -195,11 +196,13 @@ class DataDeletionRequestService
 
         if ($resourceType === 'journal_entry') {
             abort_unless($actor->role === 'mgr_finance', 403);
+
             return;
         }
 
         if ($resourceType === 'client_inflow' || $resourceType === 'project_cost') {
             abort_unless($actor->divisionKey() === 'finance' || $actor->role === 'mgr_ops', 403);
+
             return;
         }
 

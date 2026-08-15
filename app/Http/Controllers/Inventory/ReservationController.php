@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Inventory;
 
 use App\Http\Controllers\Controller;
+use App\Models\Inventory\Item;
 use App\Models\Inventory\Reservation;
 use App\Models\Inventory\ReservationLine;
 use App\Models\Inventory\Warehouse;
-use App\Models\Inventory\Item;
 use Illuminate\Http\Request;
 
 class ReservationController extends Controller
@@ -16,9 +18,10 @@ class ReservationController extends Controller
         $query = Reservation::with(['warehouse', 'lines.item']);
         if ($request->filled('search')) {
             $query->where('number', 'like', "%{$request->search}%")
-                  ->orWhere('customer_name', 'like', "%{$request->search}%");
+                ->orWhere('customer_name', 'like', "%{$request->search}%");
         }
         $reservations = $query->paginate(15);
+
         return view('inventory.reservations.index', compact('reservations'));
     }
 
@@ -26,6 +29,7 @@ class ReservationController extends Controller
     {
         $warehouses = Warehouse::all();
         $items = Item::all();
+
         return view('inventory.reservations.create', compact('warehouses', 'items'));
     }
 
@@ -65,6 +69,7 @@ class ReservationController extends Controller
     public function show($id)
     {
         $reservation = Reservation::with(['warehouse', 'lines.item'])->findOrFail($id);
+
         return view('inventory.reservations.show', compact('reservation'));
     }
 
@@ -72,6 +77,7 @@ class ReservationController extends Controller
     {
         $res = Reservation::findOrFail($id);
         $res->delete();
+
         return redirect()->route('inventory.reservations.index')->with('success', 'Reservasi Stok dihapus.');
     }
 }

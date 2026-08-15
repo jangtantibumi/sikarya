@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Models\Lead;
@@ -19,8 +21,7 @@ class LeadController extends Controller
     public function __construct(
         private readonly MetricAggregationService $metrics,
         private readonly DataDeletionRequestService $deletions,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request): JsonResponse
     {
@@ -609,6 +610,7 @@ class LeadController extends Controller
         if ($lead->status === 'deal') {
             $lead->won_at ??= now();
             $lead->lost_reason = null;
+
             return;
         }
 

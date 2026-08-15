@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -15,8 +17,7 @@ class GeminiController extends Controller
     public function __construct(
         private readonly GeminiService $gemini,
         private readonly ChatChannelService $channels,
-    ) {
-    }
+    ) {}
 
     public function status(Request $request)
     {
@@ -97,11 +98,11 @@ class GeminiController extends Controller
 
         $user = $request->user();
         $channel = $validated['channel'] ?? null;
-        if ($channel && !$this->channels->canAccess($user, $channel)) {
+        if ($channel && ! $this->channels->canAccess($user, $channel)) {
             abort(403, 'Anda tidak memiliki akses ke kanal tersebut.');
         }
 
-        if (!$this->gemini->configured($user)) {
+        if (! $this->gemini->configured($user)) {
             return response()->json([
                 'message' => 'Gemini pribadi belum aktif. Buka pengaturan Copilot dan masukkan API key akun Anda.',
                 'code' => 'GEMINI_NOT_CONFIGURED',

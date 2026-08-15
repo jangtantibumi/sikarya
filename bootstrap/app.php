@@ -1,5 +1,14 @@
 <?php
 
+use App\Exceptions\BusinessRuleException;
+use App\Http\Middleware\CustomerPortalMiddleware;
+use App\Http\Middleware\EnforceAbsoluteSessionLifetime;
+use App\Http\Middleware\EnsureEmployeeOrAlumniScope;
+use App\Http\Middleware\EnsureErpAccessGate;
+use App\Http\Middleware\EnsureFeatureEnabled;
+use App\Http\Middleware\EnsureMasterDemoAuthenticated;
+use App\Http\Middleware\ResolveTenantContext;
+use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -14,15 +23,15 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withCommands()
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
-        
+        $middleware->append(SecurityHeaders::class);
+
         $middleware->alias([
-            'erp.gate' => \App\Http\Middleware\EnsureErpAccessGate::class,
-            'feature' => \App\Http\Middleware\EnsureFeatureEnabled::class,
-            'employee.or.alumni' => \App\Http\Middleware\EnsureEmployeeOrAlumniScope::class,
-            'tenant.context' => \App\Http\Middleware\ResolveTenantContext::class,
-            'master.demo.auth' => \App\Http\Middleware\EnsureMasterDemoAuthenticated::class,
-            'customer.portal' => \App\Http\Middleware\CustomerPortalMiddleware::class,
+            'erp.gate' => EnsureErpAccessGate::class,
+            'feature' => EnsureFeatureEnabled::class,
+            'employee.or.alumni' => EnsureEmployeeOrAlumniScope::class,
+            'tenant.context' => ResolveTenantContext::class,
+            'master.demo.auth' => EnsureMasterDemoAuthenticated::class,
+            'customer.portal' => CustomerPortalMiddleware::class,
         ]);
 
         $middleware->redirectGuestsTo(
@@ -30,7 +39,7 @@ return Application::configure(basePath: dirname(__DIR__))
         );
 
         $middleware->appendToGroup('web', [
-            \App\Http\Middleware\EnforceAbsoluteSessionLifetime::class,
+            EnforceAbsoluteSessionLifetime::class,
         ]);
 
         $middleware->validateCsrfTokens(except: [
@@ -42,7 +51,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*'),
         );
-        $exceptions->render(function (\App\Exceptions\BusinessRuleException $e, Request $request) {
+        $exceptions->render(function (BusinessRuleException $e, Request $request) {
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),

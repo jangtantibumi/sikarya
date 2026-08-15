@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Product;
-use App\Models\StockMovement;
-use App\Models\Warehouse;
-use App\Models\User;
 use App\Models\StockBatch;
+use App\Models\StockMovement;
+use App\Models\User;
+use App\Models\Warehouse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -18,19 +20,25 @@ class InventoryLedgerService
             ->where('product_id', $product->id)
             ->where('warehouse_id', $warehouse->id);
 
-        if ($batchId) $query->where('batch_id', $batchId);
-        if ($rackId) $query->where('rack_id', $rackId);
-        if ($binId) $query->where('bin_id', $binId);
+        if ($batchId) {
+            $query->where('batch_id', $batchId);
+        }
+        if ($rackId) {
+            $query->where('rack_id', $rackId);
+        }
+        if ($binId) {
+            $query->where('bin_id', $binId);
+        }
 
         return (float) $query->sum('quantity');
     }
 
     public function move(
-        Product $product, 
-        Warehouse $warehouse, 
-        float $quantity, 
-        string $type, 
-        ?User $actor = null, 
+        Product $product,
+        Warehouse $warehouse,
+        float $quantity,
+        string $type,
+        ?User $actor = null,
         ?string $reference = null,
         ?int $batchId = null,
         ?int $rackId = null,
@@ -41,11 +49,11 @@ class InventoryLedgerService
             if ($product->company_id !== $warehouse->company_id || $quantity == 0) {
                 throw ValidationException::withMessages(['quantity' => 'Produk, gudang, dan jumlah tidak valid.']);
             }
-            
+
             if ($quantity < 0 && $this->balance($product, $warehouse, $batchId, $rackId, $binId) + $quantity < 0) {
                 throw ValidationException::withMessages(['quantity' => 'Stok tidak mencukupi; saldo tidak boleh negatif.']);
             }
-            
+
             // If batchId is provided, update the StockBatch quantity
             if ($batchId) {
                 $batch = StockBatch::find($batchId);
@@ -56,13 +64,13 @@ class InventoryLedgerService
             }
 
             return StockMovement::query()->create([
-                'company_id' => $product->company_id, 
-                'product_id' => $product->id, 
-                'warehouse_id' => $warehouse->id, 
-                'quantity' => $quantity, 
-                'type' => $type, 
-                'unit_cost' => $product->standard_cost ?? 0, 
-                'reference' => $reference, 
+                'company_id' => $product->company_id,
+                'product_id' => $product->id,
+                'warehouse_id' => $warehouse->id,
+                'quantity' => $quantity,
+                'type' => $type,
+                'unit_cost' => $product->standard_cost ?? 0,
+                'reference' => $reference,
                 'created_by_id' => $actor?->id,
                 'batch_id' => $batchId,
                 'rack_id' => $rackId,
@@ -87,10 +95,10 @@ class InventoryLedgerService
             }
 
             // Deduct from source
-            $out = $this->move($product, $fromWarehouse, -$quantity, 'transfer_out', $actor, $reference, $batchId, null, null, "Transfer to " . $toWarehouse->name);
-            
+            $out = $this->move($product, $fromWarehouse, -$quantity, 'transfer_out', $actor, $reference, $batchId, null, null, 'Transfer to '.$toWarehouse->name);
+
             // Add to destination
-            $in = $this->move($product, $toWarehouse, $quantity, 'transfer_in', $actor, $reference, $batchId, null, null, "Transfer from " . $fromWarehouse->name);
+            $in = $this->move($product, $toWarehouse, $quantity, 'transfer_in', $actor, $reference, $batchId, null, null, 'Transfer from '.$fromWarehouse->name);
 
             return ['out' => $out, 'in' => $in];
         });

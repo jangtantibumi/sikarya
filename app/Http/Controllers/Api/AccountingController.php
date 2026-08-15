@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -22,8 +24,7 @@ class AccountingController extends Controller
         private readonly AccountingImportService $imports,
         private readonly RecordAttachmentService $attachments,
         private readonly SecurityAuditService $audit,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request)
     {
@@ -82,7 +83,7 @@ class AccountingController extends Controller
             ],
         ]);
 
-        if ($validated['kind'] === 'revenue' && !str_ends_with($validated['category'], '_revenue')) {
+        if ($validated['kind'] === 'revenue' && ! str_ends_with($validated['category'], '_revenue')) {
             throw ValidationException::withMessages(['category' => 'Kategori pendapatan tidak valid.']);
         }
         if ($validated['kind'] === 'expense' && str_ends_with($validated['category'], '_revenue')) {

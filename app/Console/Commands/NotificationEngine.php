@@ -1,11 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
 use App\Models\Product;
 use App\Models\StockMovement;
 use App\Models\Task;
-use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
@@ -34,11 +35,11 @@ class NotificationEngine extends Command
 
         // 1. Check Task Deadlines (< 7 days)
         $approachingTasks = Task::where('status', '!=', 'done')
-                                ->whereNotNull('deadline')
-                                ->where('deadline', '<=', now()->addDays(7))
-                                ->where('deadline', '>', now())
-                                ->get();
-                                
+            ->whereNotNull('deadline')
+            ->where('deadline', '<=', now()->addDays(7))
+            ->where('deadline', '>', now())
+            ->get();
+
         foreach ($approachingTasks as $task) {
             $msg = "Task '{$task->title}' mendekati deadline ({$task->deadline->format('d M Y')}). Mohon segera diselesaikan.";
             Log::info("Notification Engine (Task): {$msg} - Sent to User #{$task->user_id}");
@@ -52,9 +53,9 @@ class NotificationEngine extends Command
         foreach ($products as $product) {
             $currentStock = StockMovement::where('product_id', $product->id)->sum('quantity');
             $threshold = $product->reorder_level > 0 ? $product->reorder_level : 1000; // default 1000 threshold
-            
+
             if ($currentStock <= ($threshold * 1.10)) { // 10% above threshold or below
-                $msg = "Stok Kritis: {$product->name} tersisa " . number_format($currentStock) . " (Batas aman: " . number_format($threshold) . "). Segera lakukan pengadaan (Purchasing).";
+                $msg = "Stok Kritis: {$product->name} tersisa ".number_format($currentStock).' (Batas aman: '.number_format($threshold).'). Segera lakukan pengadaan (Purchasing).';
                 Log::warning("Notification Engine (Stock): {$msg}");
                 // In a real app, send this to CEO & Purchasing Manager
             }

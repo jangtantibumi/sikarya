@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Models\Concerns\BelongsToCompany;
@@ -11,7 +13,7 @@ class Goal extends Model
     use BelongsToCompany, SoftDeletes;
 
     protected $fillable = [
-        'title', 'description', 'division', 'year', 'status', 'progress', 'created_by'
+        'title', 'description', 'division', 'year', 'status', 'progress', 'created_by',
     ];
 
     protected $casts = [

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -20,8 +22,7 @@ class KpiController extends Controller
         private readonly ApprovalWorkflowService $workflowService,
         private readonly MetricAggregationService $metrics,
         private readonly RecordAttachmentService $attachments,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request)
     {
@@ -35,7 +36,7 @@ class KpiController extends Controller
             'attachments',
         ]);
 
-        if (!$user->isCEO()) {
+        if (! $user->isCEO()) {
             $query->where(function ($scope) use ($user): void {
                 $scope->where('division', $user->divisionKey())
                     ->orWhereHas('goal', fn ($goal) => $goal->where('division', $user->divisionKey()));

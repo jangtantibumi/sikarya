@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
 use App\Models\Task;
@@ -24,7 +26,7 @@ class SendTaskReminders extends Command
             ->whereNotNull('deadline')
             ->orderBy('id')
             ->each(function (Task $task) use ($notifications, $today, &$processed): void {
-                if (!$task->user) {
+                if (! $task->user) {
                     return;
                 }
 
@@ -50,7 +52,7 @@ class SendTaskReminders extends Command
                     $notifications->send(
                         $recipients,
                         'Task melewati deadline',
-                        "Task \"{$task->title}\" terlambat " . abs($daysRemaining) . ' hari dan belum diverifikasi selesai.',
+                        "Task \"{$task->title}\" terlambat ".abs($daysRemaining).' hari dan belum diverifikasi selesai.',
                         "task:{$task->id}:overdue:{$today->format('Y-m-d')}",
                         'task_reminder',
                         '/#kpi-tasks',

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Models\CrmLoyalty;
@@ -10,6 +12,7 @@ class CrmLoyaltyController extends Controller
     public function index()
     {
         $loyalties = CrmLoyalty::all();
+
         return view('crm.loyalties.index', compact('loyalties'));
     }
 
@@ -26,16 +29,18 @@ class CrmLoyaltyController extends Controller
             'points_awarded' => 'required|integer|min:0',
             'is_active' => 'boolean',
         ]);
-        
+
         $validated['is_active'] = $request->has('is_active') ? true : false;
 
         CrmLoyalty::create($validated);
+
         return redirect()->route('crm.loyalties.index')->with('success', 'Loyalty rule berhasil ditambahkan.');
     }
 
     public function edit($id)
     {
         $loyalty = CrmLoyalty::findOrFail($id);
+
         return view('crm.loyalties.edit', compact('loyalty'));
     }
 
@@ -48,10 +53,11 @@ class CrmLoyaltyController extends Controller
             'points_awarded' => 'required|integer|min:0',
             'is_active' => 'boolean',
         ]);
-        
+
         $validated['is_active'] = $request->has('is_active') ? true : false;
 
         $loyalty->update($validated);
+
         return redirect()->route('crm.loyalties.index')->with('success', 'Loyalty rule berhasil diperbarui.');
     }
 
@@ -59,6 +65,7 @@ class CrmLoyaltyController extends Controller
     {
         $loyalty = CrmLoyalty::findOrFail($id);
         $loyalty->delete();
+
         return redirect()->route('crm.loyalties.index')->with('success', 'Loyalty rule berhasil dihapus.');
     }
 }

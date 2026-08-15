@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
@@ -16,8 +18,7 @@ class LoginOtpMail extends Mailable
     public function __construct(
         public readonly string $otp,
         public readonly int $expiresMinutes,
-    ) {
-    }
+    ) {}
 
     public function envelope(): Envelope
     {

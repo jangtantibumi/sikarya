@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Middleware;
 
 use Closure;
@@ -13,11 +15,11 @@ class EnforceAbsoluteSessionLifetime
 
     public function handle(Request $request, Closure $next): Response
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return $next($request);
         }
 
-        if (!$request->user()?->is_active) {
+        if (! $request->user()?->is_active) {
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();

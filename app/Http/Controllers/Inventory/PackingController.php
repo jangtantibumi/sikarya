@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Inventory;
 
 use App\Http\Controllers\Controller;
+use App\Models\Inventory\Item;
 use App\Models\Inventory\Packing;
 use App\Models\Inventory\PackingLine;
 use App\Models\Inventory\Picking;
-use App\Models\Inventory\Item;
 use Illuminate\Http\Request;
 
 class PackingController extends Controller
@@ -16,9 +18,10 @@ class PackingController extends Controller
         $query = Packing::with(['picking', 'lines.item']);
         if ($request->filled('search')) {
             $query->where('number', 'like', "%{$request->search}%")
-                  ->orWhere('packer_name', 'like', "%{$request->search}%");
+                ->orWhere('packer_name', 'like', "%{$request->search}%");
         }
         $packings = $query->paginate(15);
+
         return view('inventory.packings.index', compact('packings'));
     }
 
@@ -26,6 +29,7 @@ class PackingController extends Controller
     {
         $pickings = Picking::all();
         $items = Item::all();
+
         return view('inventory.packings.create', compact('pickings', 'items'));
     }
 
@@ -67,6 +71,7 @@ class PackingController extends Controller
     public function show($id)
     {
         $packing = Packing::with(['picking', 'lines.item'])->findOrFail($id);
+
         return view('inventory.packings.show', compact('packing'));
     }
 
@@ -74,6 +79,7 @@ class PackingController extends Controller
     {
         $pac = Packing::findOrFail($id);
         $pac->delete();
+
         return redirect()->route('inventory.packings.index')->with('success', 'Data Packing dihapus.');
     }
 }

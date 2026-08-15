@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Inventory;
 
 use App\Http\Controllers\Controller;
+use App\Models\Inventory\Item;
 use App\Models\Inventory\Picking;
 use App\Models\Inventory\PickingLine;
-use App\Models\Inventory\Warehouse;
-use App\Models\Inventory\Item;
 use App\Models\Inventory\Reservation;
+use App\Models\Inventory\Warehouse;
 use Illuminate\Http\Request;
 
 class PickingController extends Controller
@@ -17,9 +19,10 @@ class PickingController extends Controller
         $query = Picking::with(['warehouse', 'reservation', 'lines.item']);
         if ($request->filled('search')) {
             $query->where('number', 'like', "%{$request->search}%")
-                  ->orWhere('picker_name', 'like', "%{$request->search}%");
+                ->orWhere('picker_name', 'like', "%{$request->search}%");
         }
         $pickings = $query->paginate(15);
+
         return view('inventory.pickings.index', compact('pickings'));
     }
 
@@ -28,6 +31,7 @@ class PickingController extends Controller
         $warehouses = Warehouse::all();
         $reservations = Reservation::all();
         $items = Item::all();
+
         return view('inventory.pickings.create', compact('warehouses', 'reservations', 'items'));
     }
 
@@ -71,6 +75,7 @@ class PickingController extends Controller
     public function show($id)
     {
         $picking = Picking::with(['warehouse', 'reservation', 'lines.item'])->findOrFail($id);
+
         return view('inventory.pickings.show', compact('picking'));
     }
 
@@ -78,6 +83,7 @@ class PickingController extends Controller
     {
         $pic = Picking::findOrFail($id);
         $pic->delete();
+
         return redirect()->route('inventory.pickings.index')->with('success', 'Data Picking dihapus.');
     }
 }

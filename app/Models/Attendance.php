@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Models\Concerns\BelongsToCompany;
@@ -64,7 +66,7 @@ class Attendance extends Model
      */
     public function calculateOvertime(): float
     {
-        if (!$this->clock_in || !$this->clock_out) {
+        if (! $this->clock_in || ! $this->clock_out) {
             return 0;
         }
 
@@ -73,11 +75,11 @@ class Attendance extends Model
         $overtimeHours = 0;
 
         $endOfDay = $this->clock_in->copy()->setTime(17, 0, 0);
-        
+
         if ($this->clock_out->greaterThan($endOfDay)) {
             $diffInMinutes = $endOfDay->diffInMinutes($this->clock_out);
             $overtimeHours = $diffInMinutes / 60;
-            
+
             // Special logic: Time after 23:00 gets 2x multiplier
             $lateNight = $this->clock_in->copy()->setTime(23, 0, 0);
             if ($this->clock_out->greaterThan($lateNight)) {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\User;
@@ -55,7 +57,7 @@ class WorkflowNotificationService
 
     public function managersForDivision(?string $division): Collection
     {
-        if (!$division) {
+        if (! $division) {
             return collect();
         }
 
@@ -69,7 +71,7 @@ class WorkflowNotificationService
 
     public function usersForDivision(?string $division): Collection
     {
-        if (!$division) {
+        if (! $division) {
             return collect();
         }
 
@@ -83,7 +85,7 @@ class WorkflowNotificationService
     private function exists(User $user, string $key): bool
     {
         return $user->notifications()
-            ->where('data', 'like', '%"key":"' . addcslashes($key, '%_\\') . '"%')
+            ->where('data', 'like', '%"key":"'.addcslashes($key, '%_\\').'"%')
             ->exists();
     }
 }

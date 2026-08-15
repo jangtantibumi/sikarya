@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\Inventory;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,6 +13,7 @@ class SerialNumber extends Model
     use HasFactory;
 
     protected $table = 'inv_serial_numbers';
+
     protected $guarded = [];
 
     public function item(): BelongsTo

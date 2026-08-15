@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Models\ClientInflow;
@@ -19,16 +21,15 @@ class ClientInflowController extends Controller
         private readonly AccountingService $accounting,
         private readonly LeadRevenueService $leadRevenue,
         private readonly DataDeletionRequestService $deletions,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request)
     {
         $query = ClientInflow::query()->orderBy('date', 'desc')->orderBy('id', 'desc');
 
-        if ($request->has('month') && !empty($request->month)) {
+        if ($request->has('month') && ! empty($request->month)) {
             // $request->month format: YYYY-MM
-            $query->where('date', 'like', $request->month . '%');
+            $query->where('date', 'like', $request->month.'%');
         }
 
         $inflows = $query->get();
@@ -47,7 +48,7 @@ class ClientInflowController extends Controller
                 'total_outstanding' => $totalOutstanding,
                 'total_project_value' => $totalProjectValue,
                 'new_clients_count' => $newClientsCount,
-            ]
+            ],
         ]);
     }
 
@@ -93,7 +94,7 @@ class ClientInflowController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Data pemasukan klien berhasil ditambahkan.',
-            'data' => $inflow
+            'data' => $inflow,
         ]);
     }
 
@@ -142,7 +143,7 @@ class ClientInflowController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Data pemasukan berhasil diperbarui.',
-            'data' => $inflow
+            'data' => $inflow,
         ]);
     }
 
@@ -168,25 +169,25 @@ class ClientInflowController extends Controller
     public function exportCsv(Request $request)
     {
         $query = ClientInflow::query()->orderBy('date', 'asc');
-        if ($request->has('month') && !empty($request->month)) {
-            $query->where('date', 'like', $request->month . '%');
+        if ($request->has('month') && ! empty($request->month)) {
+            $query->where('date', 'like', $request->month.'%');
         }
 
         $inflows = $query->get();
 
-        $filename = "Laporan_Data_Transfer_Klien_" . ($request->month ?? date('Y-m')) . ".csv";
+        $filename = 'Laporan_Data_Transfer_Klien_'.($request->month ?? date('Y-m')).'.csv';
 
         $headers = [
-            "Content-type" => "text/csv; charset=UTF-8",
-            "Content-Disposition" => "attachment; filename=$filename",
-            "Pragma" => "no-cache",
-            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-            "Expires" => "0"
+            'Content-type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=$filename",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
         ];
 
         $callback = function () use ($inflows) {
             $file = fopen('php://output', 'w');
-            fputs($file, "\xEF\xBB\xBF"); // UTF-8 BOM
+            fwrite($file, "\xEF\xBB\xBF"); // UTF-8 BOM
 
             fputcsv($file, ['DATA TRANSFER KLIEN - SUBA ARCH STUDIO']);
             fputcsv($file, []);
@@ -205,19 +206,19 @@ class ClientInflowController extends Controller
                     $row->start_project,
                     $row->package,
                     $row->notes,
-                    'Rp ' . number_format($row->project_value, 0, ',', '.'),
+                    'Rp '.number_format($row->project_value, 0, ',', '.'),
                     $row->termin_no,
                     $row->total_termin,
-                    'Rp ' . number_format($row->payment_amount, 0, ',', '.'),
-                    'Rp ' . number_format($row->remaining_balance, 0, ',', '.'),
+                    'Rp '.number_format($row->payment_amount, 0, ',', '.'),
+                    'Rp '.number_format($row->remaining_balance, 0, ',', '.'),
                     $row->payment_status,
                     $row->invoice_file,
-                    $row->pj_survey
+                    $row->pj_survey,
                 ]);
             }
 
             fputcsv($file, []);
-            fputcsv($file, ['Total Pemasukan', '', '', '', '', '', '', '', '', '', '', 'Rp ' . number_format($totalPayments, 0, ',', '.')]);
+            fputcsv($file, ['Total Pemasukan', '', '', '', '', '', '', '', '', '', '', 'Rp '.number_format($totalPayments, 0, ',', '.')]);
 
             fclose($file);
         };
@@ -235,7 +236,7 @@ class ClientInflowController extends Controller
         $file = fopen($path, 'r');
 
         $rows = [];
-        while (($data = fgetcsv($file, 2000, ',')) !== FALSE) {
+        while (($data = fgetcsv($file, 2000, ',')) !== false) {
             $rows[] = $data;
         }
         fclose($file);
@@ -248,29 +249,37 @@ class ClientInflowController extends Controller
         $headerFound = false;
 
         foreach ($rows as $index => $row) {
-            if (!$headerFound) {
+            if (! $headerFound) {
                 if (isset($row[0]) && (strtolower(trim($row[0])) === 'no' || strtolower(trim($row[1] ?? '')) === 'tanggal')) {
                     $headerFound = true;
                 }
+
                 continue;
             }
 
-            if (empty($row[1]) && empty($row[2])) continue;
-            if (isset($row[0]) && strtolower(trim($row[0])) === 'total') continue;
+            if (empty($row[1]) && empty($row[2])) {
+                continue;
+            }
+            if (isset($row[0]) && strtolower(trim($row[0])) === 'total') {
+                continue;
+            }
 
             $dateRaw = trim($row[1] ?? '');
             $clientName = trim($row[2] ?? '');
-            if (empty($clientName)) continue;
+            if (empty($clientName)) {
+                continue;
+            }
 
             $domicile = trim($row[3] ?? '');
             $clientNo = trim($row[4] ?? '');
             $startProject = trim($row[5] ?? '');
             $package = trim($row[6] ?? 'Bronze');
             $notes = trim($row[7] ?? '');
-            
-            $cleanNum = function($str) {
+
+            $cleanNum = function ($str) {
                 $s = preg_replace('/[^0-9.]/', '', str_replace(',', '', $str ?? '0'));
-                return (float)$s;
+
+                return (float) $s;
             };
 
             $projectValue = $cleanNum($row[8] ?? '0');
@@ -281,7 +290,7 @@ class ClientInflowController extends Controller
             $pjSurvey = trim($row[15] ?? '');
 
             $formattedDate = date('Y-m-d');
-            if (!empty($dateRaw)) {
+            if (! empty($dateRaw)) {
                 $time = strtotime($dateRaw);
                 if ($time !== false) {
                     $formattedDate = date('Y-m-d', $time);
@@ -322,8 +331,8 @@ class ClientInflowController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Berhasil mengimpor ' . count($imported) . ' data transaksi dari file spreadsheet.',
-            'imported_count' => count($imported)
+            'message' => 'Berhasil mengimpor '.count($imported).' data transaksi dari file spreadsheet.',
+            'imported_count' => count($imported),
         ]);
     }
 
@@ -335,16 +344,16 @@ class ClientInflowController extends Controller
 
         $file = $request->file('invoice');
         $uploadDir = public_path('uploads/invoices');
-        if (!file_exists($uploadDir)) {
+        if (! file_exists($uploadDir)) {
             mkdir($uploadDir, 0777, true);
         }
 
-        $fileName = 'invoice_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+        $fileName = 'invoice_'.time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
         $file->move($uploadDir, $fileName);
 
         return response()->json([
             'success' => true,
-            'url' => '/uploads/invoices/' . $fileName
+            'url' => '/uploads/invoices/'.$fileName,
         ]);
     }
 
@@ -356,12 +365,12 @@ class ClientInflowController extends Controller
         if ($packageLower === 'survey' || $terminLower === 'survei') {
             return [
                 'remaining_balance' => 0,
-                'payment_status' => 'LUNAS'
+                'payment_status' => 'LUNAS',
             ];
         }
 
         $query = ClientInflow::query();
-        if (!empty($clientNo)) {
+        if (! empty($clientNo)) {
             $query->where('client_no', $clientNo);
         } else {
             $query->where('client_name', $clientName);
@@ -379,7 +388,7 @@ class ClientInflowController extends Controller
 
         return [
             'remaining_balance' => $remaining,
-            'payment_status' => $status
+            'payment_status' => $status,
         ];
     }
 }

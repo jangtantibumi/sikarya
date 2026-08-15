@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\JournalEntry;
 use App\Models\Goal;
+use App\Models\JournalEntry;
 use App\Models\KpiPlan;
 use App\Models\ProjectCost;
 use App\Models\RecordAttachment;

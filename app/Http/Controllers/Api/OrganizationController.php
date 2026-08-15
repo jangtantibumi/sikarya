@@ -1,14 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\User;
-use App\Models\Company;
-use App\Models\EmployeePerformance;
+use App\Models\Attendance;
 use App\Models\AuditLog;
+use App\Models\CompanyDivision;
+use App\Models\EmployeePerformance;
+use App\Models\ErpDocument;
+use App\Models\LeaveQuota;
+use App\Models\LeaveRequest;
 use App\Models\OrganizationRequest;
+use App\Models\Payroll;
+use App\Models\Project;
+use App\Models\Task;
+use App\Models\User;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class OrganizationController extends Controller
@@ -19,20 +29,20 @@ class OrganizationController extends Controller
     public function tree(Request $request)
     {
         $companyId = auth()->user()->company_id;
-        
+
         $users = User::where('company_id', $companyId)
             ->where('is_active', true)
             ->get();
 
         $performances = EmployeePerformance::whereIn('user_id', $users->pluck('id'))->get()->keyBy('user_id');
 
-        $treeData = $users->map(function($user) use ($performances) {
+        $treeData = $users->map(function ($user) use ($performances) {
             $parentId = null;
             if ($user->parent) {
                 $parentUser = User::where('username', $user->parent)
-                                ->where('company_id', $user->company_id)
-                                ->where('is_active', true)
-                                ->first();
+                    ->where('company_id', $user->company_id)
+                    ->where('is_active', true)
+                    ->first();
                 if ($parentUser) {
                     $parentId = $parentUser->id;
                 }
@@ -46,7 +56,7 @@ class OrganizationController extends Controller
                 'name' => $user->name,
                 'positionName' => $user->job_title ?: 'Staff',
                 'department' => $user->divisionLabel(),
-                'imageUrl' => $user->profile_picture_path ? asset('storage/' . $user->profile_picture_path) : 'https://ui-avatars.com/api/?name=' . urlencode($user->name) . '&background=random',
+                'imageUrl' => $user->profile_picture_path ? asset('storage/'.$user->profile_picture_path) : 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&background=random',
                 'role' => $user->role,
                 'employmentType' => $user->employment_type,
                 'employee_code' => $user->employee_code,
@@ -55,14 +65,14 @@ class OrganizationController extends Controller
                 'tags' => $user->isManager() ? ['manager'] : [],
             ];
         });
-        $divisions = \App\Models\CompanyDivision::where('company_id', $companyId)
+        $divisions = CompanyDivision::where('company_id', $companyId)
             ->orderBy('order')
             ->pluck('name')
             ->toArray();
 
         return response()->json([
             'users' => $treeData,
-            'divisions' => $divisions
+            'divisions' => $divisions,
         ]);
     }
 
@@ -70,12 +80,12 @@ class OrganizationController extends Controller
     {
         $currentUser = auth()->user();
         $user = User::findOrFail($id);
-        
+
         $isSelf = $currentUser->id === $user->id;
         $isCEO = $currentUser->isCEO() || $currentUser->isPlatformAdmin();
         $isDirectManager = $currentUser->isManagerOf($user);
 
-        if (!$isSelf && !$isCEO && !$isDirectManager) {
+        if (! $isSelf && ! $isCEO && ! $isDirectManager) {
             // Technically some peers might need basic profile view, but let's restrict sensitive tabs
         }
 
@@ -97,7 +107,7 @@ class OrganizationController extends Controller
                 $directReports = User::where('parent', $user->username)
                     ->where('is_active', true)
                     ->get(['id', 'name', 'job_title', 'profile_picture_path']);
-                
+
                 return response()->json([
                     'profile' => [
                         'id' => $user->id,
@@ -108,7 +118,7 @@ class OrganizationController extends Controller
                         'job_title' => $user->job_title,
                         'role' => $user->role,
                         'division' => $user->divisionLabel(),
-                        'profile_picture_path' => $user->profile_picture_path ? asset('storage/' . $user->profile_picture_path) : 'https://ui-avatars.com/api/?name=' . urlencode($user->name) . '&background=random',
+                        'profile_picture_path' => $user->profile_picture_path ? asset('storage/'.$user->profile_picture_path) : 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&background=random',
                     ],
                     'manager' => $manager ? ['id' => $manager->id, 'name' => $manager->name, 'job_title' => $manager->job_title] : null,
                     'direct_reports' => $directReports,
@@ -123,23 +133,23 @@ class OrganizationController extends Controller
                         'joined_date' => $user->created_at->format('Y-m-d'),
                         'division' => $user->divisionLabel(),
                         'job_title' => $user->job_title,
-                    ]
+                    ],
                 ]);
 
             case 'role':
                 return response()->json([
                     'role' => [
                         'system_role' => $user->role,
-                        'permissions' => ['view_dashboard', 'manage_tasks', 'submit_leave'] // Orchestrated from RBAC
-                    ]
+                        'permissions' => ['view_dashboard', 'manage_tasks', 'submit_leave'], // Orchestrated from RBAC
+                    ],
                 ]);
 
             case 'performance':
                 $performances = EmployeePerformance::where('user_id', $user->id)->latest('created_at')->get();
-                $tasks = \App\Models\Task::where('assignee_id', $user->id)->get();
+                $tasks = Task::where('assignee_id', $user->id)->get();
                 $totalTasks = $tasks->count();
                 $completedTasks = $tasks->where('status', 'completed')->count();
-                
+
                 $kpimScore = 0;
                 if ($totalTasks > 0) {
                     $kpimScore = round(($completedTasks / $totalTasks) * 100);
@@ -151,81 +161,87 @@ class OrganizationController extends Controller
                         'completed_tasks' => $completedTasks,
                         'total_tasks' => $totalTasks,
                         'kpim_score' => $kpimScore,
-                        'tasks_list' => $tasks->map(function($t) {
+                        'tasks_list' => $tasks->map(function ($t) {
                             return [
                                 'title' => $t->title,
                                 'category' => $t->category ?? 'General',
-                                'deadline' => $t->due_date ? \Carbon\Carbon::parse($t->due_date)->format('M d') : 'No Deadline',
+                                'deadline' => $t->due_date ? Carbon::parse($t->due_date)->format('M d') : 'No Deadline',
                                 'status' => $t->status,
                             ];
                         })->values(),
-                        'current_badge' => $performances->first() ? $performances->first()->badge : 'N/A'
-                    ]
+                        'current_badge' => $performances->first() ? $performances->first()->badge : 'N/A',
+                    ],
                 ]);
 
             case 'attendance':
-                $attendances = \App\Models\Attendance::where('user_id', $user->id)
+                $attendances = Attendance::where('user_id', $user->id)
                     ->latest('date')
                     ->take(30)
                     ->get();
+
                 return response()->json([
                     'attendance' => [
                         'records' => $attendances,
-                        'attendance_rate' => 95 // Mocked logic
-                    ]
+                        'attendance_rate' => 95, // Mocked logic
+                    ],
                 ]);
 
             case 'payroll':
                 abort_unless($isCEO || $isSelf, 403, 'Unauthorized to view payroll');
-                $payrolls = \App\Models\Payroll::where('user_id', $user->id)
+                $payrolls = Payroll::where('user_id', $user->id)
                     ->latest('period_end')
                     ->take(12)
                     ->get();
+
                 return response()->json([
                     'payroll' => [
-                        'history' => $payrolls
-                    ]
+                        'history' => $payrolls,
+                    ],
                 ]);
 
             case 'leave':
-                $quota = \App\Models\LeaveQuota::where('user_id', $user->id)->where('year', date('Y'))->first();
-                $requests = \App\Models\LeaveRequest::where('user_id', $user->id)->latest('created_at')->take(10)->get();
+                $quota = LeaveQuota::where('user_id', $user->id)->where('year', date('Y'))->first();
+                $requests = LeaveRequest::where('user_id', $user->id)->latest('created_at')->take(10)->get();
+
                 return response()->json([
                     'leave' => [
                         'balance' => $quota ? $quota->remaining_days : 0,
-                        'history' => $requests
-                    ]
+                        'history' => $requests,
+                    ],
                 ]);
 
             case 'projects':
-                $projects = \App\Models\Project::whereHas('members', function($q) use ($user) {
+                $projects = Project::whereHas('members', function ($q) use ($user) {
                     $q->where('user_id', $user->id);
                 })->get();
+
                 return response()->json([
                     'projects' => [
                         'active' => $projects->where('status', 'in_progress')->values(),
-                        'completed' => $projects->where('status', 'completed')->values()
-                    ]
+                        'completed' => $projects->where('status', 'completed')->values(),
+                    ],
                 ]);
 
             case 'documents':
                 // Orchestrating from Document module
-                $docs = \App\Models\ErpDocument::where('created_by', $user->id)->latest()->take(5)->get();
+                $docs = ErpDocument::where('created_by', $user->id)->latest()->take(5)->get();
+
                 return response()->json([
                     'documents' => [
-                        'uploaded' => $docs
-                    ]
+                        'uploaded' => $docs,
+                    ],
                 ]);
 
             case 'finance':
                 abort_unless($isCEO || $isSelf, 403, 'Unauthorized to view financial summary');
+
                 // Employee Financial Summary (Orchestrated)
                 return response()->json([
                     'finance' => [
-                        'salary_grade' => 'SG-0' . rand(1,5),
+                        'salary_grade' => 'SG-0'.rand(1, 5),
                         'current_salary' => $user->base_salary,
                         'payroll_status' => 'Active',
-                        'bank_information' => 'BCA - 1234567890 (A/N ' . $user->name . ')',
+                        'bank_information' => 'BCA - 1234567890 (A/N '.$user->name.')',
                         'allowance_summary' => 1500000,
                         'deduction_summary' => 200000,
                         'reimbursement_history' => [],
@@ -234,19 +250,20 @@ class OrganizationController extends Controller
                         'tax_bpjs' => [
                             'npwp' => '12.345.678.9-012.000',
                             'bpjs_ketenagakerjaan' => '0987654321',
-                            'bpjs_kesehatan' => '1234567890123'
+                            'bpjs_kesehatan' => '1234567890123',
                         ],
-                        'financial_audit_summary' => 'Clear'
-                    ]
+                        'financial_audit_summary' => 'Clear',
+                    ],
                 ]);
 
             case 'history':
                 abort_unless($isCEO, 403, 'Only CEO can view full audit history');
                 $logs = AuditLog::where('target_user_id', $user->id)->latest()->take(20)->get();
+
                 return response()->json([
                     'history' => [
-                        'logs' => $logs
-                    ]
+                        'logs' => $logs,
+                    ],
                 ]);
 
             default:
@@ -269,7 +286,7 @@ class OrganizationController extends Controller
         try {
             if ($isCEO) {
                 $beforeState = $targetUser->toArray();
-                
+
                 $targetUser->name = $request->input('name', $targetUser->name);
                 $targetUser->email = $request->input('email', $targetUser->email);
                 $targetUser->username = $request->input('username', $targetUser->username);
@@ -279,9 +296,9 @@ class OrganizationController extends Controller
                 $targetUser->employment_type = $request->input('employment_type', $targetUser->employment_type);
                 $targetUser->base_salary = $request->input('base_salary', $targetUser->base_salary);
                 $targetUser->parent = $request->input('parent', $targetUser->parent);
-                
+
                 $targetUser->save();
-                
+
                 AuditLog::create([
                     'user_id' => $currentUser->id,
                     'target_user_id' => $targetUser->id,
@@ -296,16 +313,18 @@ class OrganizationController extends Controller
                     'target_user_id' => $targetUser->id,
                     'type' => 'edit_profile',
                     'details' => $request->all(),
-                    'status' => 'pending'
+                    'status' => 'pending',
                 ]);
             } else {
                 return response()->json(['error' => 'Unauthorized'], 403);
             }
 
             DB::commit();
+
             return response()->json(['success' => true, 'message' => 'Profile updated successfully.']);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
@@ -320,7 +339,7 @@ class OrganizationController extends Controller
         $isCEO = $currentUser->isCEO() || $currentUser->isPlatformAdmin();
         $isDirectManager = $currentUser->isManagerOf($targetUser);
 
-        if (!$isCEO && !$isDirectManager) {
+        if (! $isCEO && ! $isDirectManager) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -334,6 +353,7 @@ class OrganizationController extends Controller
                 'period_start' => now()->startOfYear(),
                 'period_end' => now(),
             ]);
+
             return response()->json(['success' => true, 'message' => 'Performance review added.']);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -350,7 +370,7 @@ class OrganizationController extends Controller
         $isCEO = $currentUser->isCEO() || $currentUser->isPlatformAdmin();
         $isDirectManager = $currentUser->isManagerOf($targetUser);
 
-        if (!$isCEO && !$isDirectManager) {
+        if (! $isCEO && ! $isDirectManager) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -373,12 +393,12 @@ class OrganizationController extends Controller
         try {
             if ($isCEO) {
                 $beforeState = $targetUser->toArray();
-                
+
                 // Soft delete / archive
                 $targetUser->is_active = false;
                 $targetUser->account_status = 'archived';
                 $targetUser->save();
-                
+
                 AuditLog::create([
                     'user_id' => $currentUser->id,
                     'target_user_id' => $targetUser->id,
@@ -393,16 +413,18 @@ class OrganizationController extends Controller
                     'target_user_id' => $targetUser->id,
                     'type' => 'delete_request',
                     'details' => ['reason' => $request->input('reason', 'No reason provided')],
-                    'status' => 'pending'
+                    'status' => 'pending',
                 ]);
             } else {
                 return response()->json(['error' => 'Unauthorized'], 403);
             }
 
             DB::commit();
+
             return response()->json(['success' => true, 'message' => 'Employee removed or request sent.']);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
@@ -419,7 +441,7 @@ class OrganizationController extends Controller
         DB::beginTransaction();
         try {
             if ($isCEO) {
-                $nik = 'EMP-' . date('Ymd') . '-' . rand(1000, 9999);
+                $nik = 'EMP-'.date('Ymd').'-'.rand(1000, 9999);
                 $newUser = User::create([
                     'name' => $request->input('name'),
                     'email' => $request->input('email'),
@@ -445,22 +467,24 @@ class OrganizationController extends Controller
                     'after_state' => $newUser->toArray(),
                     'ip_address' => $request->ip(),
                 ]);
-                
+
             } elseif ($isManager) {
                 OrganizationRequest::create([
                     'requester_id' => $currentUser->id,
                     'type' => 'new_staff',
                     'details' => $request->all(),
-                    'status' => 'pending'
+                    'status' => 'pending',
                 ]);
             } else {
                 return response()->json(['error' => 'Unauthorized'], 403);
             }
 
             DB::commit();
+
             return response()->json(['success' => true, 'message' => 'Staff added or request submitted.']);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
@@ -474,39 +498,39 @@ class OrganizationController extends Controller
         $currentUser = auth()->user();
         $isCEO = $currentUser->isCEO() || $currentUser->isPlatformAdmin();
 
-        if (!$isCEO) {
+        if (! $isCEO) {
             return response()->json(['error' => 'Only CEO can appoint managers.'], 403);
         }
 
         $request->validate([
-            'user_id'       => 'required',
-            'division'      => 'required',
+            'user_id' => 'required',
+            'division' => 'required',
             'force_replace' => 'sometimes|boolean',
         ]);
 
-        $userId       = $request->input('user_id');
-        $division     = $request->input('division');
+        $userId = $request->input('user_id');
+        $division = $request->input('division');
         $forceReplace = (bool) $request->input('force_replace', false);
 
         // Map division label → role slug
         $roleMap = [
-            'Marketing'  => 'mgr_marketing',
-            'Finance'    => 'mgr_finance',
-            'HRD'        => 'mgr_hrd',
-            'Operasional'=> 'mgr_ops',
+            'Marketing' => 'mgr_marketing',
+            'Finance' => 'mgr_finance',
+            'HRD' => 'mgr_hrd',
+            'Operasional' => 'mgr_ops',
             'Perusahaan' => 'manager',
         ];
 
         $staffRoleMap = [
-            'Marketing'  => 'staff_marketing',
-            'Finance'    => 'staff_finance',
-            'HRD'        => 'staff_hrd',
-            'Operasional'=> 'staff_ops',
+            'Marketing' => 'staff_marketing',
+            'Finance' => 'staff_finance',
+            'HRD' => 'staff_hrd',
+            'Operasional' => 'staff_ops',
             'Perusahaan' => 'staff',
         ];
 
-        $newRole   = $roleMap[$division]      ?? 'manager';
-        $staffRole = $staffRoleMap[$division]  ?? 'staff';
+        $newRole = $roleMap[$division] ?? 'manager';
+        $staffRole = $staffRoleMap[$division] ?? 'staff';
 
         DB::beginTransaction();
         try {
@@ -525,17 +549,18 @@ class OrganizationController extends Controller
                     return $u->isManager() && $u->divisionLabel() === $division;
                 });
 
-            if ($existingManager && !$forceReplace) {
+            if ($existingManager && ! $forceReplace) {
                 // Return 409 Conflict so the frontend shows the confirmation dialog
                 DB::rollBack();
+
                 return response()->json([
-                    'conflict'        => true,
+                    'conflict' => true,
                     'existing_manager' => [
-                        'id'   => $existingManager->id,
+                        'id' => $existingManager->id,
                         'name' => $existingManager->name,
                     ],
                     'new_candidate' => [
-                        'id'   => $targetUser->id,
+                        'id' => $targetUser->id,
                         'name' => $targetUser->name,
                     ],
                     'division' => $division,
@@ -544,16 +569,16 @@ class OrganizationController extends Controller
 
             // ── Downgrade old manager if replacement confirmed ─────────────────
             if ($existingManager && $forceReplace) {
-                $existingManager->role   = $staffRole;
+                $existingManager->role = $staffRole;
                 $existingManager->parent = $targetUser->username; // will report to new manager
                 $existingManager->save();
             }
 
             // ── Promote the new manager ───────────────────────────────────────
             $beforeState = $targetUser->toArray();
-            $targetUser->role     = $newRole;
+            $targetUser->role = $newRole;
             $targetUser->division = $division;
-            $targetUser->parent   = $currentUser->username; // reports to CEO
+            $targetUser->parent = $currentUser->username; // reports to CEO
             $targetUser->save();
 
             // ── Re-link all staff in that division ────────────────────────────
@@ -563,36 +588,37 @@ class OrganizationController extends Controller
                 ->get();
 
             foreach ($allInDivision as $member) {
-                if ($member->divisionLabel() === $division && !$member->isManager()) {
+                if ($member->divisionLabel() === $division && ! $member->isManager()) {
                     $member->parent = $targetUser->username;
                     $member->save();
                 }
             }
 
             AuditLog::create([
-                'user_id'        => $currentUser->id,
+                'user_id' => $currentUser->id,
                 'target_user_id' => $targetUser->id,
-                'action'         => 'appoint_manager',
-                'before_state'   => $beforeState,
-                'after_state'    => $targetUser->fresh()->toArray(),
-                'ip_address'     => $request->ip(),
+                'action' => 'appoint_manager',
+                'before_state' => $beforeState,
+                'after_state' => $targetUser->fresh()->toArray(),
+                'ip_address' => $request->ip(),
             ]);
 
             DB::commit();
+
             return response()->json([
-                'success'          => true,
-                'message'          => 'Manager appointed successfully.',
-                'new_manager'      => [
-                    'id'       => $targetUser->id,
-                    'name'     => $targetUser->name,
+                'success' => true,
+                'message' => 'Manager appointed successfully.',
+                'new_manager' => [
+                    'id' => $targetUser->id,
+                    'name' => $targetUser->name,
                     'division' => $division,
                 ],
                 'replaced_manager' => $existingManager ? $existingManager->name : null,
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 }
-

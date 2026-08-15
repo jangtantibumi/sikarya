@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Models\Lead;
@@ -13,8 +15,7 @@ class WhatsAppCloudController extends Controller
 {
     public function __construct(
         private readonly WhatsAppCloudService $whatsApp,
-    ) {
-    }
+    ) {}
 
     public function status(Request $request): JsonResponse
     {

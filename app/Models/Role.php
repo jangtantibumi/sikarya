@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -25,7 +27,7 @@ class Role extends Model
     {
         return $this->belongsTo(Company::class);
     }
-    
+
     public function users()
     {
         return $this->hasMany(User::class, 'role', 'key');

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Mail;
 
 use App\Models\AlumniEventInvitation;
@@ -15,8 +17,7 @@ class AlumniEventInvitationMail extends Mailable
     public function __construct(
         public readonly AlumniEventInvitation $invitation,
         public readonly User $alumni,
-    ) {
-    }
+    ) {}
 
     public function build(): self
     {

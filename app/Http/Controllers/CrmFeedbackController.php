@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
+use App\Models\CrmCustomerTimeline;
 use App\Models\CrmFeedback;
 use Illuminate\Http\Request;
 
@@ -14,12 +17,13 @@ class CrmFeedbackController extends Controller
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
-        
+
         if ($request->filled('rating')) {
             $query->where('rating', $request->rating);
         }
 
         $feedbacks = $query->paginate(15);
+
         return view('crm.feedbacks.index', compact('feedbacks'));
     }
 
@@ -39,7 +43,7 @@ class CrmFeedbackController extends Controller
         $feedback->update($validated);
 
         if ($oldStatus !== $feedback->status) {
-            \App\Models\CrmCustomerTimeline::create([
+            CrmCustomerTimeline::create([
                 'customer_id' => $feedback->customer_id,
                 'action' => 'FEEDBACK_UPDATED',
                 'description' => "Status keluhan/feedback berubah dari {$oldStatus} menjadi {$feedback->status}.",
@@ -53,6 +57,7 @@ class CrmFeedbackController extends Controller
     public function destroy(CrmFeedback $feedback)
     {
         $feedback->delete();
+
         return redirect()->route('crm.feedbacks.index')->with('success', 'Feedback berhasil dihapus');
     }
 }

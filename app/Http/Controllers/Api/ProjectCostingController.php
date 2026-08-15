@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -21,8 +23,7 @@ class ProjectCostingController extends Controller
         private readonly AccountingService $accounting,
         private readonly RecordAttachmentService $attachments,
         private readonly SecurityAuditService $audit,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request)
     {

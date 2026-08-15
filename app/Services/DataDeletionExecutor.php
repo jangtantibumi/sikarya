@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Attendance;
@@ -27,8 +29,7 @@ class DataDeletionExecutor
         private readonly AccountingService $accounting,
         private readonly MetricAggregationService $metrics,
         private readonly SecurityAuditService $audit,
-    ) {
-    }
+    ) {}
 
     public function execute(DataDeletionRequest $deletion, User $actor): DataDeletionRequest
     {
@@ -163,6 +164,7 @@ class DataDeletionExecutor
                 $this->accounting->reverseEntry($entry, $actor, $deletion->reason);
             }
             $this->softDelete($target);
+
             return;
         }
 
@@ -171,6 +173,7 @@ class DataDeletionExecutor
                 $this->accounting->reverseEntry($target->journalEntry, $actor, $deletion->reason);
             }
             $this->softDelete($target);
+
             return;
         }
 

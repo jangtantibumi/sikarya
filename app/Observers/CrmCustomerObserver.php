@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Observers;
 
 use App\Models\CrmCustomer;
@@ -25,7 +27,7 @@ class CrmCustomerObserver
                 $nextNumber = (int) end($parts) + 1;
             }
 
-            $customer->customer_code = 'CUST-' . now()->year . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+            $customer->customer_code = 'CUST-'.now()->year.'-'.str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
         }
     }
 
@@ -38,7 +40,7 @@ class CrmCustomerObserver
         CrmCustomerTimeline::create([
             'customer_id' => $customer->id,
             'action' => 'REGISTER',
-            'description' => 'Customer baru terdaftar dengan kode ' . $customer->customer_code,
+            'description' => 'Customer baru terdaftar dengan kode '.$customer->customer_code,
             'reference_id' => null,
         ]);
     }
@@ -67,15 +69,27 @@ class CrmCustomerObserver
      */
     public static function getMembershipLevel(float $spending): string
     {
-        if ($spending >= 50_000_000) return 'Diamond';
-        if ($spending >= 10_000_000) return 'Platinum';
-        if ($spending >= 2_500_000) return 'Gold';
-        if ($spending >= 500_000) return 'Silver';
+        if ($spending >= 50_000_000) {
+            return 'Diamond';
+        }
+        if ($spending >= 10_000_000) {
+            return 'Platinum';
+        }
+        if ($spending >= 2_500_000) {
+            return 'Gold';
+        }
+        if ($spending >= 500_000) {
+            return 'Silver';
+        }
+
         return 'Guest';
     }
 
     public function updated(CrmCustomer $customer): void {}
+
     public function deleted(CrmCustomer $customer): void {}
+
     public function restored(CrmCustomer $customer): void {}
+
     public function forceDeleted(CrmCustomer $customer): void {}
 }

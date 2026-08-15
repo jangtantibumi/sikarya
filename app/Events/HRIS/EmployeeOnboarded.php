@@ -12,7 +12,9 @@ class EmployeeOnboarded
     use Dispatchable, SerializesModels;
 
     public int $employeeId;
+
     public string $name;
+
     public string $department;
 
     public function __construct(int $employeeId, string $name, string $department)

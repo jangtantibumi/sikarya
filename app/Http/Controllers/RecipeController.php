@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Recipe;
 use App\Models\RecipeItem;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -13,7 +15,7 @@ class RecipeController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
-        if (!$user || (!$user->isCEO() && !$user->isPlatformAdmin())) {
+        if (! $user || (! $user->isCEO() && ! $user->isPlatformAdmin())) {
             abort(403, 'Hanya CEO yang memiliki wewenang membuat atau mengubah resep master.');
         }
 
@@ -39,7 +41,7 @@ class RecipeController extends Controller
             ]);
 
             foreach ($request->materials as $index => $materialId) {
-                if (!empty($materialId) && isset($request->quantities[$index]) && $request->quantities[$index] > 0) {
+                if (! empty($materialId) && isset($request->quantities[$index]) && $request->quantities[$index] > 0) {
                     RecipeItem::create([
                         'recipe_id' => $recipe->id,
                         'product_id' => $materialId,

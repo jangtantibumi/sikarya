@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
 use App\Models\Task;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class TaskPolicy
 {
@@ -21,10 +22,18 @@ class TaskPolicy
      */
     public function view(User $user, Task $task): bool
     {
-        if ($user->isCEO()) return true;
-        if ($user->id === $task->user_id) return true;
-        if ($user->isManager() && $user->isManagerOf($task->user)) return true;
-        if ($user->isHRD()) return true;
+        if ($user->isCEO()) {
+            return true;
+        }
+        if ($user->id === $task->user_id) {
+            return true;
+        }
+        if ($user->isManager() && $user->isManagerOf($task->user)) {
+            return true;
+        }
+        if ($user->isHRD()) {
+            return true;
+        }
 
         return false;
     }
@@ -42,9 +51,15 @@ class TaskPolicy
      */
     public function update(User $user, Task $task): bool
     {
-        if ($user->isCEO()) return true;
-        if ($user->id === $task->user_id) return true;
-        if ($user->isManager() && $user->isManagerOf($task->user)) return true;
+        if ($user->isCEO()) {
+            return true;
+        }
+        if ($user->id === $task->user_id) {
+            return true;
+        }
+        if ($user->isManager() && $user->isManagerOf($task->user)) {
+            return true;
+        }
 
         return false;
     }
@@ -54,9 +69,15 @@ class TaskPolicy
      */
     public function delete(User $user, Task $task): bool
     {
-        if ($user->isCEO()) return true;
-        if ($user->id === $task->user_id) return true;
-        if ($user->isManager() && $user->isManagerOf($task->user)) return true;
+        if ($user->isCEO()) {
+            return true;
+        }
+        if ($user->id === $task->user_id) {
+            return true;
+        }
+        if ($user->isManager() && $user->isManagerOf($task->user)) {
+            return true;
+        }
 
         return false;
     }

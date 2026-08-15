@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,7 +18,7 @@ class EmployeePerformance extends Model
         'period_end',
         'score',
         'badge',
-        'notes'
+        'notes',
     ];
 
     protected $casts = [

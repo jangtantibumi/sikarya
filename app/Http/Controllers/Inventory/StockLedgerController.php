@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Inventory;
 
 use App\Http\Controllers\Controller;
@@ -19,11 +21,11 @@ class StockLedgerController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('reference_number', 'like', "%{$search}%")
-                  ->orWhereHas('item', function($iq) use ($search) {
-                      $iq->where('name', 'like', "%{$search}%")->orWhere('sku', 'like', "%{$search}%");
-                  });
+                    ->orWhereHas('item', function ($iq) use ($search) {
+                        $iq->where('name', 'like', "%{$search}%")->orWhere('sku', 'like', "%{$search}%");
+                    });
             });
         }
 

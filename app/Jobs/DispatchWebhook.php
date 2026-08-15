@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Jobs;
 
 use App\Models\WebhookSubscription;
@@ -15,6 +17,7 @@ class DispatchWebhook implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $eventName;
+
     public $payload;
 
     /**

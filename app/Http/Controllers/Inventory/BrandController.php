@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Inventory;
 
 use App\Http\Controllers\Controller;
@@ -14,9 +16,10 @@ class BrandController extends Controller
         $query = Brand::withCount('items');
         if ($request->filled('search')) {
             $query->where('name', 'like', "%{$request->search}%")
-                  ->orWhere('code', 'like', "%{$request->search}%");
+                ->orWhere('code', 'like', "%{$request->search}%");
         }
         $brands = $query->paginate(15);
+
         return view('inventory.brands.index', compact('brands'));
     }
 
@@ -33,18 +36,21 @@ class BrandController extends Controller
             'description' => 'nullable|string',
         ]);
         Brand::create($validated);
+
         return redirect()->route('inventory.brands.index')->with('success', 'Brand berhasil ditambahkan.');
     }
 
     public function show($id)
     {
         $brand = Brand::with('items')->findOrFail($id);
+
         return view('inventory.brands.show', compact('brand'));
     }
 
     public function edit($id)
     {
         $brand = Brand::findOrFail($id);
+
         return view('inventory.brands.edit', compact('brand'));
     }
 
@@ -57,6 +63,7 @@ class BrandController extends Controller
             'description' => 'nullable|string',
         ]);
         $brand->update($validated);
+
         return redirect()->route('inventory.brands.index')->with('success', 'Brand berhasil diperbarui.');
     }
 
@@ -64,6 +71,7 @@ class BrandController extends Controller
     {
         $brand = Brand::findOrFail($id);
         $brand->delete();
+
         return redirect()->route('inventory.brands.index')->with('success', 'Brand berhasil dihapus.');
     }
 
@@ -74,6 +82,7 @@ class BrandController extends Controller
         foreach ($brands as $b) {
             $csv .= "{$b->id},\"{$b->code}\",\"{$b->name}\",\"{$b->description}\"\n";
         }
+
         return Response::make($csv, 200, [
             'Content-Type' => 'text/csv',
             'Content-Disposition' => 'attachment; filename="brands.csv"',

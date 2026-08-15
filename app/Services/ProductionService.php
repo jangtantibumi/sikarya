@@ -1,8 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
-use App\Models\Product;
 use App\Models\Recipe;
 use App\Models\StockMovement;
 use App\Models\User;
@@ -18,7 +19,7 @@ class ProductionService
     public function recordProduction(Recipe $recipe, float $producedQuantity, Warehouse $warehouse, User $user, string $reference)
     {
         if ($producedQuantity <= 0) {
-            throw new InvalidArgumentException("Produced quantity must be greater than zero.");
+            throw new InvalidArgumentException('Produced quantity must be greater than zero.');
         }
 
         DB::transaction(function () use ($recipe, $producedQuantity, $warehouse, $user, $reference) {
@@ -39,7 +40,7 @@ class ProductionService
 
             foreach ($recipe->items as $item) {
                 $deductQuantity = $item->quantity * $multiplier;
-                
+
                 StockMovement::create([
                     'company_id' => $recipe->company_id,
                     'product_id' => $item->product_id,

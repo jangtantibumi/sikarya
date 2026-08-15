@@ -1,18 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Account;
 use App\Models\ClientInflow;
+use App\Models\GoodsReceipt;
 use App\Models\JournalEntry;
 use App\Models\Project;
+use App\Models\PurchaseOrder;
 use App\Models\User;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
-use App\Models\PurchaseOrder;
-use App\Models\GoodsReceipt;
 
 class AccountingService
 {
@@ -62,7 +64,7 @@ class AccountingService
                 ? JournalEntry::query()->where('source_type', $sourceType)->where('source_id', $sourceId)->first()
                 : null;
 
-            $entry = $existing ?: new JournalEntry();
+            $entry = $existing ?: new JournalEntry;
             $entry->fill([
                 'company_id' => $actor->company_id,
                 'entry_date' => $date,
@@ -90,8 +92,7 @@ class AccountingService
         array $data,
         ?string $reference = null,
         ?string $sourceType = null,
-    ): JournalEntry
-    {
+    ): JournalEntry {
         $amount = round((float) $data['amount'], 2);
         $projectId = $data['project_id'] ?? null;
         $isRevenue = $data['kind'] === 'revenue';
@@ -108,7 +109,7 @@ class AccountingService
                 : [
                     ['system_key' => $data['category'], 'debit' => $amount, 'project_id' => $projectId],
                     ['system_key' => 'cash_bank', 'credit' => $amount, 'project_id' => $projectId],
-            ],
+                ],
             sourceType: $sourceType,
             reference: $reference,
         );
@@ -178,7 +179,7 @@ class AccountingService
         $actor ??= User::query()->where('username', $inflow->created_by)->first()
             ?: User::query()->where('role', 'ceo')->first();
 
-        if (!$actor || (float) $inflow->payment_amount <= 0) {
+        if (! $actor || (float) $inflow->payment_amount <= 0) {
             $this->removeSource('client_inflow', $inflow->id);
 
             return null;
@@ -302,7 +303,7 @@ class AccountingService
 
         return Str::contains($text, ['kontraktor', 'construction', 'konstruksi', 'pelaksana']);
     }
-    
+
     /**
      * Generate jurnal untuk Purchase Order setelah disetujui CEO.
      */
@@ -364,10 +365,12 @@ class AccountingService
                     $carry['total_debit'] += (float) $line->debit;
                     $carry['total_credit'] += (float) $line->credit;
                 }
+
                 return $carry;
             }, ['total_debit' => 0, 'total_credit' => 0]);
 
         $balance = $totals['total_debit'] - $totals['total_credit'];
+
         return [
             'balance_sheet' => ['value' => $balance],
             'profit_loss' => ['value' => $balance],
@@ -376,4 +379,3 @@ class AccountingService
         ];
     }
 }
-

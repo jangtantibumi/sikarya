@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Models\Concerns\BelongsToCompany;
@@ -12,7 +14,7 @@ class ProductionRouting extends Model
     protected $fillable = [
         'company_id',
         'bill_of_material_id',
-        'name'
+        'name',
     ];
 
     public function billOfMaterial()

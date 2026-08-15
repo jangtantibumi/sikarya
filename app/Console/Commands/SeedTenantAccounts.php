@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
 use App\Models\Account;
@@ -9,6 +11,7 @@ use Illuminate\Console\Command;
 class SeedTenantAccounts extends Command
 {
     protected $signature = 'app:seed-tenant-accounts';
+
     protected $description = 'Seed standard Chart of Accounts for all existing tenants and remove global accounts.';
 
     public function handle()
@@ -32,12 +35,12 @@ class SeedTenantAccounts extends Command
                 ['code' => '6300', 'name' => 'Beban Pemasaran', 'type' => 'expense', 'normal_balance' => 'debit', 'system_key' => 'marketing_expense', 'is_active' => true],
                 ['code' => '1300', 'name' => 'Persediaan', 'type' => 'asset', 'normal_balance' => 'debit', 'system_key' => 'inventory', 'is_active' => true],
             ];
-            $globalAccounts = collect($standardAccounts)->map(fn($a) => (object)$a);
+            $globalAccounts = collect($standardAccounts)->map(fn ($a) => (object) $a);
         } else {
             // Also add inventory account if missing
-            if (!$globalAccounts->where('system_key', 'inventory')->first()) {
-                $globalAccounts->push((object)[
-                    'code' => '1300', 'name' => 'Persediaan', 'type' => 'asset', 'normal_balance' => 'debit', 'system_key' => 'inventory', 'is_active' => true
+            if (! $globalAccounts->where('system_key', 'inventory')->first()) {
+                $globalAccounts->push((object) [
+                    'code' => '1300', 'name' => 'Persediaan', 'type' => 'asset', 'normal_balance' => 'debit', 'system_key' => 'inventory', 'is_active' => true,
                 ]);
             }
         }

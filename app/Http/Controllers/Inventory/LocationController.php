@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Inventory;
 
 use App\Http\Controllers\Controller;
 use App\Models\Inventory\Warehouse;
-use App\Models\Inventory\WarehouseZone;
-use App\Models\Inventory\WarehouseRack;
 use App\Models\Inventory\WarehouseBin;
+use App\Models\Inventory\WarehouseRack;
+use App\Models\Inventory\WarehouseZone;
 use Illuminate\Http\Request;
 
 class LocationController extends Controller
@@ -14,6 +16,7 @@ class LocationController extends Controller
     public function index(Request $request)
     {
         $warehouses = Warehouse::with(['zones.racks.bins'])->paginate(10);
+
         return view('inventory.locations.index', compact('warehouses'));
     }
 
@@ -22,6 +25,7 @@ class LocationController extends Controller
         $warehouses = Warehouse::all();
         $zones = WarehouseZone::all();
         $racks = WarehouseRack::all();
+
         return view('inventory.locations.create', compact('warehouses', 'zones', 'racks'));
     }
 
@@ -72,6 +76,7 @@ class LocationController extends Controller
     {
         $bin = WarehouseBin::findOrFail($id);
         $bin->delete();
+
         return redirect()->route('inventory.locations.index')->with('success', 'Bin lokasi berhasil dihapus.');
     }
 }

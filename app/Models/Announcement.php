@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Models\Concerns\BelongsToCompany;
@@ -8,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Announcement extends Model
 {
-    use HasFactory, BelongsToCompany;
+    use BelongsToCompany, HasFactory;
 
     protected $fillable = [
         'company_id',
@@ -28,7 +30,7 @@ class Announcement extends Model
     public function reads()
     {
         return $this->belongsToMany(User::class, 'announcement_reads')
-                    ->withPivot('read_at')
-                    ->withTimestamps();
+            ->withPivot('read_at')
+            ->withTimestamps();
     }
 }

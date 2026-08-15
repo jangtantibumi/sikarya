@@ -1,13 +1,14 @@
 <?php
 
-require __DIR__ . '/vendor/autoload.php';
-$app = require_once __DIR__ . '/bootstrap/app.php';
-$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+require __DIR__.'/vendor/autoload.php';
+$app = require_once __DIR__.'/bootstrap/app.php';
+$kernel = $app->make(Kernel::class);
 $kernel->bootstrap();
 
-use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 // Authenticate user
 $user = User::first() ?? User::create([
@@ -76,7 +77,7 @@ $results = [];
 foreach ($inventoryRoutes as $uri) {
     Auth::login($user);
     $request = Request::create($uri, 'GET');
-    $request->setUserResolver(function() use ($user) {
+    $request->setUserResolver(function () use ($user) {
         return $user;
     });
 
@@ -94,7 +95,7 @@ foreach ($inventoryRoutes as $uri) {
 
 echo "\n==========================================\n";
 if ($allPassed) {
-    echo "SUCCESS: ALL " . count($inventoryRoutes) . " INVENTORY ROUTES RETURNED HTTP 200!\n";
+    echo 'SUCCESS: ALL '.count($inventoryRoutes)." INVENTORY ROUTES RETURNED HTTP 200!\n";
 } else {
     echo "FAILED: SOME ROUTES RETURNED ERROR CODES!\n";
 }

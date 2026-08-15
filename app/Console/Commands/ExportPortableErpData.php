@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
@@ -54,7 +56,7 @@ class ExportPortableErpData extends Command
 
         $tables = [];
         foreach (self::TABLES as $table) {
-            if (!Schema::hasTable($table)) {
+            if (! Schema::hasTable($table)) {
                 continue;
             }
 
@@ -88,7 +90,7 @@ class ExportPortableErpData extends Command
         }
 
         $rows = collect($tables)->sum(fn (array $items): int => count($items));
-        $this->info("Export selesai: {$rows} baris dari ".count($tables)." tabel.");
+        $this->info("Export selesai: {$rows} baris dari ".count($tables).' tabel.');
         $this->line($path);
         $this->line('SHA-256: '.hash_file('sha256', $path));
 

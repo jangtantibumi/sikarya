@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\Inventory;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,6 +14,7 @@ class Picking extends Model
     use HasFactory;
 
     protected $table = 'inv_pickings';
+
     protected $guarded = [];
 
     public function reservation(): BelongsTo

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Inventory;
 
 use App\Http\Controllers\Controller;
@@ -19,6 +21,7 @@ class BatchNumberController extends Controller
         $batches = $query->paginate(15);
         $items = Item::all();
         $warehouses = Warehouse::all();
+
         return view('inventory.batch-numbers.index', compact('batches', 'items', 'warehouses'));
     }
 
@@ -32,6 +35,7 @@ class BatchNumberController extends Controller
             'quantity' => 'required|numeric|min:1',
         ]);
         BatchNumber::create($validated);
+
         return redirect()->route('inventory.batch-numbers.index')->with('success', 'Batch Number berhasil ditambahkan.');
     }
 
@@ -39,6 +43,7 @@ class BatchNumberController extends Controller
     {
         $bn = BatchNumber::findOrFail($id);
         $bn->delete();
+
         return redirect()->route('inventory.batch-numbers.index')->with('success', 'Batch Number dihapus.');
     }
 }

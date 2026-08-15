@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\SystemSetting;
@@ -25,7 +27,7 @@ class SecuritySettingsService
     public function get(string $key, mixed $default = null): mixed
     {
         $fallback = self::DEFAULTS[$key] ?? $default;
-        if (!Schema::hasTable('system_settings')) {
+        if (! Schema::hasTable('system_settings')) {
             return $fallback;
         }
 
@@ -122,7 +124,7 @@ class SecuritySettingsService
 
     public function applyMailConfiguration(): bool
     {
-        if (!$this->mailConfigured()) {
+        if (! $this->mailConfigured()) {
             return false;
         }
 
@@ -154,7 +156,7 @@ class SecuritySettingsService
                 'channel' => 'email',
                 'mail_driver' => $storedMailReady ? 'smtp' : config('mail.default'),
                 'mail_ready' => $storedMailReady
-                    || !in_array(config('mail.default'), ['log', 'array'], true),
+                    || ! in_array(config('mail.default'), ['log', 'array'], true),
             ]),
             'access_gate' => [
                 'enabled' => $this->gateEnabled(),

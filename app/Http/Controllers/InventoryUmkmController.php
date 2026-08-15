@@ -1,10 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Product;
 use App\Models\Company;
+use App\Models\Product;
+use App\Models\Warehouse;
+use App\Services\InventoryLedgerService;
+use Illuminate\Http\Request;
 
 class InventoryUmkmController extends Controller
 {
@@ -14,24 +18,26 @@ class InventoryUmkmController extends Controller
             return auth()->user()->company_id;
         }
         $company = Company::first();
+
         return $company ? $company->id : 1;
     }
 
-    public function index(\App\Services\InventoryLedgerService $inventoryService)
+    public function index(InventoryLedgerService $inventoryService)
     {
         $companyId = $this->getCompanyId();
-        $warehouse = \App\Models\Warehouse::where('company_id', $companyId)->first();
+        $warehouse = Warehouse::where('company_id', $companyId)->first();
         $products = Product::where('company_id', $companyId)
             ->orderBy('name', 'asc')
             ->get();
 
-        $mapped = $products->map(function($p) use ($inventoryService, $warehouse) {
+        $mapped = $products->map(function ($p) use ($inventoryService, $warehouse) {
             $stock = $warehouse ? $inventoryService->balance($p, $warehouse) : 0;
+
             return [
                 'id' => $p->id,
                 'item_code' => $p->sku,
                 'item_name' => $p->name,
-                'category' => $p->category_id ? 'Kategori ' . $p->category_id : 'Umum',
+                'category' => $p->category_id ? 'Kategori '.$p->category_id : 'Umum',
                 'uom' => $p->unit,
                 'min_stock' => $p->min_stock,
                 'max_stock' => $p->max_stock,
@@ -60,7 +66,7 @@ class InventoryUmkmController extends Controller
 
         $product = Product::create([
             'company_id' => $this->getCompanyId(),
-            'sku' => $validated['item_code'] ?? 'BRG-' . strtoupper(uniqid()),
+            'sku' => $validated['item_code'] ?? 'BRG-'.strtoupper(uniqid()),
             'name' => $validated['item_name'],
             'unit' => $validated['uom'] ?? 'Pcs',
             'min_stock' => $validated['min_stock'] ?? 0,
@@ -70,12 +76,12 @@ class InventoryUmkmController extends Controller
         ]);
 
         return response()->json([
-            'success' => true, 
+            'success' => true,
             'data' => [
                 'id' => $product->id,
                 'item_code' => $product->sku,
                 'item_name' => $product->name,
-            ]
+            ],
         ]);
     }
 
@@ -110,6 +116,7 @@ class InventoryUmkmController extends Controller
     {
         $product = Product::where('company_id', $this->getCompanyId())->findOrFail($id);
         $product->delete();
+
         return response()->json(['success' => true]);
     }
 }

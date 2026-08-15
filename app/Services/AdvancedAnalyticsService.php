@@ -1,11 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Attendance;
 use App\Models\ClientInflow;
 use App\Models\Goal;
+use App\Models\Lead;
+use App\Models\Product;
+use App\Models\ProductionOrder;
+use App\Models\ProductionWaste;
 use App\Models\Project;
+use App\Models\PurchaseOrder;
 use App\Models\TalentReview;
 use App\Models\Task;
 use App\Models\User;
@@ -16,8 +23,7 @@ class AdvancedAnalyticsService
     public function __construct(
         private readonly AccountingService $accounting,
         private readonly ProjectCostingService $projectCosting,
-    ) {
-    }
+    ) {}
 
     public function overview(User $viewer, int $year): array
     {
@@ -111,7 +117,7 @@ class AdvancedAnalyticsService
                 'overdue_tasks' => $overdue,
                 'attendance_on_time_rate' => $attendanceCount > 0 ? round(($onTimeCount / $attendanceCount) * 100, 2) : 0,
                 'goal_progress' => round((float) Goal::query()
-                    ->when(!$viewer->isCEO(), fn (Builder $query) => $query->where('division', $viewer->divisionKey()))
+                    ->when(! $viewer->isCEO(), fn (Builder $query) => $query->where('division', $viewer->divisionKey()))
                     ->where('status', 'active')
                     ->avg('progress'), 2),
             ],
@@ -149,10 +155,10 @@ class AdvancedAnalyticsService
 
     private function getCrmMetrics(): array
     {
-        $leads = \App\Models\Lead::query()->get();
+        $leads = Lead::query()->get();
         $won = $leads->where('status', 'deal')->count();
         $closed = $won + $leads->where('status', 'lost')->count();
-        
+
         return [
             'total_leads' => $leads->count(),
             'open_pipeline_value' => (float) $leads->whereIn('status', ['leads', 'penawaran'])->sum('project_value'),
@@ -163,7 +169,8 @@ class AdvancedAnalyticsService
 
     private function getPurchasingMetrics(): array
     {
-        $pos = \App\Models\PurchaseOrder::query()->get();
+        $pos = PurchaseOrder::query()->get();
+
         return [
             'total_orders' => $pos->count(),
             'total_value' => (float) $pos->sum('total_amount'),
@@ -175,7 +182,8 @@ class AdvancedAnalyticsService
     {
         // Simplification for analytics: sum of product standard_cost * some estimated qty
         // Or if we have a view for current stock, we can use it.
-        $products = \App\Models\Product::query()->get();
+        $products = Product::query()->get();
+
         return [
             'total_products' => $products->count(),
             'estimated_valuation' => (float) $products->sum('standard_cost'), // Placeholder for actual stock * cost
@@ -184,12 +192,12 @@ class AdvancedAnalyticsService
 
     private function getProductionMetrics(): array
     {
-        $orders = \App\Models\ProductionOrder::query()->get();
+        $orders = ProductionOrder::query()->get();
         $totalOutput = $orders->sum('planned_quantity');
-        
+
         // Count waste
-        $waste = \App\Models\ProductionWaste::query()->sum('quantity');
-        
+        $waste = ProductionWaste::query()->sum('quantity');
+
         return [
             'total_orders' => $orders->count(),
             'active_orders' => $orders->whereIn('status', ['planned', 'in_progress'])->count(),

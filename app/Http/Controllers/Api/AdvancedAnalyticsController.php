@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -8,9 +10,7 @@ use Illuminate\Http\Request;
 
 class AdvancedAnalyticsController extends Controller
 {
-    public function __construct(private readonly AdvancedAnalyticsService $analytics)
-    {
-    }
+    public function __construct(private readonly AdvancedAnalyticsService $analytics) {}
 
     public function index(Request $request)
     {
