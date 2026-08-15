@@ -2117,62 +2117,7 @@
                 </div>
                 <p class="desc" style="margin-bottom: 24px;">Pengaturan hak paten resep (BOM). Hanya CEO & Manajer Produksi yang memiliki wewenang mengubah takaran. Seluruh takaran <strong>wajib menggunakan satuan Gram (gr)</strong> untuk akurasi HPP. Harga Modal (Cost per Gram) tersinkron otomatis dengan stok Gudang.</p>
                 
-                <!-- Create Recipe Form (Modal for CEO) -->
-                <div id="modal-add-recipe" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
-                    <div style="background: var(--panel-bg); border: 1px solid var(--panel-border); padding: 24px; border-radius: 12px; width: 600px; max-width: 95%; max-height: 90vh; overflow-y: auto;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--panel-border); padding-bottom: 12px;">
-                            <h4 style="margin: 0; color: var(--text-heading); font-size: 16px;">Buat Resep (BOM) Baru</h4>
-                            <button onclick="document.getElementById('modal-add-recipe').style.display='none'" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 24px; line-height: 1;">&times;</button>
-                        </div>
-                        <form method="post" action="{{ route('master-demo.recipes.store') }}">
-                            @csrf
-                            <div style="display: flex; flex-direction: column; gap: 20px;">
-                                <div style="background: rgba(255,255,255,0.02); padding: 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
-                                    <h5 style="margin: 0 0 12px 0; font-size: 13px; color: var(--accent);">1. Info Barang Jadi</h5>
-                                    <label style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px; display: block;">Pilih Produk Jadi (Hasil Akhir)</label>
-                                    <select name="product_id" class="form-control" style="background: rgba(0,0,0,0.2); border: 1px solid var(--panel-border); color: white; padding: 10px 12px; border-radius: 6px; width: 100%; margin-bottom: 12px;" required>
-                                        <option value="">-- Pilih --</option>
-                                        @foreach(\App\Models\Product::where('company_id', $company->id)->get() as $product)
-                                            <option value="{{ $product->id }}">{{ $product->name }}</option>
-                                        @endforeach
-                                    </select>
-                                    
-                                    <label style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px; display: block;">Nama Resep Khusus</label>
-                                    <input type="text" name="name" class="form-control" placeholder="Contoh: Roti Sobek Standar Premium" style="background: rgba(0,0,0,0.2); border: 1px solid var(--panel-border); color: white; padding: 10px 12px; border-radius: 6px; width: 100%; margin-bottom: 12px;" required>
-                                    
-                                    <label style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px; display: block;">Target Output per Batch (Pcs/Porsi)</label>
-                                    <input type="number" step="0.1" name="yield_quantity" class="form-control" placeholder="Misal: 100" style="background: rgba(0,0,0,0.2); border: 1px solid var(--panel-border); color: white; padding: 10px 12px; border-radius: 6px; width: 100%;" required>
-                                </div>
-                                
-                                <div style="background: rgba(255,255,255,0.02); padding: 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
-                                    <h5 style="margin: 0 0 12px 0; font-size: 13px; color: var(--accent);">2. Komposisi Bahan Mentah</h5>
-                                    <label style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px; display: block;">Pilih Bahan dari Gudang (Gram)</label>
-                                    
-                                    <div id="recipe-items-container">
-                                        <div class="recipe-item-row" style="display: flex; gap: 8px; margin-bottom: 12px; align-items: center;">
-                                            <select name="materials[]" class="form-control material-select" onchange="calculateRecipeCost()" style="background: rgba(0,0,0,0.2); border: 1px solid var(--panel-border); color: white; padding: 10px 12px; border-radius: 6px; flex: 2;" required>
-                                                <option value="" data-cost="0">-- Pilih Bahan --</option>
-                                                @foreach(\App\Models\Product::where('company_id', $company->id)->get() as $material)
-                                                    <option value="{{ $material->id }}" data-cost="{{ $material->standard_cost ?? 0 }}">{{ $material->name }} (Rp{{ number_format($material->standard_cost ?? 0, 0, ',', '.') }}/gr)</option>
-                                                @endforeach
-                                            </select>
-                                            <input type="number" step="0.1" name="quantities[]" class="form-control material-qty" oninput="calculateRecipeCost()" placeholder="Gram" style="background: rgba(0,0,0,0.2); border: 1px solid var(--panel-border); color: white; padding: 10px 12px; border-radius: 6px; flex: 1; min-width: 0;" required>
-                                            <button type="button" onclick="this.parentElement.remove(); calculateRecipeCost();" style="background: none; border: none; color: var(--danger); cursor: pointer; padding: 8px; flex-shrink: 0;"><i class="fa-solid fa-trash"></i></button>
-                                        </div>
-                                    </div>
-                                    
-                                    <button type="button" class="user-pill" onclick="addRecipeItemRow()" style="background: rgba(255,255,255,0.1); border: none; cursor: pointer; color: white; margin-bottom: 16px; width: 100%; justify-content: center;"><i class="fa-solid fa-plus"></i> Tambah Bahan Lain</button>
-                                    
-                                    <div style="font-size: 13px; color: var(--success); font-weight: bold; padding: 12px; background: rgba(12, 53, 39,0.2); border-radius: 6px; text-align: center; border: 1px solid rgba(16, 185, 129, 0.2);">
-                                        ESTIMASI HPP (MODAL): <span id="recipe-total-cost">Rp 0</span>
-                                    </div>
-                                </div>
-                                
-                                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px; font-size: 15px;"><i class="fa-solid fa-check"></i> Simpan Resep Permanen</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+
                 
                 <script>
                 function calculateRecipeCost() {
@@ -2287,6 +2232,63 @@
             </script>
             
             <div id="prod-tab-dashboard">
+                <!-- Create Recipe Form (Modal for CEO) -->
+                <div id="modal-add-recipe" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
+                    <div style="background: var(--panel-bg); border: 1px solid var(--panel-border); padding: 24px; border-radius: 12px; width: 600px; max-width: 95%; max-height: 90vh; overflow-y: auto;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--panel-border); padding-bottom: 12px;">
+                            <h4 style="margin: 0; color: var(--text-heading); font-size: 16px;">Buat Resep (BOM) Baru</h4>
+                            <button onclick="document.getElementById('modal-add-recipe').style.display='none'" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 24px; line-height: 1;">&times;</button>
+                        </div>
+                        <form method="post" action="{{ route('master-demo.recipes.store') }}">
+                            @csrf
+                            <div style="display: flex; flex-direction: column; gap: 20px;">
+                                <div style="background: rgba(255,255,255,0.02); padding: 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                                    <h5 style="margin: 0 0 12px 0; font-size: 13px; color: var(--accent);">1. Info Barang Jadi</h5>
+                                    <label style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px; display: block;">Pilih Produk Jadi (Hasil Akhir)</label>
+                                    <select name="product_id" class="form-control" style="background: rgba(0,0,0,0.2); border: 1px solid var(--panel-border); color: white; padding: 10px 12px; border-radius: 6px; width: 100%; margin-bottom: 12px;" required>
+                                        <option value="">-- Pilih --</option>
+                                        @foreach(\App\Models\Product::where('company_id', $company->id)->get() as $product)
+                                            <option value="{{ $product->id }}">{{ $product->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    
+                                    <label style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px; display: block;">Nama Resep Khusus</label>
+                                    <input type="text" name="name" class="form-control" placeholder="Contoh: Roti Sobek Standar Premium" style="background: rgba(0,0,0,0.2); border: 1px solid var(--panel-border); color: white; padding: 10px 12px; border-radius: 6px; width: 100%; margin-bottom: 12px;" required>
+                                    
+                                    <label style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px; display: block;">Target Output per Batch (Pcs/Porsi)</label>
+                                    <input type="number" step="0.1" name="yield_quantity" class="form-control" placeholder="Misal: 100" style="background: rgba(0,0,0,0.2); border: 1px solid var(--panel-border); color: white; padding: 10px 12px; border-radius: 6px; width: 100%;" required>
+                                </div>
+                                
+                                <div style="background: rgba(255,255,255,0.02); padding: 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                                    <h5 style="margin: 0 0 12px 0; font-size: 13px; color: var(--accent);">2. Komposisi Bahan Mentah</h5>
+                                    <label style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px; display: block;">Pilih Bahan dari Gudang (Gram)</label>
+                                    
+                                    <div id="recipe-items-container">
+                                        <div class="recipe-item-row" style="display: flex; gap: 8px; margin-bottom: 12px; align-items: center;">
+                                            <select name="materials[]" class="form-control material-select" onchange="calculateRecipeCost()" style="background: rgba(0,0,0,0.2); border: 1px solid var(--panel-border); color: white; padding: 10px 12px; border-radius: 6px; flex: 2;" required>
+                                                <option value="" data-cost="0">-- Pilih Bahan --</option>
+                                                @foreach(\App\Models\Product::where('company_id', $company->id)->get() as $material)
+                                                    <option value="{{ $material->id }}" data-cost="{{ $material->standard_cost ?? 0 }}">{{ $material->name }} (Rp{{ number_format($material->standard_cost ?? 0, 0, ',', '.') }}/gr)</option>
+                                                @endforeach
+                                            </select>
+                                            <input type="number" step="0.1" name="quantities[]" class="form-control material-qty" oninput="calculateRecipeCost()" placeholder="Gram" style="background: rgba(0,0,0,0.2); border: 1px solid var(--panel-border); color: white; padding: 10px 12px; border-radius: 6px; flex: 1; min-width: 0;" required>
+                                            <button type="button" onclick="this.parentElement.remove(); calculateRecipeCost();" style="background: none; border: none; color: var(--danger); cursor: pointer; padding: 8px; flex-shrink: 0;"><i class="fa-solid fa-trash"></i></button>
+                                        </div>
+                                    </div>
+                                    
+                                    <button type="button" class="user-pill" onclick="addRecipeItemRow()" style="background: rgba(255,255,255,0.1); border: none; cursor: pointer; color: white; margin-bottom: 16px; width: 100%; justify-content: center;"><i class="fa-solid fa-plus"></i> Tambah Bahan Lain</button>
+                                    
+                                    <div style="font-size: 13px; color: var(--success); font-weight: bold; padding: 12px; background: rgba(12, 53, 39,0.2); border-radius: 6px; text-align: center; border: 1px solid rgba(16, 185, 129, 0.2);">
+                                        ESTIMASI HPP (MODAL): <span id="recipe-total-cost">Rp 0</span>
+                                    </div>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px; font-size: 15px;"><i class="fa-solid fa-check"></i> Simpan Resep Permanen</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
             <!-- Production KPIs -->
             <div class="grid-4" style="margin-bottom: 24px;">
                 @php
