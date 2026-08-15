@@ -34,7 +34,7 @@ unset($__defined_vars, $__key, $__value); ?>
             <i class="fa-solid <?php echo e($icon); ?>" style="font-size: 40px; color: <?php echo e($iconColor); ?>; margin-bottom: 16px;"></i>
         <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
         
-        <h3 style="margin-bottom: 24px; font-weight: 800; font-size: 20px;"><?php echo e($title); ?></h3>
+        <h3 id="<?php echo e($id); ?>-title" style="margin-bottom: 24px; font-weight: 800; font-size: 20px;"><?php echo e($title); ?></h3>
         
         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($formId): ?>
         <form id="<?php echo e($formId); ?>" method="POST" action="">

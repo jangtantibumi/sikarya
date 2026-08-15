@@ -253,6 +253,14 @@
                     <input type="text" id="inv-umkm-name" required class="form-control-ios">
                 </div>
 
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label class="form-label-ios">Tipe Barang *</label>
+                    <select id="inv-umkm-type" required class="form-control-ios">
+                        <option value="raw_material">Bahan Baku</option>
+                        <option value="finished_good">Barang Jadi</option>
+                    </select>
+                </div>
+
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
                     <div class="form-group">
                         <label class="form-label-ios">Kode (Opsional)</label>
@@ -544,6 +552,7 @@
     function editInvUmkm(item) {
         document.getElementById('inv-umkm-id').value = item.id;
         document.getElementById('inv-umkm-name').value = item.item_name;
+        document.getElementById('inv-umkm-type').value = item.type || 'raw_material';
         document.getElementById('inv-umkm-code').value = item.item_code || '';
         document.getElementById('inv-umkm-category').value = item.category || '';
         document.getElementById('inv-umkm-uom').value = item.uom || '';
@@ -575,6 +584,7 @@
 
         const payload = {
             item_name: document.getElementById('inv-umkm-name').value,
+            type: document.getElementById('inv-umkm-type').value,
             item_code: document.getElementById('inv-umkm-code').value || null,
             category: document.getElementById('inv-umkm-category').value || null,
             uom: document.getElementById('inv-umkm-uom').value || null,

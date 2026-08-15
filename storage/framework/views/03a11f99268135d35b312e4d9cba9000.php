@@ -29,6 +29,14 @@
         display: flex; flex-direction: column;
         max-height: 85vh;
     }
+
+    /* Fix Flexbox Trap: Mencegah tombol bawah tertutup jika konten panjang */
+    .ios-modal-overlay.purchasing-modal .ios-modal form {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+    }
     @keyframes purchModalSlideUp {
         from { opacity: 0; transform: translateY(24px) scale(0.97); }
         to { opacity: 1; transform: translateY(0) scale(1); }
@@ -201,7 +209,7 @@
         <button onclick="purchasingApp.openPRModal()" class="ios-btn ios-btn-primary"><i class="fa-solid fa-file-pen" style="margin-right: 6px;"></i> Buat Pengajuan Baru</button>
     </div>
     <div id="purchasing-pr-container" style="display: flex; flex-direction: column; gap: 16px;">
-        <div class="loader" style="margin: 40px auto; border-top-color: var(--accent);"></div>
+        <i class="fa-solid fa-spinner fa-spin" style="font-size: 24px; color: var(--accent);"></i>
     </div>
 </div>
 
@@ -220,7 +228,7 @@
 
     <!-- Container for PO List -->
     <div id="purchasing-po-container" style="display: flex; flex-direction: column; gap: 16px;">
-        <div class="loader" style="margin: 40px auto; border-top-color: var(--accent);"></div>
+        <i class="fa-solid fa-spinner fa-spin" style="font-size: 24px; color: var(--accent);"></i>
     </div>
 </div>
 
@@ -234,7 +242,7 @@
         <button onclick="purchasingApp.openSupplierModal()" class="ios-btn ios-btn-secondary"><i class="fa-solid fa-plus"></i> Tambah Supplier Baru</button>
     </div>
     <div id="supplier-list-container" style="display: flex; flex-direction: column; gap: 12px;">
-        <div class="loader" style="margin: 40px auto; border-top-color: var(--accent);"></div>
+        <i class="fa-solid fa-spinner fa-spin" style="font-size: 24px; color: var(--accent);"></i>
     </div>
 </div>
 
@@ -527,4 +535,5 @@
     };
 </script>
 <script src="<?php echo e(asset('js/purchasing.js')); ?>?v=<?php echo e(time()); ?>"></script>
+
 <?php /**PATH D:\suba-erp-master-local-latest\resources\views/purchasing/index.blade.php ENDPATH**/ ?>

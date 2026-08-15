@@ -72,6 +72,7 @@ class InventoryUmkmController extends Controller
                 'id' => $p->id,
                 'item_code' => $p->sku,
                 'item_name' => $p->name,
+                'type' => $p->type ?? 'raw_material',
                 'category' => $p->category_id ? 'Kategori '.$p->category_id : 'Umum',
                 'uom' => $p->unit,
                 'min_stock' => $p->min_stock,
@@ -91,6 +92,7 @@ class InventoryUmkmController extends Controller
         $validated = $request->validate([
             'item_code' => 'nullable|string',
             'item_name' => 'required|string',
+            'type' => 'required|string|in:raw_material,finished_good',
             'category' => 'nullable|string',
             'uom' => 'nullable|string',
             'min_stock' => 'nullable|numeric',
@@ -103,6 +105,7 @@ class InventoryUmkmController extends Controller
             'company_id' => $this->getCompanyId(),
             'sku' => $validated['item_code'] ?? 'BRG-'.strtoupper(uniqid()),
             'name' => $validated['item_name'],
+            'type' => $validated['type'] ?? 'raw_material',
             'unit' => $validated['uom'] ?? 'Pcs',
             'min_stock' => $validated['min_stock'] ?? 0,
             'max_stock' => $validated['max_stock'] ?? 0,
@@ -127,6 +130,7 @@ class InventoryUmkmController extends Controller
         $validated = $request->validate([
             'item_code' => 'nullable|string',
             'item_name' => 'required|string',
+            'type' => 'required|string|in:raw_material,finished_good',
             'category' => 'nullable|string',
             'uom' => 'nullable|string',
             'min_stock' => 'nullable|numeric',
@@ -138,6 +142,7 @@ class InventoryUmkmController extends Controller
         $product->update([
             'sku' => $validated['item_code'] ?? $product->sku,
             'name' => $validated['item_name'],
+            'type' => $validated['type'] ?? $product->type,
             'unit' => $validated['uom'] ?? $product->unit,
             'min_stock' => $validated['min_stock'] ?? $product->min_stock,
             'max_stock' => $validated['max_stock'] ?? $product->max_stock,

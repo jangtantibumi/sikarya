@@ -886,22 +886,22 @@ Logout <?php echo $__env->renderComponent(); ?>
             <div class="grid-4">
                 <div class="card" style="opacity: 0.5; cursor: not-allowed;" title="Module coming soon">
                     <h3>CRM Pipeline</h3>
-                    <div class="value" id="metrics-crm-value"><div class="loader"></div></div>
+                    <div class="value" id="metrics-crm-value"><i class="fa-solid fa-spinner fa-spin" style="font-size: 24px; color: var(--accent);"></i></div>
                     <div class="trend" style="color: var(--text-muted);"><i class="fa-solid fa-tools"></i> Module in Development</div>
                 </div>
                 <div class="card" style="opacity: 0.5; cursor: not-allowed;" title="Module coming soon">
                     <h3>Pending Payables</h3>
-                    <div class="value" id="metrics-po-value"><div class="loader"></div></div>
+                    <div class="value" id="metrics-po-value"><i class="fa-solid fa-spinner fa-spin" style="font-size: 24px; color: var(--accent);"></i></div>
                     <div class="trend" style="color: var(--text-muted);"><i class="fa-solid fa-tools"></i> Module in Development</div>
                 </div>
                 <div class="card" style="opacity: 0.5; cursor: not-allowed;" title="Module coming soon">
                     <h3>Production Quality</h3>
-                    <div class="value" id="metrics-qa-value"><div class="loader"></div></div>
+                    <div class="value" id="metrics-qa-value"><i class="fa-solid fa-spinner fa-spin" style="font-size: 24px; color: var(--accent);"></i></div>
                     <div class="trend" style="color: var(--text-muted);"><i class="fa-solid fa-tools"></i> Module in Development</div>
                 </div>
                 <div class="card interactive" onclick="switchView('inventory_umkm')" style="cursor:pointer;">
                     <h3>Asset Valuation</h3>
-                    <div class="value" id="metrics-inv-value"><div class="loader"></div></div>
+                    <div class="value" id="metrics-inv-value"><i class="fa-solid fa-spinner fa-spin" style="font-size: 24px; color: var(--accent);"></i></div>
                     <div class="trend"><i class="fa-solid fa-boxes-stacked"></i> Go to Inventory & Warehouse</div>
                 </div>
             </div>
@@ -910,7 +910,7 @@ Logout <?php echo $__env->renderComponent(); ?>
                 <div class="card">
                     <h3>Executive Alerts</h3>
                     <div id="alerts-container">
-                        <div class="loader"></div> Fetching system alerts...
+                        <i class="fa-solid fa-spinner fa-spin" style="font-size: 24px; color: var(--accent);"></i> Fetching system alerts...
                     </div>
                 </div>
                 <div class="card">
@@ -1232,7 +1232,7 @@ Logout <?php echo $__env->renderComponent(); ?>
                 <!-- Timeline / Data Container -->
                 <div id="audit-log-container" style="position: relative; min-height: 200px; padding-top: 8px;">
                     <div style="text-align: center; padding: 40px 0;">
-                        <div class="loader"></div> <span style="margin-top: 12px; display: block; color: var(--text-muted); font-size: 14px;">Mengambil data log...</span>
+                        <i class="fa-solid fa-spinner fa-spin" style="font-size: 24px; color: var(--accent);"></i> <span style="margin-top: 12px; display: block; color: var(--text-muted); font-size: 14px;">Mengambil data log...</span>
                     </div>
                 </div>
                 
@@ -1279,7 +1279,7 @@ Logout <?php echo $__env->renderComponent(); ?>
 
                 async function loadAuditLogs() {
                     const container = document.getElementById('audit-log-container');
-                    container.innerHTML = '<div style="text-align: center; padding: 40px 0;"><div class="loader" style="margin: 0 auto;"></div><div style="margin-top: 12px; color: var(--text-muted); font-size: 14px;">Memuat data...</div></div>';
+                    container.innerHTML = '<div style="text-align: center; padding: 40px 0;"><i class="fa-solid fa-spinner fa-spin" style="font-size: 24px; color: var(--accent);"></i><div style="margin-top: 12px; color: var(--text-muted); font-size: 14px;">Memuat data...</div></div>';
                     
                     const date = document.getElementById('audit-date').value;
                     const timeStart = document.getElementById('audit-time-start').value;
@@ -1409,7 +1409,7 @@ Logout <?php echo $__env->renderComponent(); ?>
                     const timeframe = document.getElementById('audit-clear-timeframe').value;
                     const btn = document.getElementById('btn-execute-clear');
                     const originalText = btn.innerHTML;
-                    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Memproses...';
+                    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
                     btn.disabled = true;
 
                     try {
@@ -2145,52 +2145,11 @@ Logout <?php echo $__env->renderComponent(); ?>
             <div class="card" style="margin-bottom: 24px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--panel-border); padding-bottom: 16px; margin-bottom: 16px;">
                     <h3 style="margin: 0; border: none; padding: 0;">Master Resep (Bill of Materials)</h3>
-                    <button class="user-pill" style="background: var(--accent); color: white; cursor: pointer; border: none;">+ Buat Resep Baru</button>
+                    <button class="user-pill" onclick="document.getElementById('modal-add-recipe').style.display='flex'" style="background: var(--accent); color: white; cursor: pointer; border: none;">+ Buat Resep Baru</button>
                 </div>
                 <p class="desc" style="margin-bottom: 24px;">Pengaturan hak paten resep (BOM). Hanya CEO & Manajer Produksi yang memiliki wewenang mengubah takaran. Seluruh takaran <strong>wajib menggunakan satuan Gram (gr)</strong> untuk akurasi HPP. Harga Modal (Cost per Gram) tersinkron otomatis dengan stok Gudang.</p>
                 
-                <!-- Create Recipe Form (Mockup for CEO) -->
-                <div style="background: rgba(0,0,0,0.2); padding: 16px; border-radius: 8px; margin-bottom: 24px; border: 1px solid var(--panel-border);">
-                    <h4 style="margin: 0 0 12px 0; font-size: 14px;">Draft Resep Baru</h4>
-                    <form method="post" action="<?php echo e(route('master-demo.recipes.store')); ?>">
-                        <?php echo csrf_field(); ?>
-                        <div class="grid-2">
-                            <div>
-                                <label style="font-size: 12px; color: var(--text-muted);">Pilih Produk Jadi</label>
-                                <select name="product_id" class="form-control" style="background: rgba(255,255,255,0.05); border: 1px solid var(--panel-border); color: white; padding: 8px 12px; border-radius: 6px; width: 100%; margin-bottom: 12px;">
-                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = \App\Models\Product::where('company_id', $company->id)->get(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $product): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
-                                        <option value="<?php echo e($product->id); ?>"><?php echo e($product->name); ?></option>
-                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
-                                </select>
-                                <label style="font-size: 12px; color: var(--text-muted);">Nama Resep Khusus</label>
-                                <input type="text" name="name" class="form-control" placeholder="Contoh: Roti Sobek Standar" style="background: rgba(255,255,255,0.05); border: 1px solid var(--panel-border); color: white; padding: 8px 12px; border-radius: 6px; width: 100%; margin-bottom: 12px;">
-                                <label style="font-size: 12px; color: var(--text-muted);">Yield (Output Pcs)</label>
-                                <input type="number" name="yield_quantity" class="form-control" placeholder="100" style="background: rgba(255,255,255,0.05); border: 1px solid var(--panel-border); color: white; padding: 8px 12px; border-radius: 6px; width: 100%; margin-bottom: 12px;">
-                            </div>
-                            <div>
-                                <label style="font-size: 12px; color: var(--text-muted);">Pilih Bahan dari Gudang (Gram)</label>
-                                <div id="recipe-items-container">
-                                    <div class="recipe-item-row" style="display: flex; gap: 8px; margin-bottom: 8px;">
-                                        <select name="materials[]" class="form-control material-select" onchange="calculateRecipeCost()" style="background: rgba(255,255,255,0.05); border: 1px solid var(--panel-border); color: white; padding: 8px 12px; border-radius: 6px; flex: 2;">
-                                            <option value="" data-cost="0">Pilih Bahan...</option>
-                                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = \App\Models\Product::where('company_id', $company->id)->get(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $material): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
-                                                <option value="<?php echo e($material->id); ?>" data-cost="<?php echo e($material->standard_cost ?? 0); ?>"><?php echo e($material->name); ?> (Rp<?php echo e(number_format($material->standard_cost ?? 0, 0, ',', '.')); ?>/gr)</option>
-                                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
-                                        </select>
-                                        <input type="number" name="quantities[]" class="form-control material-qty" oninput="calculateRecipeCost()" placeholder="Gram" style="background: rgba(255,255,255,0.05); border: 1px solid var(--panel-border); color: white; padding: 8px 12px; border-radius: 6px; flex: 1;">
-                                    </div>
-                                </div>
-                                <button type="button" class="user-pill" onclick="addRecipeItemRow()" style="background: rgba(255,255,255,0.1); border: none; cursor: pointer; color: white; margin-bottom: 16px;">+ Tambah Bahan Lain</button>
-                                
-                                <div style="font-size: 12px; color: var(--success); font-weight: bold; margin-bottom: 16px; padding: 8px; background: rgba(12, 53, 39,0.1); border-radius: 4px;">
-                                    TOTAL ESTIMASI HPP: <span id="recipe-total-cost">Rp 0</span>
-                                </div>
-                                
-                                <button type="submit" class="btn btn-primary" style="width: 100%;">Simpan Resep / BOM</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
+
                 
                 <script>
                 function calculateRecipeCost() {
@@ -2279,9 +2238,9 @@ Logout <?php echo $__env->renderComponent(); ?>
         <!-- PRODUCTION VIEW -->
         <section id="view-production" class="view-section">
             <div class="ios-tabs" style="display: flex; gap: 16px; border-bottom: 1px solid var(--panel-border); margin-bottom: 24px; padding-bottom: 8px; overflow-x: auto;">
-                <button class="ios-tab-main active" data-prodtab="dashboard" onclick="switchProdTab('dashboard')" style="background:none; border:none; color:var(--accent); font-weight:600; padding:8px 16px; border-bottom: 2px solid var(--accent); cursor:pointer; white-space: nowrap;">Production / BOM</button>
-                <button class="ios-tab-main" data-prodtab="request" onclick="switchProdTab('request')" style="background:none; border:none; color:var(--text-muted); font-weight:500; padding:8px 16px; cursor:pointer; white-space: nowrap;">Request Bahan (Pabrik)</button>
-                <button class="ios-tab-main" data-prodtab="automation" onclick="switchProdTab('automation')" style="background:none; border:none; color:var(--text-muted); font-weight:500; padding:8px 16px; cursor:pointer; white-space: nowrap;">Otomasi Backflush</button>
+                <button class="ios-tab-main active" data-prodtab="dashboard" onclick="switchProdTab('dashboard')" style="background:none; border:none; color:var(--accent); font-weight:600; padding:8px 16px; border-bottom: 2px solid var(--accent); cursor:pointer; white-space: nowrap;">Resep & Produksi</button>
+                <button class="ios-tab-main" data-prodtab="request" onclick="switchProdTab('request')" style="background:none; border:none; color:var(--text-muted); font-weight:500; padding:8px 16px; cursor:pointer; white-space: nowrap;">Permintaan ke Gudang</button>
+                <button class="ios-tab-main" data-prodtab="automation" onclick="switchProdTab('automation')" style="background:none; border:none; color:var(--text-muted); font-weight:500; padding:8px 16px; cursor:pointer; white-space: nowrap;">Riwayat Penggunaan</button>
             </div>
             
             <script>
@@ -2305,6 +2264,63 @@ Logout <?php echo $__env->renderComponent(); ?>
             </script>
             
             <div id="prod-tab-dashboard">
+                <!-- Create Recipe Form (Modal for CEO) -->
+                <div id="modal-add-recipe" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
+                    <div style="background: rgba(20, 24, 30, 0.95); backdrop-filter: blur(20px); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8); border: 1px solid var(--panel-border); padding: 24px; border-radius: 12px; width: 600px; max-width: 95%; max-height: 90vh; overflow-y: auto;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--panel-border); padding-bottom: 12px;">
+                            <h4 style="margin: 0; color: var(--text-heading); font-size: 16px;">Buat Resep (BOM) Baru</h4>
+                            <button onclick="document.getElementById('modal-add-recipe').style.display='none'" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 24px; line-height: 1;">&times;</button>
+                        </div>
+                        <form method="post" action="<?php echo e(route('master-demo.recipes.store')); ?>">
+                            <?php echo csrf_field(); ?>
+                            <div style="display: flex; flex-direction: column; gap: 20px;">
+                                <div style="background: rgba(255,255,255,0.02); padding: 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                                    <h5 style="margin: 0 0 12px 0; font-size: 13px; color: var(--accent);">1. Info Barang Jadi</h5>
+                                    <label style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px; display: block;">Pilih Produk Jadi (Hasil Akhir)</label>
+                                    <select name="product_id" class="form-control" style="background: rgba(0,0,0,0.2); border: 1px solid var(--panel-border); color: white; padding: 10px 12px; border-radius: 6px; width: 100%; margin-bottom: 12px;" required>
+                                        <option value="">-- Pilih --</option>
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = \App\Models\Product::where('company_id', $company->id)->get(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $product): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                                            <option value="<?php echo e($product->id); ?>"><?php echo e($product->name); ?></option>
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                                    </select>
+                                    
+                                    <label style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px; display: block;">Nama Resep Khusus</label>
+                                    <input type="text" name="name" class="form-control" placeholder="Contoh: Roti Sobek Standar Premium" style="background: rgba(0,0,0,0.2); border: 1px solid var(--panel-border); color: white; padding: 10px 12px; border-radius: 6px; width: 100%; margin-bottom: 12px;" required>
+                                    
+                                    <label style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px; display: block;">Target Output per Batch (Pcs/Porsi)</label>
+                                    <input type="number" step="0.1" name="yield_quantity" class="form-control" placeholder="Misal: 100" style="background: rgba(0,0,0,0.2); border: 1px solid var(--panel-border); color: white; padding: 10px 12px; border-radius: 6px; width: 100%;" required>
+                                </div>
+                                
+                                <div style="background: rgba(255,255,255,0.02); padding: 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                                    <h5 style="margin: 0 0 12px 0; font-size: 13px; color: var(--accent);">2. Komposisi Bahan Mentah</h5>
+                                    <label style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px; display: block;">Pilih Bahan dari Gudang (Gram)</label>
+                                    
+                                    <div id="recipe-items-container">
+                                        <div class="recipe-item-row" style="display: flex; gap: 8px; margin-bottom: 12px; align-items: center;">
+                                            <select name="materials[]" class="form-control material-select" onchange="calculateRecipeCost()" style="background: rgba(0,0,0,0.2); border: 1px solid var(--panel-border); color: white; padding: 10px 12px; border-radius: 6px; flex: 2;" required>
+                                                <option value="" data-cost="0">-- Pilih Bahan --</option>
+                                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = \App\Models\Product::where('company_id', $company->id)->get(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $material): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                                                    <option value="<?php echo e($material->id); ?>" data-cost="<?php echo e($material->standard_cost ?? 0); ?>"><?php echo e($material->name); ?> (Rp<?php echo e(number_format($material->standard_cost ?? 0, 0, ',', '.')); ?>/gr)</option>
+                                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
+                                            </select>
+                                            <input type="number" step="0.1" name="quantities[]" class="form-control material-qty" oninput="calculateRecipeCost()" placeholder="Gram" style="background: rgba(0,0,0,0.2); border: 1px solid var(--panel-border); color: white; padding: 10px 12px; border-radius: 6px; flex: 1; min-width: 0;" required>
+                                            <button type="button" onclick="this.parentElement.remove(); calculateRecipeCost();" style="background: none; border: none; color: var(--danger); cursor: pointer; padding: 8px; flex-shrink: 0;"><i class="fa-solid fa-trash"></i></button>
+                                        </div>
+                                    </div>
+                                    
+                                    <button type="button" class="user-pill" onclick="addRecipeItemRow()" style="background: rgba(255,255,255,0.1); border: none; cursor: pointer; color: white; margin-bottom: 16px; width: 100%; justify-content: center;"><i class="fa-solid fa-plus"></i> Tambah Bahan Lain</button>
+                                    
+                                    <div style="font-size: 13px; color: var(--success); font-weight: bold; padding: 12px; background: rgba(12, 53, 39,0.2); border-radius: 6px; text-align: center; border: 1px solid rgba(16, 185, 129, 0.2);">
+                                        ESTIMASI HPP (MODAL): <span id="recipe-total-cost">Rp 0</span>
+                                    </div>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px; font-size: 15px;"><i class="fa-solid fa-check"></i> Simpan Resep Permanen</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
             <!-- Production KPIs -->
             <div class="grid-4" style="margin-bottom: 24px;">
                 <?php
@@ -2340,10 +2356,13 @@ Logout <?php echo $__env->renderComponent(); ?>
             <div class="card" style="margin-bottom: 24px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--panel-border); padding-bottom: 16px; margin-bottom: 16px;">
                     <h3 style="margin: 0; border: none; padding: 0;">Laporan Produksi Harian</h3>
-                    <div style="color: var(--success); font-size: 13px; font-weight: bold;"><i class="fa-solid fa-link"></i> Terkoneksi ke Gudang Sentral</div>
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <button class="user-pill" onclick="document.getElementById('modal-add-recipe').style.display='flex'" style="background: var(--accent); color: white; cursor: pointer; border: none;"><i class="fa-solid fa-plus"></i> Buat Resep Baru</button>
+                        <div style="color: var(--success); font-size: 13px; font-weight: bold;"><i class="fa-solid fa-link"></i> Terkoneksi ke Gudang Sentral</div>
+                    </div>
                 </div>
                 
-                <div class="grid-2">
+                <div style="display: flex; flex-direction: column; gap: 24px;">
                     <div>
                         <h4 style="margin: 0 0 12px 0; font-size: 14px;">Real-Time Stok Gudang</h4>
                         <div style="background: rgba(0,0,0,0.2); padding: 16px; border-radius: 8px; border: 1px solid var(--panel-border);">
@@ -2465,7 +2484,7 @@ Logout <?php echo $__env->renderComponent(); ?>
                 <div style="text-align: center; padding: 40px 20px; background: rgba(255, 255, 255, 0.02); border: 1px dashed var(--panel-border); border-radius: 12px;">
                     <i class="fa-solid fa-boxes-packing" style="font-size: 48px; color: var(--text-muted); margin-bottom: 16px; opacity: 0.5;"></i>
                     <h4 style="margin: 0 0 8px 0; color: var(--text-heading);">Fitur dalam tahap pengembangan</h4>
-                    <p style="margin: 0; font-size: 14px; color: var(--text-muted);">Sistem pengajuan bahan baku dari pabrik ke gudang akan tersedia di pembaruan berikutnya.</p>
+                    <p style="margin: 0; font-size: 14px; color: var(--text-muted);">Sistem permintaan bahan baku dari pabrik ke gudang akan tersedia di pembaruan berikutnya.</p>
                 </div>
             </div>
             
@@ -2474,7 +2493,7 @@ Logout <?php echo $__env->renderComponent(); ?>
                 <div style="text-align: center; padding: 40px 20px; background: rgba(255, 255, 255, 0.02); border: 1px dashed var(--panel-border); border-radius: 12px;">
                     <i class="fa-solid fa-robot" style="font-size: 48px; color: var(--text-muted); margin-bottom: 16px; opacity: 0.5;"></i>
                     <h4 style="margin: 0 0 8px 0; color: var(--text-heading);">Fitur dalam tahap pengembangan</h4>
-                    <p style="margin: 0; font-size: 14px; color: var(--text-muted);">Pengaturan matriks pemotongan stok otomatis (Backflushing) akan tersedia di pembaruan berikutnya.</p>
+                    <p style="margin: 0; font-size: 14px; color: var(--text-muted);">Laporan riwayat pemotongan stok otomatis (Backflushing) akan tersedia di pembaruan berikutnya.</p>
                 </div>
             </div>
         </section>
@@ -3443,14 +3462,14 @@ Batal <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
             <?php if (isset($component)) { $__componentOriginala8bb031a483a05f647cb99ed3a469847 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginala8bb031a483a05f647cb99ed3a469847 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.ui.button','data' => ['variant' => 'danger','type' => 'button','id' => 'confirm-btn','onclick' => 'document.getElementById(\'confirm-form\').submit();']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.ui.button','data' => ['variant' => 'danger','type' => 'submit','id' => 'confirm-btn','onclick' => 'this.innerHTML=`<i class=\'fa-solid fa-spinner fa-spin\'></i> Memproses...`; this.style.pointerEvents=`none`;']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('ui.button'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['variant' => 'danger','type' => 'button','id' => 'confirm-btn','onclick' => 'document.getElementById(\'confirm-form\').submit();']); ?>
+<?php $component->withAttributes(['variant' => 'danger','type' => 'submit','id' => 'confirm-btn','onclick' => 'this.innerHTML=`<i class=\'fa-solid fa-spinner fa-spin\'></i> Memproses...`; this.style.pointerEvents=`none`;']); ?>
 <?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::processComponentKey($component); ?>
 Ya, Lanjutkan <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
@@ -3588,14 +3607,14 @@ Ya, Lanjutkan <?php echo $__env->renderComponent(); ?>
     }
     
     function confirmDeleteUser(id) {
-        document.getElementById('confirm-title').innerText = "Hapus Staf";
+        document.getElementById('modal-confirm-title').innerText = "Hapus Staf";
         document.getElementById('confirm-msg').innerText = "Apakah Anda yakin ingin menonaktifkan/menghapus staf ini dari sistem?";
         document.getElementById('confirm-form').action = "/master-demo/employee/" + id + "/delete"; 
         document.getElementById('modal-confirm').style.display = 'flex';
     }
     
     function confirmLogout() {
-        document.getElementById('confirm-title').innerText = "Logout";
+        document.getElementById('modal-confirm-title').innerText = "Logout";
         document.getElementById('confirm-msg').innerText = "Apakah Anda yakin ingin keluar dari sistem?";
         document.getElementById('confirm-form').action = "/master-demo/logout"; 
         document.getElementById('modal-confirm').style.display = 'flex';
@@ -3736,7 +3755,7 @@ Ya, Lanjutkan <?php echo $__env->renderComponent(); ?>
 
         } catch (error) {
             console.error('Failed to load analytics', error);
-            document.querySelectorAll('.loader').forEach(el => el.parentElement.innerText = 'Error loading data');
+            document.querySelectorAll('.fa-spinner').forEach(el => el.parentElement.innerText = 'Error loading data');
         }
     }
 
@@ -3878,7 +3897,7 @@ Ya, Lanjutkan <?php echo $__env->renderComponent(); ?>
             <p style="margin: 0 0 24px 0; font-size: 14px; color: var(--text-main); font-weight: 500;">Menghapus divisi <strong id="del-div-name"></strong>? Modul di dalamnya akan dipindahkan ke Uncategorized.</p>
 
             <div style="display: flex; gap: 12px;">
-                <button type="button" class="ios-btn ios-btn-secondary" style="flex: 1; background: #f3f4f6; color: #374151; font-weight: 600;" onclick="closePopup('division-delete-modal')">Cancel</button>
+                <button type="button" class="ios-btn ios-btn-secondary" style="flex: 1;  font-weight: 600;" onclick="closePopup('division-delete-modal')">Cancel</button>
                 <button type="button" class="ios-btn ios-btn-danger" style="flex: 1; background: #ef4444; color: white; font-weight: 600;" onclick="confirmDeleteDivision()">Hapus Divisi</button>
             </div>
         </div>
@@ -3897,7 +3916,7 @@ Ya, Lanjutkan <?php echo $__env->renderComponent(); ?>
             </div>
 
             <div style="display: flex; gap: 12px;">
-                <button type="button" class="ios-btn ios-btn-secondary" style="flex: 1; background: #f3f4f6; color: #374151; font-weight: 600;" onclick="closePopup('division-edit-modal')">Cancel</button>
+                <button type="button" class="ios-btn ios-btn-secondary" style="flex: 1;  font-weight: 600;" onclick="closePopup('division-edit-modal')">Cancel</button>
                 <button type="button" class="ios-btn ios-btn-primary" style="flex: 1; font-weight: 600;" onclick="confirmRenameDivision()">Simpan</button>
             </div>
         </div>
@@ -3919,7 +3938,7 @@ Ya, Lanjutkan <?php echo $__env->renderComponent(); ?>
                     <input type="text" id="add-div-code-input" class="form-control" placeholder="Contoh: MKT" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--panel-border); font-size: 15px;">
                 </div>
                 <div style="display: flex; gap: 12px;">
-                    <button type="button" class="ios-btn ios-btn-secondary" style="flex: 1; background: #f3f4f6; color: #374151; font-weight: 600;" onclick="closePopup('division-add-modal')">Batal</button>
+                    <button type="button" class="ios-btn ios-btn-secondary" style="flex: 1;  font-weight: 600;" onclick="closePopup('division-add-modal')">Batal</button>
                     <button type="submit" class="ios-btn ios-btn-primary" style="flex: 1; font-weight: 600;">Simpan Divisi</button>
                 </div>
             </form>
@@ -4296,7 +4315,7 @@ Ya, Lanjutkan <?php echo $__env->renderComponent(); ?>
         </p>
         <input type="hidden" id="revoke-user-id" value="">
         <div style="display: flex; gap: 12px; justify-content: center;">
-            <button class="ios-btn" style="flex: 1; background: #f1f5f9; color: #475569;" onclick="document.getElementById('modal-confirm-revoke').style.display='none'">Batal</button>
+            <button class="ios-btn" style="flex: 1; " onclick="document.getElementById('modal-confirm-revoke').style.display='none'">Batal</button>
             <button class="ios-btn ios-btn-danger" style="flex: 1;" onclick="executeRevoke()">Ya, Cabut Akses</button>
         </div>
     </div>
@@ -4354,7 +4373,7 @@ Ya, Lanjutkan <?php echo $__env->renderComponent(); ?>
             </div>
             
             <div style="display: flex; gap: 12px; justify-content: flex-end;">
-                <button type="button" class="ios-btn" style="background: #f1f5f9; color: #475569;" onclick="document.getElementById('modal-create-announcement').style.display='none'">Batal</button>
+                <button type="button" class="ios-btn" style="" onclick="document.getElementById('modal-create-announcement').style.display='none'">Batal</button>
                 <button type="submit" class="ios-btn ios-btn-primary"><i class="fa-solid fa-paper-plane" style="margin-right: 6px;"></i> Siarkan Pengumuman</button>
             </div>
         </form>
@@ -4497,7 +4516,7 @@ async function submitAnnouncement(e) {
     
     const btn = e.target.querySelector('button[type="submit"]');
     const oriText = btn.innerHTML;
-    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Menyimpan...';
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
     btn.disabled = true;
     
     try {
@@ -4585,7 +4604,7 @@ async function submitNewChannel(e) {
     
     const btn = e.target.querySelector('button[type="submit"]');
     const oriText = btn.innerHTML;
-    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Menyimpan...';
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
     btn.disabled = true;
     
     try {
@@ -4641,5 +4660,9 @@ async function submitNewChannel(e) {
 <?php endif; ?>
 <?php echo $__env->make('components.global-loading', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 <?php echo $__env->make('components.chat-widget', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+
+
+
+
 
 <?php /**PATH D:\suba-erp-master-local-latest\resources\views/master-portal.blade.php ENDPATH**/ ?>

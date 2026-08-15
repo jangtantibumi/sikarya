@@ -1,6 +1,16 @@
 <section id="view-inventory_umkm" class="view-section">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+            border-radius: 4px;
+        }
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
         .ios-card {
             background: var(--panel-glass);
             backdrop-filter: blur(20px);
@@ -117,7 +127,7 @@
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
         <h2 style="margin: 0; font-size: 28px; color: var(--text-accent); font-weight: 800;">Manajemen Gudang</h2>
         <div style="display: flex; gap: 12px;">
-            <button class="btn-ios-outline" onclick="switchInvUmkmTab('history')">
+            <button class="btn-ios-outline" id="btn-inv-history" onclick="switchInvUmkmTab('history')">
                 <i class="fa-solid fa-clock-rotate-left"></i> Riwayat Input
             </button>
             <button class="btn-ios" onclick="openInvUmkmModal()">
@@ -156,8 +166,8 @@
         </div>
     </div>
 
-    <!-- Table Area -->
-    <div class="ios-card" style="overflow-x: auto; margin-bottom: 30px;">
+    <!-- Table Area (Stok Aktual) -->
+    <div id="inv-tab-stock" class="ios-card" style="overflow-x: auto; margin-bottom: 30px;">
         <table class="modern-table">
             <thead>
                 <tr>
@@ -165,12 +175,32 @@
                     <th>Nama Barang</th>
                     <th>Stok Aktual</th>
                     <th>Batas Min.</th>
+                    <th>Batas Max.</th>
                     <th>Harga/Satuan</th>
                     <th>Status</th>
                     <th style="text-align: center;">Aksi</th>
                 </tr>
             </thead>
             <tbody id="inv-umkm-list">
+                <!-- Loaded via JS -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Table Area (Riwayat Input) -->
+    <div id="inv-tab-history" class="ios-card" style="overflow-x: auto; margin-bottom: 30px; display: none;">
+        <table class="modern-table">
+            <thead>
+                <tr>
+                    <th>Waktu</th>
+                    <th>Kode</th>
+                    <th>Nama Barang</th>
+                    <th>Mutasi (+/-)</th>
+                    <th>Referensi</th>
+                    <th>Catatan</th>
+                </tr>
+            </thead>
+            <tbody id="inv-umkm-history-list">
                 <!-- Loaded via JS -->
             </tbody>
         </table>
@@ -286,6 +316,77 @@
 <script>
     let isSubmittingInv = false;
     let myInventoryChart = null;
+    let currentInvTab = 'stock'; // 'stock' or 'history'
+
+    function switchInvUmkmTab(tab) {
+        const btnHistory = document.getElementById('btn-inv-history');
+        if (tab === 'history') {
+            document.getElementById('inv-tab-stock').style.display = 'none';
+            document.getElementById('inv-tab-history').style.display = 'block';
+            btnHistory.innerHTML = '<i class="fa-solid fa-arrow-left"></i> Kembali ke Stok';
+            btnHistory.setAttribute('onclick', "switchInvUmkmTab('stock')");
+            loadInvUmkmHistory();
+        } else {
+            document.getElementById('inv-tab-history').style.display = 'none';
+            document.getElementById('inv-tab-stock').style.display = 'block';
+            btnHistory.innerHTML = '<i class="fa-solid fa-clock-rotate-left"></i> Riwayat Input';
+            btnHistory.setAttribute('onclick', "switchInvUmkmTab('history')");
+            loadInvUmkm();
+        }
+        currentInvTab = tab;
+    }
+
+    async function loadInvUmkmHistory() {
+        try {
+            // [NEW] Injeksi Skeleton Loader untuk Tabel Riwayat
+            const tbody = document.getElementById('inv-umkm-history-list');
+            tbody.innerHTML = '';
+            for(let i=0; i<3; i++){
+                tbody.innerHTML += `<tr>
+                    <td style="padding: 16px;"><div class="skeleton" style="height: 20px; width: 80%;"></div></td>
+                    <td style="padding: 16px;"><div class="skeleton" style="height: 20px; width: 100%;"></div></td>
+                    <td style="padding: 16px;"><div class="skeleton" style="height: 20px; width: 60%;"></div></td>
+                    <td style="padding: 16px;"><div class="skeleton" style="height: 20px; width: 60%;"></div></td>
+                    <td style="padding: 16px;"><div class="skeleton" style="height: 20px; width: 80%;"></div></td>
+                    <td style="padding: 16px;"><div class="skeleton" style="height: 20px; width: 100%;"></div></td>
+                </tr>`;
+            }
+
+            const res = await fetch('/master-demo/inventory-umkm/history');
+            const data = await res.json();
+            
+            tbody.innerHTML = '';
+            
+            if(data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 32px;">Belum ada riwayat mutasi stok.</td></tr>';
+                return;
+            }
+
+            data.forEach(m => {
+                const isOut = m.type === 'out' || m.quantity < 0;
+                const sign = isOut ? '' : '+';
+                const qtyColor = isOut ? '#e74c3c' : '#27ae60';
+                const qtyBg = isOut ? 'rgba(231,76,60,0.1)' : 'rgba(39,174,96,0.1)';
+                
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="color: var(--text-muted); font-size: 13px;">${m.date}</td>
+                        <td style="color: var(--text-muted);">${m.item_code}</td>
+                        <td style="color: var(--text-heading); font-weight: 700;">${m.item_name}</td>
+                        <td>
+                            <span style="background: ${qtyBg}; color: ${qtyColor}; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: bold;">
+                                ${sign}${parseFloat(m.quantity)} ${m.uom}
+                            </span>
+                        </td>
+                        <td style="color: var(--text-muted); font-size: 13px;">${m.reference}</td>
+                        <td style="color: var(--text-muted); font-size: 13px;">${m.notes}</td>
+                    </tr>
+                `;
+            });
+        } catch (e) {
+            console.error('Failed to load history', e);
+        }
+    }
 
     function formatCurrencyUmkm(amount) {
         return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
@@ -304,10 +405,28 @@
 
     async function loadInvUmkm() {
         try {
+            // [NEW] Injeksi Skeleton Loader
+            document.getElementById('kpi-valuation').innerHTML = '<div class="skeleton" style="height: 28px; width: 80%; border-radius: 6px;"></div>';
+            document.getElementById('kpi-items').innerHTML = '<div class="skeleton" style="height: 28px; width: 40%; border-radius: 6px;"></div>';
+            document.getElementById('kpi-critical').innerHTML = '<div class="skeleton" style="height: 28px; width: 40%; border-radius: 6px;"></div>';
+            
+            const tbody = document.getElementById('inv-umkm-list');
+            tbody.innerHTML = '';
+            for(let i=0; i<3; i++){
+                tbody.innerHTML += `<tr>
+                    <td style="padding: 16px;"><div class="skeleton" style="height: 20px; width: 80%;"></div></td>
+                    <td style="padding: 16px;"><div class="skeleton" style="height: 20px; width: 100%;"></div></td>
+                    <td style="padding: 16px;"><div class="skeleton" style="height: 20px; width: 60%;"></div></td>
+                    <td style="padding: 16px;"><div class="skeleton" style="height: 20px; width: 60%;"></div></td>
+                    <td style="padding: 16px;"><div class="skeleton" style="height: 20px; width: 80%;"></div></td>
+                    <td style="padding: 16px;"><div class="skeleton" style="height: 24px; width: 80px; border-radius: 12px;"></div></td>
+                    <td style="padding: 16px;"><div class="skeleton" style="height: 30px; width: 70px; border-radius: 8px;"></div></td>
+                </tr>`;
+            }
+
             const res = await fetch('/master-demo/inventory-umkm');
             const data = await res.json();
             
-            const tbody = document.getElementById('inv-umkm-list');
             tbody.innerHTML = '';
             
             let warningCount = 0;
@@ -317,6 +436,7 @@
             data.forEach(item => {
                 const actualStock = parseFloat(item.actual_stock) || 0;
                 const minStock = parseFloat(item.min_stock) || 0;
+                const maxStock = item.max_stock ? parseFloat(item.max_stock) : '-';
                 const price = parseFloat(item.price_per_gram) || 0;
                 
                 const isWarning = actualStock < minStock;
@@ -337,6 +457,7 @@
                         <td style="color: var(--text-heading); font-weight: 700;">${item.item_name}</td>
                         <td style="color: ${isWarning ? 'var(--danger)' : 'var(--text-main)'}; font-weight: bold;">${actualStock} ${item.uom || ''}</td>
                         <td style="color: var(--text-muted);">${minStock} ${item.uom || ''}</td>
+                        <td style="color: var(--text-muted);">${maxStock !== '-' ? maxStock + ' ' + (item.uom || '') : '-'}</td>
                         <td style="color: var(--text-heading); font-weight: 600;">${formatCurrencyUmkm(price)}</td>
                         <td>${statusBadge}</td>
                         <td style="text-align: center;">
@@ -495,9 +616,19 @@
         }
     }
 
-    async function deleteInvUmkm(id) {
-        if (!confirm('Yakin ingin menghapus barang ini?')) return;
-        
+    function deleteInvUmkm(id) {
+        if (window.showCustomConfirm) {
+            window.showCustomConfirm('Yakin ingin menghapus barang ini?', async () => {
+                await performDeleteInvUmkm(id);
+            });
+        } else {
+            if (confirm('Yakin ingin menghapus barang ini?')) {
+                performDeleteInvUmkm(id);
+            }
+        }
+    }
+
+    async function performDeleteInvUmkm(id) {
         try {
             const res = await fetch('/master-demo/inventory-umkm/' + id, {
                 method: 'DELETE',
@@ -519,7 +650,22 @@
         window.switchView = function(viewId) {
             if (orgSwitchView) orgSwitchView(viewId);
             if (viewId === 'inventory_umkm') {
+                if (currentInvTab === 'stock') {
+                    loadInvUmkm();
+                } else {
+                    loadInvUmkmHistory();
+                }
+            }
+        };
+
+        // Failsafe untuk Race Condition SPA:
+        // Jika halaman di-reload, switchView dari master-portal akan terpicu sebelum DOMContentLoaded ini.
+        // Maka kita periksa secara manual apakah view aktif saat ini adalah inventory_umkm.
+        if (localStorage.getItem('subaActiveView') === 'inventory_umkm') {
+            if (currentInvTab === 'stock') {
                 loadInvUmkm();
+            } else {
+                loadInvUmkmHistory();
             }
         }
     });

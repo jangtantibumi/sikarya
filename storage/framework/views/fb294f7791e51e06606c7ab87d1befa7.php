@@ -49,7 +49,7 @@
 
     <!-- Workspace Area -->
     <div id="org-workspace-container" style="display: flex; flex-direction: column; gap: 40px; padding-bottom: 80px;">
-        <div class="loader" style="margin: 60px auto; border-top-color: var(--accent);"></div>
+        <i class="fa-solid fa-spinner fa-spin" style="font-size: 24px; color: var(--accent);"></i>
     </div>
 </section>
 
@@ -141,7 +141,7 @@
 
     <!-- 3. Delete/Deactivate Popup -->
     <div id="popup-delete" class="ios-modal-overlay" style="display:none; z-index: 10000;">
-        <div class="ios-modal" style="width: 400px; text-align: center; max-width: 95vw; border-radius: 18px; background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(12px); border: 1px solid #ef4444; box-shadow: 0 20px 40px rgba(239, 68, 68, 0.15); padding: 28px;">
+        <div class="ios-modal modal-content" style="width: 400px; text-align: center; max-width: 95vw; padding: 28px;">
             <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(239, 68, 68, 0.1); color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 16px;">
                 <i class="fa-solid fa-user-slash"></i>
             </div>
@@ -149,7 +149,7 @@
             <p style="margin: 0 0 24px; color: var(--text-muted); font-size: 14px; line-height: 1.5;">Anda yakin ingin menonaktifkan <strong id="del-emp-name" style="color:var(--text-heading);"></strong>? Akun ini tidak akan dapat login kembali.</p>
             
             <div style="display: flex; gap: 12px;">
-                <button type="button" class="ios-btn ios-btn-secondary" style="flex: 1; background: #f3f4f6; color: #374151; font-weight: 600;" onclick="closePopup('popup-delete')">Batal</button>
+                <button type="button" class="ios-btn ios-btn-secondary" style="flex: 1; font-weight: 600;" onclick="closePopup('popup-delete')">Batal</button>
                 <button type="button" class="ios-btn" style="flex: 1; background: #ef4444; color: white; border: none; font-weight: 600;" onclick="submitDelete()">Nonaktifkan</button>
             </div>
         </div>
@@ -157,7 +157,7 @@
 
     <!-- 3.1. Delete Division Popup -->
     <div id="popup-delete-division" class="ios-modal-overlay" style="display:none; z-index: 10000;">
-        <div class="ios-modal" style="width: 400px; text-align: center; max-width: 95vw; border-radius: 18px; background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(12px); border: 1px solid #ef4444; box-shadow: 0 20px 40px rgba(239, 68, 68, 0.15); padding: 28px;">
+        <div class="ios-modal modal-content" style="width: 400px; text-align: center; max-width: 95vw; padding: 28px;">
             <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(239, 68, 68, 0.1); color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 16px;">
                 <i class="fa-solid fa-trash"></i>
             </div>
@@ -165,7 +165,7 @@
             <p style="margin: 0 0 24px; color: var(--text-muted); font-size: 14px; line-height: 1.5;">Anda yakin ingin menghapus divisi <strong id="del-org-div-name" style="color:var(--text-heading);"></strong>?</p>
             
             <div style="display: flex; gap: 12px;">
-                <button type="button" class="ios-btn ios-btn-secondary" style="flex: 1; background: #f3f4f6; color: #374151; font-weight: 600;" onclick="closePopup('popup-delete-division')">Batal</button>
+                <button type="button" class="ios-btn ios-btn-secondary" style="flex: 1; font-weight: 600;" onclick="closePopup('popup-delete-division')">Batal</button>
                 <button type="button" class="ios-btn" style="flex: 1; background: #ef4444; color: white; border: none; font-weight: 600;" onclick="submitDeleteDivision()">Hapus Divisi</button>
             </div>
         </div>
@@ -344,7 +344,7 @@
 
     <!-- 6. Add Division Popup -->
     <div id="popup-add-division" class="ios-modal-overlay" style="display:none; z-index: 10001; position: fixed; inset: 0; background: rgba(0,0,0,0.5); justify-content: center; align-items: center;">
-        <div class="modal-content ios-modal" style="width: 400px; max-width: 95vw; border-radius: 18px; background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(12px); border: 1px solid var(--panel-border); padding: 28px;">
+        <div class="modal-content ios-modal" style="width: 400px; max-width: 95vw; padding: 28px;">
             <div style="text-align: left;">
                 <h3 style="margin: 0 0 16px 0; font-size: 18px; font-weight: 700; color: var(--text-accent);"><i class="fa-solid fa-users" style="color: var(--accent); margin-right: 8px;"></i> Tambah Divisi Baru</h3>
                 <form onsubmit="submitAddDivision(event)">
@@ -357,7 +357,7 @@
                         <input type="text" id="div-code" class="form-control" placeholder="Contoh: MKT" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--panel-border); font-size: 15px;">
                     </div>
                     <div style="display: flex; gap: 12px;">
-                        <button type="button" class="ios-btn ios-btn-secondary" style="flex: 1; background: #f3f4f6; color: #374151; font-weight: 600;" onclick="closePopup('popup-add-division')">Batal</button>
+                        <button type="button" class="ios-btn ios-btn-secondary" style="flex: 1; font-weight: 600;" onclick="closePopup('popup-add-division')">Batal</button>
                         <button type="submit" class="ios-btn ios-btn-primary" style="flex: 1; font-weight: 600;">Simpan Divisi</button>
                     </div>
                 </form>
@@ -520,7 +520,7 @@
 
     <!-- UI Overlay for Global Status -->
     <div id="global-loading" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99999; justify-content: center; align-items: center; flex-direction: column; color: white;">
-        <div class="loader" style="border-top-color: var(--accent); width: 40px; height: 40px; margin-bottom: 16px;"></div>
+        <i class="fa-solid fa-spinner fa-spin" style="font-size: 24px; color: var(--accent);"></i>
         <div style="font-weight: 600; font-size: 16px; letter-spacing: 1px;">MEMPROSES...</div>
     </div>
     
@@ -921,7 +921,7 @@
         document.getElementById('perf-popup-title').innerText = "Daftar Tugas & Performa: Loading...";
         document.getElementById('perf-popup-subtitle').innerText = "";
         document.getElementById('perf-popup-kpi').innerHTML = "<i class='fa-solid fa-chart-line'></i> Memuat data...";
-        document.getElementById('perf-tasks-container').innerHTML = '<div class="loader" style="margin: 20px auto; border-top-color: var(--accent);"></div>';
+        document.getElementById('perf-tasks-container').innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="font-size: 24px; color: var(--accent);"></i>';
 
         try {
             // Fetch basic profile & performance
@@ -1429,4 +1429,5 @@ function populateManagerCandidates() {
 
     setTimeout(loadOrgWorkspace, 100);
 </script>
+
 <?php /**PATH D:\suba-erp-master-local-latest\resources\views/organization/index.blade.php ENDPATH**/ ?>

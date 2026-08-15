@@ -55,6 +55,8 @@
         };
     }
 
+    window.showCustomConfirm = showCustomConfirm;
+
     // Convert native confirm to custom
     function attachCustomConfirm() {
         document.querySelectorAll('form[onsubmit*="confirm("]').forEach(form => {
@@ -86,7 +88,7 @@
         
         // Terapkan efek spinner & disable
         btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>';
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
         
         return originalState;
     }
@@ -139,14 +141,20 @@
                         'X-Requested-With': 'XMLHttpRequest',
                         'Accept': 'application/json'
                     }
-                }).then(res => {
+                }).then(async res => {
                     if(res.ok || res.redirected || res.type === 'opaqueredirect') {
                         // Tampilkan toast secara independen dan LANGSUNG REFRESH tanpa ditunda
                         showToast(getSuccessMessage(actualMethod), 'success');
                         window.location.reload(); 
                     } else {
+                        let errorMsg = 'Gagal memproses data.';
+                        try {
+                            const data = await res.json();
+                            if (data.errors) errorMsg = Object.values(data.errors)[0][0];
+                            else if (data.message) errorMsg = data.message;
+                        } catch(e) {}
                         revertButton(submitBtn, btnState);
-                        showToast('Gagal memproses data.', 'error');
+                        showToast(errorMsg, 'error');
                     }
                 }).catch(err => {
                     revertButton(submitBtn, btnState);
@@ -198,8 +206,15 @@
                     revertButton(triggerBtn, btnState); // Lepas tombol (jika halamannya tidak otomatis direfresh oleh logika asal)
                     return response;
                 } else {
+                    let errorMsg = 'Gagal memproses data.';
+                    try {
+                        const cloneRes = response.clone();
+                        const data = await cloneRes.json();
+                        if (data.errors) errorMsg = Object.values(data.errors)[0][0];
+                        else if (data.message) errorMsg = data.message;
+                    } catch(e) {}
                     revertButton(triggerBtn, btnState);
-                    showToast('Gagal memproses data.', 'error');
+                    showToast(errorMsg, 'error');
                     return response;
                 }
             } catch (err) {
@@ -213,4 +228,5 @@
     };
 })();
 </script>
+
 <?php /**PATH D:\suba-erp-master-local-latest\resources\views/components/global-loading.blade.php ENDPATH**/ ?>

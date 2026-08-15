@@ -15,16 +15,6 @@ class StockMovement extends Model
 
     protected $casts = ['quantity' => 'decimal:3', 'unit_cost' => 'decimal:2'];
 
-    public function product()
-    {
-        return $this->belongsTo(Product::class, 'product_id');
-    }
-
-    public function createdBy()
-    {
-        return $this->belongsTo(User::class, 'created_by_id');
-    }
-
     public function batch()
     {
         return $this->belongsTo(StockBatch::class, 'batch_id');
