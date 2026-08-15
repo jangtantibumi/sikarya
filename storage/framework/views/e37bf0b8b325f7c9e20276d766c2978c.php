@@ -781,9 +781,27 @@
             </div>
         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
         <div style="padding: 16px 24px; margin-top: auto;">
-            <button type="button" onclick="confirmLogout()" style="width: 100%; background: var(--danger); color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px;">
-                <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
-            </button>
+            <?php if (isset($component)) { $__componentOriginala8bb031a483a05f647cb99ed3a469847 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginala8bb031a483a05f647cb99ed3a469847 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.ui.button','data' => ['variant' => 'danger','icon' => 'fa-arrow-right-from-bracket','onclick' => 'confirmLogout()','style' => 'width: 100%; border-radius: 8px; padding: 10px 16px; font-size: 14px;']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('ui.button'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['variant' => 'danger','icon' => 'fa-arrow-right-from-bracket','onclick' => 'confirmLogout()','style' => 'width: 100%; border-radius: 8px; padding: 10px 16px; font-size: 14px;']); ?>
+<?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::processComponentKey($component); ?>
+Logout <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginala8bb031a483a05f647cb99ed3a469847)): ?>
+<?php $attributes = $__attributesOriginala8bb031a483a05f647cb99ed3a469847; ?>
+<?php unset($__attributesOriginala8bb031a483a05f647cb99ed3a469847); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginala8bb031a483a05f647cb99ed3a469847)): ?>
+<?php $component = $__componentOriginala8bb031a483a05f647cb99ed3a469847; ?>
+<?php unset($__componentOriginala8bb031a483a05f647cb99ed3a469847); ?>
+<?php endif; ?>
         </div>
     </aside>
 
@@ -3386,21 +3404,76 @@
 </html>
 
 <!-- Global Confirm Modal -->
-<div id="modal-confirm" class="modal-overlay">
-    <div class="modal-content" style="max-width: 400px; text-align: center;">
-        <i class="fa-solid fa-triangle-exclamation" style="font-size: 40px; color: var(--danger); margin-bottom: 16px;"></i>
-        <h3 id="confirm-title" style="margin-bottom: 8px;">Konfirmasi</h3>
+<?php if (isset($component)) { $__componentOriginal7762953202be6518eecd1cfbd075bf2f = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal7762953202be6518eecd1cfbd075bf2f = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.ui.modal','data' => ['id' => 'modal-confirm','title' => 'Konfirmasi','icon' => 'fa-triangle-exclamation','iconColor' => 'var(--danger)','formId' => 'confirm-form']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('ui.modal'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['id' => 'modal-confirm','title' => 'Konfirmasi','icon' => 'fa-triangle-exclamation','iconColor' => 'var(--danger)','formId' => 'confirm-form']); ?>
+<?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::processComponentKey($component); ?>
+
+    <div style="text-align: center;">
         <p id="confirm-msg" class="desc" style="margin-bottom: 24px;">Apakah Anda yakin?</p>
+        <input type="hidden" name="_method" id="confirm-method" value="POST">
         <div style="display: flex; gap: 12px; justify-content: center;">
-            <button class="user-pill" onclick="document.getElementById('modal-confirm').style.display='none'" style="background: rgba(255,255,255,0.1); border: none; padding: 10px 24px; cursor: pointer;">Batal</button>
-            <form id="confirm-form" method="POST" action="">
-                <?php echo csrf_field(); ?>
-                <input type="hidden" name="_method" id="confirm-method" value="POST">
-                <button type="submit" class="user-pill" id="confirm-btn" style="background: var(--danger); color: white; border: none; padding: 10px 24px; cursor: pointer; font-weight: bold;">Ya, Lanjutkan</button>
-            </form>
+            <?php if (isset($component)) { $__componentOriginala8bb031a483a05f647cb99ed3a469847 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginala8bb031a483a05f647cb99ed3a469847 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.ui.button','data' => ['variant' => 'secondary','type' => 'button','onclick' => 'document.getElementById(\'modal-confirm\').style.display=\'none\'','style' => 'flex:1;']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('ui.button'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['variant' => 'secondary','type' => 'button','onclick' => 'document.getElementById(\'modal-confirm\').style.display=\'none\'','style' => 'flex:1;']); ?>
+<?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::processComponentKey($component); ?>
+Batal <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginala8bb031a483a05f647cb99ed3a469847)): ?>
+<?php $attributes = $__attributesOriginala8bb031a483a05f647cb99ed3a469847; ?>
+<?php unset($__attributesOriginala8bb031a483a05f647cb99ed3a469847); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginala8bb031a483a05f647cb99ed3a469847)): ?>
+<?php $component = $__componentOriginala8bb031a483a05f647cb99ed3a469847; ?>
+<?php unset($__componentOriginala8bb031a483a05f647cb99ed3a469847); ?>
+<?php endif; ?>
+            <?php if (isset($component)) { $__componentOriginala8bb031a483a05f647cb99ed3a469847 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginala8bb031a483a05f647cb99ed3a469847 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.ui.button','data' => ['variant' => 'danger','type' => 'button','id' => 'confirm-btn','onclick' => 'document.getElementById(\'confirm-form\').submit();']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('ui.button'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['variant' => 'danger','type' => 'button','id' => 'confirm-btn','onclick' => 'document.getElementById(\'confirm-form\').submit();']); ?>
+<?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::processComponentKey($component); ?>
+Ya, Lanjutkan <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginala8bb031a483a05f647cb99ed3a469847)): ?>
+<?php $attributes = $__attributesOriginala8bb031a483a05f647cb99ed3a469847; ?>
+<?php unset($__attributesOriginala8bb031a483a05f647cb99ed3a469847); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginala8bb031a483a05f647cb99ed3a469847)): ?>
+<?php $component = $__componentOriginala8bb031a483a05f647cb99ed3a469847; ?>
+<?php unset($__componentOriginala8bb031a483a05f647cb99ed3a469847); ?>
+<?php endif; ?>
         </div>
     </div>
-</div>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal7762953202be6518eecd1cfbd075bf2f)): ?>
+<?php $attributes = $__attributesOriginal7762953202be6518eecd1cfbd075bf2f; ?>
+<?php unset($__attributesOriginal7762953202be6518eecd1cfbd075bf2f); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal7762953202be6518eecd1cfbd075bf2f)): ?>
+<?php $component = $__componentOriginal7762953202be6518eecd1cfbd075bf2f; ?>
+<?php unset($__componentOriginal7762953202be6518eecd1cfbd075bf2f); ?>
+<?php endif; ?>
 
 <script>
     function showToast(message) {

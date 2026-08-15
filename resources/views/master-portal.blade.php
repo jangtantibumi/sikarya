@@ -827,7 +827,7 @@
 
                 <!-- Announcement Popup Modal -->
                 <div id="modal-announcement-popup" class="modal-overlay" style="display:none; z-index: 10000; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); align-items: center; justify-content: center;">
-                    <div class="modal-content ios-modal" style="width: 500px; max-width: 90vw; border-radius: 18px; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(12px); border: 1px solid var(--panel-border); box-shadow: 0 20px 40px rgba(0,0,0,0.2); padding: 32px 24px;">
+                    <div class="modal-content ios-modal" style="width: 500px; max-width: 90vw; padding: 32px 24px;">
                         <div style="text-align: center; margin-bottom: 20px;">
                             <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(79, 70, 229, 0.1); color: #4f46e5; display: inline-flex; align-items: center; justify-content: center; font-size: 32px; margin-bottom: 16px;">
                                 <i class="fa-solid fa-bullhorn"></i>
@@ -3668,7 +3668,7 @@
 </script>
 <!-- EDIT TASK MODAL -->
 <div id="task-edit-modal" class="modal-overlay" style="display:none;">
-    <div class="modal-content ios-modal" style="width: 480px; max-width: 95vw; border-radius: 18px; background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid #D9EFE9; box-shadow: 0 20px 40px rgba(12, 53, 39, 0.2); padding: 24px;">
+    <div class="modal-content ios-modal" style="width: 480px; max-width: 95vw; padding: 24px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--panel-border); padding-bottom: 12px;">
             <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: var(--text-accent);"><i class="fa-solid fa-pen-to-square" style="color: var(--text-accent); margin-right: 8px;"></i> Edit Tugas / Goal</h3>
             <button type="button" class="ios-btn-close" onclick="closePopup('task-edit-modal')" style="background: none; border: none; font-size: 18px; color: var(--text-muted); cursor: pointer;"><i class="fa-solid fa-xmark"></i></button>
@@ -3731,7 +3731,7 @@
 
 <!-- DELETE TASK MODAL -->
 <div id="task-delete-modal" class="modal-overlay" style="display:none;">
-    <div class="modal-content ios-modal" style="width: 440px; max-width: 95vw; border-radius: 18px; background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid #D9EFE9; box-shadow: 0 20px 40px rgba(12, 53, 39, 0.2); padding: 28px;">
+    <div class="modal-content ios-modal" style="width: 440px; max-width: 95vw; padding: 28px;">
         <div style="text-align: center;">
             <div style="width: 60px; height: 60px; border-radius: 50%; background: #D9EFE9; color: var(--text-accent); display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 16px; box-shadow: 0 4px 12px rgba(12, 53, 39, 0.1);">
                 <i class="fa-solid fa-triangle-exclamation"></i>
@@ -3771,7 +3771,7 @@
 
 <!-- Modal Hapus Divisi -->
 <div id="division-delete-modal" class="ios-modal-overlay" style="display:none; z-index: 10001; position: fixed; inset: 0; background: rgba(0,0,0,0.5); justify-content: center; align-items: center;">
-    <div class="modal-content ios-modal" style="width: 400px; max-width: 95vw; border-radius: 18px; background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(12px); border: 1px solid #ef4444; box-shadow: 0 20px 40px rgba(239, 68, 68, 0.15); padding: 28px;">
+    <div class="modal-content ios-modal" style="width: 400px; max-width: 95vw; padding: 28px;">
         <div style="text-align: center;">
             <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(239, 68, 68, 0.1); color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 16px;">
                 <i class="fa-solid fa-trash"></i>
@@ -3790,7 +3790,7 @@
 
 <!-- Modal Edit Divisi -->
 <div id="division-edit-modal" class="ios-modal-overlay" style="display:none; z-index: 10001; position: fixed; inset: 0; background: rgba(0,0,0,0.5); justify-content: center; align-items: center;">
-    <div class="modal-content ios-modal" style="width: 400px; max-width: 95vw; border-radius: 18px; background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(12px); border: 1px solid var(--panel-border); padding: 28px;">
+    <div class="modal-content ios-modal" style="width: 400px; max-width: 95vw; padding: 28px;">
         <div style="text-align: left;">
             <h3 style="margin: 0 0 16px 0; font-size: 18px; font-weight: 700; color: var(--text-accent);"><i class="fa-solid fa-pen" style="color: var(--accent); margin-right: 8px;"></i> Ubah Nama Divisi</h3>
             
@@ -3809,7 +3809,7 @@
 
 <!-- Modal Tambah Divisi -->
 <div id="division-add-modal" class="ios-modal-overlay" style="display:none; z-index: 10001; position: fixed; inset: 0; background: rgba(0,0,0,0.5); justify-content: center; align-items: center;">
-    <div class="modal-content ios-modal" style="width: 400px; max-width: 95vw; border-radius: 18px; background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(12px); border: 1px solid var(--panel-border); padding: 28px;">
+    <div class="modal-content ios-modal" style="width: 400px; max-width: 95vw; padding: 28px;">
         <div style="text-align: left;">
             <h3 style="margin: 0 0 16px 0; font-size: 18px; font-weight: 700; color: var(--text-accent);"><i class="fa-solid fa-users" style="color: var(--accent); margin-right: 8px;"></i> Tambah Divisi Baru</h3>
             <form onsubmit="submitNewDivision(event)">
@@ -4190,7 +4190,7 @@
 
 <!-- CONFIRM REVOKE MODAL -->
 <div id="modal-confirm-revoke" class="modal-overlay" style="display:none; z-index: 10000;">
-    <div class="modal-content ios-modal" style="width: 400px; max-width: 90vw; border-radius: 18px; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(12px); border: 1px solid #fee2e2; box-shadow: 0 20px 40px rgba(239, 68, 68, 0.15); padding: 32px 24px; text-align: center;">
+    <div class="modal-content ios-modal" style="width: 400px; max-width: 90vw; padding: 32px 24px; text-align: center;">
         <i class="fa-solid fa-triangle-exclamation" style="font-size: 48px; color: var(--danger); margin-bottom: 20px;"></i>
         <h3 style="margin: 0 0 12px 0; font-size: 18px; font-weight: 800; color: #111827;">Cabut Hak Akses?</h3>
         <p style="color: var(--text-muted); font-size: 14px; margin: 0 0 24px 0; line-height: 1.5;">
@@ -4207,7 +4207,7 @@
 
 <!-- Modal Create Custom Channel -->
 <div id="modal-create-channel" class="modal-overlay" style="display:none; z-index: 10000; align-items: center; justify-content: center;">
-    <div class="modal-content ios-modal" style="width: 500px; max-width: 90vw; border-radius: 18px; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(12px); border: 1px solid var(--panel-border); box-shadow: 0 20px 40px rgba(0,0,0,0.1); padding: 32px 24px;">
+    <div class="modal-content ios-modal" style="width: 500px; max-width: 90vw; padding: 32px 24px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
             <h3 style="margin: 0; font-size: 20px; font-weight: 700; color: #000;">Buat Grup Kustom</h3>
             <button class="ios-btn ios-btn-icon" style="background: rgba(0,0,0,0.05); color: #000;" onclick="document.getElementById('modal-create-channel').style.display='none'"><i class="fa-solid fa-times"></i></button>
@@ -4231,7 +4231,7 @@
 
 <!-- Modal Create Announcement -->
 <div id="modal-create-announcement" class="modal-overlay" style="display:none; z-index: 10000; align-items: center; justify-content: center;">
-    <div class="modal-content ios-modal" style="width: 500px; max-width: 90vw; border-radius: 18px; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(12px); border: 1px solid var(--panel-border); box-shadow: 0 20px 40px rgba(0,0,0,0.1); padding: 32px 24px;">
+    <div class="modal-content ios-modal" style="width: 500px; max-width: 90vw; padding: 32px 24px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
             <h3 style="margin: 0; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
                 <i class="fa-solid fa-bullhorn" style="color: var(--primary);"></i> Buat Pengumuman Baru
@@ -4400,7 +4400,7 @@ async function submitAnnouncement(e) {
     
     const btn = e.target.querySelector('button[type="submit"]');
     const oriText = btn.innerHTML;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Menyimpan...';
     btn.disabled = true;
     
     try {
@@ -4488,7 +4488,7 @@ async function submitNewChannel(e) {
     
     const btn = e.target.querySelector('button[type="submit"]');
     const oriText = btn.innerHTML;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Menyimpan...';
     btn.disabled = true;
     
     try {
@@ -4523,3 +4523,4 @@ async function submitNewChannel(e) {
 <x-ui.toast />
 @include('components.global-loading')
 @include('components.chat-widget')
+
