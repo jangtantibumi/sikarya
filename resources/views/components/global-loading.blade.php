@@ -55,6 +55,8 @@
         };
     }
 
+    window.showCustomConfirm = showCustomConfirm;
+
     // Convert native confirm to custom
     function attachCustomConfirm() {
         document.querySelectorAll('form[onsubmit*="confirm("]').forEach(form => {
